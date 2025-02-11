@@ -1,11 +1,11 @@
 import { Tabs } from "expo-router";
-import CustomTabBar from "@/components/CustomTabBar";
+import { TabBar } from "@/components/TabBar/TabBar";
 
 const TabLayout = () => {
   return (
     <Tabs
       screenOptions={{ headerShown: false, animation: "fade" }}
-      tabBar={CustomTabBar}
+      tabBar={(props) => <TabBar {...props} />}
     >
       <Tabs.Screen name="index" options={{ tabBarLabel: "Home" }} />
       <Tabs.Screen name="order" options={{ tabBarLabel: "Orders" }} />
