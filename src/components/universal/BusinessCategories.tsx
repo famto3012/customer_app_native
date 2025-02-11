@@ -7,7 +7,7 @@ import {
   Alert,
 } from "react-native";
 import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
-import Typo from "./Typo";
+import Typo from "../Typo";
 import { colors, radius } from "@/constants/theme";
 import { BusinessCategoryProps } from "@/types";
 import { router } from "expo-router";

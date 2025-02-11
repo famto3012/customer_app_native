@@ -18,17 +18,24 @@ import { productFilters } from "@/utils/defaultData";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { useAuthStore } from "@/store/store";
-import { CategoryProps, MerchantDataProps, ProductProps } from "@/types";
 import {
+  AddVariantProps,
+  CategoryProps,
+  MerchantDataProps,
+  ProductProps,
+} from "@/types";
+import {
+  addProductToCart,
   getAllCategory,
   getAllProducts,
   getMerchantBanners,
   getMerchantData,
+  haveValidCart,
 } from "@/service/universal";
 import { useSafeLocation } from "@/utils/helpers";
-import ProductCard from "@/components/ProductCard";
+import ProductCard from "@/components/universal/ProductCard";
 import { Image } from "react-native";
-import FloatingCart from "@/components/FloatingCart";
+import FloatingCart from "@/components/universal/FloatingCart";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import VariantSheet from "@/components/BottomSheets/VariantSheet";
@@ -140,6 +147,74 @@ const Product = () => {
       setProduct(product);
       variantSheetRef.current?.snapToIndex(0);
     }
+  };
+
+  const onAddItem = async (data: AddVariantProps) => {
+    const quantity = data.quantity ?? 0;
+    const res = await addProductToCart(
+      data.productId,
+      quantity,
+      data.variantTypeId
+    );
+
+    if (res) {
+      const floatingCartRes = await haveValidCart();
+
+      useAuthStore.setState({
+        cart: {
+          showCart: floatingCartRes.haveCart,
+          merchant: floatingCartRes.merchant,
+          cartId: floatingCartRes.cartId,
+        },
+      });
+
+      setCategoryProducts((prev) => {
+        const updatedProducts = { ...prev };
+        for (const categoryId in updatedProducts) {
+          updatedProducts[categoryId] = updatedProducts[categoryId].map(
+            (product) => {
+              if (product.productId === data.productId) {
+                return {
+                  ...product,
+                  cartCount: (product.cartCount || 0) + data.quantity,
+                };
+              }
+              return product;
+            }
+          );
+        }
+
+        return updatedProducts;
+      });
+
+      variantSheetRef.current?.close();
+    }
+  };
+
+  const handleClearCart = () => {
+    setCategoryProducts((prev) => {
+      const updatedProducts = JSON.parse(JSON.stringify(prev)); // Deep copy to trigger re-render
+
+      for (const categoryId in updatedProducts) {
+        updatedProducts[categoryId] = updatedProducts[categoryId].map(
+          (product: ProductProps) => ({
+            ...product,
+            cartCount: 0,
+          })
+        );
+      }
+
+      return updatedProducts;
+    });
+
+    // Also update FloatingCart state to hide it
+    useAuthStore.setState({
+      cart: {
+        showCart: false,
+        merchant: "",
+        cartId: "",
+      },
+    });
   };
 
   const renderItem = ({ item }: any) => {
@@ -318,7 +393,7 @@ const Product = () => {
                   <ProductCard
                     item={item}
                     openVariant={openVariantSheet}
-                    onSelectVariant={() => {}}
+                    cartCount={item?.cartCount || null}
                     showAddCart={true}
                   />
                 )}
@@ -355,7 +430,7 @@ const Product = () => {
           }
         />
 
-        <FloatingCart />
+        <FloatingCart onClearCart={handleClearCart} />
 
         <BottomSheet
           ref={variantSheetRef}
@@ -367,10 +442,7 @@ const Product = () => {
         >
           <VariantSheet
             product={product ? product : null}
-            onAddItem={(data) => {
-              console.log(data);
-              variantSheetRef.current?.close();
-            }}
+            onAddItem={onAddItem}
           />
         </BottomSheet>
       </View>

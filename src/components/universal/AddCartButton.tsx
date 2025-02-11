@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, View } from "react-native";
 import { FC } from "react";
-import Typo from "./Typo";
+import Typo from "../Typo";
 import { colors, radius } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
 import { AddCartButtonProps } from "@/types";

@@ -2,7 +2,7 @@ import { Image, Pressable, StyleSheet, View } from "react-native";
 import { useEffect, useState } from "react";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius, spacingX } from "@/constants/theme";
-import Typo from "./Typo";
+import Typo from "../Typo";
 import { Heart, Star } from "phosphor-react-native";
 import { MerchantCardProps } from "@/types";
 import { toggleMerchantFavorite } from "@/service/universal";
@@ -41,12 +41,14 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
   return (
     <Pressable
       style={styles.container}
-      onPress={() =>
+      onPress={() => {
+        if (!item.status) return null;
+
         router.push({
           pathname: "/screens/products",
           params: { merchantId: item.id },
-        })
-      }
+        });
+      }}
     >
       <View style={{ position: "relative" }}>
         <Image

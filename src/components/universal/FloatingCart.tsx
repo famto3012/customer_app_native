@@ -3,11 +3,13 @@ import { colors, radius, spacingY } from "@/constants/theme";
 import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import { useAuthStore } from "@/store/store";
 import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
-import Typo from "./Typo";
+import Typo from "../Typo";
 import { XCircle } from "phosphor-react-native";
 import { clearCart } from "@/service/universal";
+import { FC } from "react";
+import { router } from "expo-router";
 
-const FloatingCart = () => {
+const FloatingCart: FC<{ onClearCart: () => void }> = ({ onClearCart }) => {
   const showCart = useAuthStore((state) => state.cart.showCart);
   const merchant = useAuthStore((state) => state.cart.merchant);
   const cartId = useAuthStore((state) => state.cart.cartId);
@@ -23,6 +25,8 @@ const FloatingCart = () => {
           cartId: "",
         },
       });
+
+      onClearCart();
     }
   };
 
@@ -52,7 +56,17 @@ const FloatingCart = () => {
         </Typo>
       </View>
 
-      <Pressable style={styles.checkoutBtn}>
+      <Pressable
+        onPress={() =>
+          router.push({
+            pathname: "/screens/universal/checkout",
+            params: {
+              cartId,
+            },
+          })
+        }
+        style={styles.checkoutBtn}
+      >
         <Typo size={12} color={colors.WHITE}>
           Checkout
         </Typo>

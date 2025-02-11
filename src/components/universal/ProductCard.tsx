@@ -2,7 +2,7 @@ import { Image, Pressable, StyleSheet, View } from "react-native";
 import { FC, useEffect, useState } from "react";
 import { ProductProps } from "@/types";
 import { scale, verticalScale } from "@/utils/styling";
-import Typo from "./Typo";
+import Typo from "../Typo";
 import { colors, radius, spacingX } from "@/constants/theme";
 import AddCartButton from "./AddCartButton";
 import { Heart } from "phosphor-react-native";
@@ -17,19 +17,23 @@ import { router } from "expo-router";
 const ProductCard: FC<{
   item: ProductProps;
   openVariant?: (product: ProductProps) => void;
-  onSelectVariant?: () => void;
+  cartCount?: number | null;
   showAddCart: boolean;
-}> = ({ item, openVariant, onSelectVariant, showAddCart }) => {
+}> = ({ item, openVariant, cartCount, showAddCart }) => {
   const [isFavorite, setIsFavorite] = useState<boolean>(item.isFavorite);
-  const [count, setCount] = useState<number | null>(null);
+  const [count, setCount] = useState<number | null>(cartCount || null);
 
   const { token } = useAuthStore.getState();
 
   useEffect(() => {
-    if (count !== null && count >= 0) {
+    if (count !== null && count >= 0 && !item.variantAvailable) {
       updateCartItem();
     }
   }, [count]);
+
+  useEffect(() => {
+    cartCount ? setCount(cartCount) : setCount(null);
+  }, [cartCount]);
 
   const handleFavorite = async () => {
     try {
@@ -63,7 +67,6 @@ const ProductCard: FC<{
     if (!isUserAuthenticated()) return;
 
     if (item.variantAvailable) {
-      console.log(`Variant available`);
       openVariant?.(item);
     } else {
       setCount((prev) => (prev ? prev + 1 : 1));
