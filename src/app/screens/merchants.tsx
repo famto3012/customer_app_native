@@ -9,7 +9,7 @@ import { merchantFilters } from "@/utils/defaultData";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, spacingX } from "@/constants/theme";
 import Typo from "@/components/Typo";
-import MerchantCard from "@/components/MerchantCard";
+import MerchantCard from "@/components/universal/MerchantCard";
 import { MerchantCardProps } from "@/types";
 import { getMerchants } from "@/service/universal";
 import { useSafeLocation } from "@/utils/helpers";

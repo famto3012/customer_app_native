@@ -19,7 +19,7 @@ import {
   verticalScale,
 } from "@/utils/styling";
 import TopService from "@/components/TopService";
-import BusinessCategories from "@/components/BusinessCategories";
+import BusinessCategories from "@/components/universal/BusinessCategories";
 import { logout } from "@/service/authService";
 import { useEffect } from "react";
 import { requestLocationPermission } from "@/utils/helpers";

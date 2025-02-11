@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import React, { FC, useState } from "react";
 import { CategoryProps } from "@/types";
-import Typo from "./Typo";
+import Typo from "../Typo";
 import { CaretDown, CaretUp } from "phosphor-react-native";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius } from "@/constants/theme";
