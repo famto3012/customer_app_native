@@ -108,6 +108,7 @@ export type ProductProps = {
   productImageURL: string;
   inventory: boolean;
   variantAvailable: boolean;
+  cartCount?: number;
 };
 
 export type AddCartButtonProps = {
@@ -134,4 +135,14 @@ export type AddVariantProps = {
   productId: string;
   quantity: number;
   variantTypeId: string;
+};
+
+export type AddressProps = {
+  id: string;
+  fullName: string;
+  phoneNumber: string;
+  flat: string;
+  area: string;
+  landmark: string;
+  coordinates: number[];
 };
