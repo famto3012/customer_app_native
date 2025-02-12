@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   },
   shadowView: {
     position: "absolute",
-    top: -30,
+    top: -25,
     left: 0,
     right: 0,
     height: 190,
