@@ -1,5 +1,7 @@
 import { useAuthStore } from "@/store/store";
 import * as Location from "expo-location";
+import { Audio } from "expo-av";
+import { Alert, Linking } from "react-native";
 
 export const requestLocationPermission = async () => {
   try {
@@ -35,6 +37,30 @@ export const requestLocationPermission = async () => {
     console.error("Location error:", error);
     return false;
   }
+};
+
+export const getRecordingPermissions = async () => {
+  const { status } = await Audio.requestPermissionsAsync();
+
+  if (status !== "granted") {
+    Alert.alert(
+      "Microphone Permission Required",
+      "Please allow microphone access to record audio.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Open Settings",
+          onPress: () => Linking.openSettings(), // Redirect user to settings
+        },
+      ]
+    );
+    return false;
+  }
+
+  return true;
 };
 
 export const useSafeLocation = () => {

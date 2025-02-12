@@ -6,7 +6,7 @@ import Search from "@/components/Search";
 import { useLocalSearchParams } from "expo-router";
 import { XCircle } from "phosphor-react-native";
 import { merchantFilters } from "@/utils/defaultData";
-import { scale, verticalScale } from "@/utils/styling";
+import { scale, SCREEN_HEIGHT, verticalScale } from "@/utils/styling";
 import { colors, spacingX } from "@/constants/theme";
 import Typo from "@/components/Typo";
 import MerchantCard from "@/components/universal/MerchantCard";
@@ -114,6 +114,33 @@ const Merchants = () => {
           backgroundColor: colors.WHITE,
         }}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          !isLoading ? (
+            <View
+              style={{
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "center",
+
+                height: SCREEN_HEIGHT - verticalScale(250),
+              }}
+            >
+              <Typo>Coming Soon...</Typo>
+            </View>
+          ) : (
+            <View
+              style={{
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "center",
+
+                height: SCREEN_HEIGHT - verticalScale(250),
+              }}
+            >
+              <Typo>Loading...</Typo>
+            </View>
+          )
+        }
       />
     </ScreenWrapper>
   );

@@ -1,11 +1,19 @@
 import {
+  KeyboardAvoidingView,
   Pressable,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import SchedulePicker from "@/components/common/SchedulePicker";
@@ -19,9 +27,14 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
-import BottomSheet, { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+  SCREEN_WIDTH,
+} from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import ScheduleSheet from "@/components/BottomSheets/ScheduleSheet";
+import { router } from "expo-router";
 
 const TAB_WIDTH = scale((SCREEN_WIDTH - 40) / 2);
 
@@ -46,6 +59,20 @@ const Checkout = () => {
   const animatedIndicator = useAnimatedStyle(() => ({
     transform: [{ translateX: indicatorPosition.value }],
   }));
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+        style={[props.style, styles.backdrop]}
+        // onPress={handleClosePress}
+      />
+    ),
+    []
+  );
 
   return (
     <GestureHandlerRootView>
@@ -112,7 +139,10 @@ const Checkout = () => {
         </ScrollView>
 
         <View style={styles.confirmContainer}>
-          <TouchableOpacity style={styles.confirmBtn}>
+          <TouchableOpacity
+            onPress={() => router.push("/screens/universal/bill")}
+            style={styles.confirmBtn}
+          >
             <Typo size={14} color={colors.WHITE}>
               Confirm Order detail
             </Typo>
@@ -126,7 +156,7 @@ const Checkout = () => {
         snapPoints={variantSheetSnapPoints}
         enableDynamicSizing={false}
         enablePanDownToClose
-        onClose={() => {}}
+        backdropComponent={renderBackdrop}
       >
         <ScheduleSheet />
       </BottomSheet>
@@ -139,7 +169,7 @@ export default Checkout;
 const styles = StyleSheet.create({
   tabContainer: {
     marginHorizontal: scale(20),
-    marginTop: verticalScale(15),
+    marginTop: verticalScale(10),
   },
   tab: {
     flexDirection: "row",
@@ -186,5 +216,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: radius._10,
+  },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 1)",
   },
 });
