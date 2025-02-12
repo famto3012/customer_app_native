@@ -39,6 +39,7 @@ import FloatingCart from "@/components/universal/FloatingCart";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import VariantSheet from "@/components/BottomSheets/VariantSheet";
+import { useQuery } from "@tanstack/react-query";
 
 const { height } = Dimensions.get("window");
 
@@ -66,7 +67,6 @@ const Product = () => {
   const PRODUCT_LIMIT: number = 10;
 
   useEffect(() => {
-    fetchMerchantData();
     fetchMerchantBanners();
     fetchCategory();
   }, [merchantId, selectedBusiness]);
@@ -107,15 +107,14 @@ const Product = () => {
     }));
   };
 
-  const fetchMerchantData = async () => {
-    const res = await getMerchantData(
-      merchantId.toString(),
-      latitude,
-      longitude
-    );
+  const { data: merchantData } = useQuery({
+    queryKey: ["merchant-data", merchantId],
+    queryFn: () => getMerchantData(merchantId.toString(), latitude, longitude),
+  });
 
-    setMerchant(res);
-  };
+  useEffect(() => {
+    setMerchant(merchantData);
+  }, [merchantData]);
 
   const fetchMerchantBanners = async () => {
     const res = await getMerchantBanners(merchantId.toString());

@@ -1,4 +1,4 @@
-import { Alert, FlatList, Pressable, StyleSheet, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import { useEffect, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
@@ -13,6 +13,7 @@ import MerchantCard from "@/components/universal/MerchantCard";
 import { MerchantCardProps } from "@/types";
 import { getMerchants } from "@/service/universal";
 import { useSafeLocation } from "@/utils/helpers";
+import { useQuery } from "@tanstack/react-query";
 
 const Merchants = () => {
   const { businessCategory, businessCategoryId } = useLocalSearchParams();
@@ -23,26 +24,21 @@ const Merchants = () => {
 
   const { latitude, longitude } = useSafeLocation();
 
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["merchants", businessCategory, selectedFilter, query],
+    queryFn: () =>
+      getMerchants(
+        latitude,
+        longitude,
+        businessCategoryId.toString(),
+        selectedFilter,
+        query
+      ),
+  });
+
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await getMerchants(
-          latitude,
-          longitude,
-          businessCategoryId.toString(),
-          selectedFilter,
-          query
-        );
-
-        setMerchants(res);
-      } catch (error) {
-        console.error("Failed to fetch categories", error);
-        Alert.alert("Error", "Could not load categories.");
-      }
-    };
-
-    fetchCategories();
-  }, [businessCategory, selectedFilter, query]);
+    setMerchants(data);
+  }, [data]);
 
   useEffect(() => {
     const timeOut = setTimeout(() => {

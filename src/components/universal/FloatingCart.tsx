@@ -8,16 +8,17 @@ import { XCircle } from "phosphor-react-native";
 import { clearCart } from "@/service/universal";
 import { FC } from "react";
 import { router } from "expo-router";
+import { useMutation } from "@tanstack/react-query";
 
 const FloatingCart: FC<{ onClearCart: () => void }> = ({ onClearCart }) => {
   const showCart = useAuthStore((state) => state.cart.showCart);
   const merchant = useAuthStore((state) => state.cart.merchant);
   const cartId = useAuthStore((state) => state.cart.cartId);
 
-  const handleClearCart = async () => {
-    const res = await clearCart(cartId);
-
-    if (res) {
+  const handleClearCartMutation = useMutation({
+    mutationKey: ["clear-cart"],
+    mutationFn: () => clearCart(cartId),
+    onSuccess: () => {
       useAuthStore.setState({
         cart: {
           showCart: false,
@@ -27,8 +28,8 @@ const FloatingCart: FC<{ onClearCart: () => void }> = ({ onClearCart }) => {
       });
 
       onClearCart();
-    }
-  };
+    },
+  });
 
   return showCart ? (
     <Animated.View
@@ -72,7 +73,10 @@ const FloatingCart: FC<{ onClearCart: () => void }> = ({ onClearCart }) => {
         </Typo>
       </Pressable>
 
-      <Pressable onPress={handleClearCart} style={styles.clearBtn}>
+      <Pressable
+        onPress={() => handleClearCartMutation.mutate()}
+        style={styles.clearBtn}
+      >
         <XCircle size={20} color={colors.RED} />
       </Pressable>
     </Animated.View>

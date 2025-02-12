@@ -1,11 +1,4 @@
-import {
-  FlatList,
-  Image,
-  Pressable,
-  StyleSheet,
-  View,
-  Alert,
-} from "react-native";
+import { FlatList, Image, Pressable, StyleSheet, View } from "react-native";
 import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
 import { colors, radius } from "@/constants/theme";
@@ -15,6 +8,7 @@ import { FC, useEffect, useState } from "react";
 import { getBusinessCategories } from "@/service/universal";
 import { useAuthStore } from "@/store/store";
 import { useSafeLocation } from "@/utils/helpers";
+import { useQuery } from "@tanstack/react-query";
 
 const BusinessCategories: FC<{ query: string }> = ({ query }) => {
   const [businessCategory, setBusinessCategory] = useState<
@@ -24,20 +18,14 @@ const BusinessCategories: FC<{ query: string }> = ({ query }) => {
   const { setSelectedBusiness } = useAuthStore.getState();
   const { latitude, longitude } = useSafeLocation();
 
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["business-category"],
+    queryFn: () => getBusinessCategories(latitude, longitude, query),
+  });
+
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await getBusinessCategories(latitude, longitude, query);
-
-        setBusinessCategory(res);
-      } catch (error) {
-        console.error("Failed to fetch categories", error);
-        Alert.alert("Error", "Could not load categories.");
-      }
-    };
-
-    fetchCategories();
-  }, []);
+    setBusinessCategory(data);
+  }, [data]);
 
   const renderItem = ({ item }: { item: BusinessCategoryProps }) => (
     <Pressable

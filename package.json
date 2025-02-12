@@ -16,11 +16,12 @@
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.1.0",
+    "@react-native-community/datetimepicker": "^8.3.0",
     "@react-native-firebase/app": "^21.8.0",
     "@react-native-firebase/auth": "^21.8.0",
-    "@react-native-community/datetimepicker": "^8.3.0",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
+    "@tanstack/react-query": "^5.66.0",
     "axios": "^1.7.9",
     "customer-app": "file:",
     "expo": "~52.0.25",
