@@ -15,7 +15,7 @@ import Typo from "@/components/Typo";
 import { CaretUp, Clock, Star, XCircle } from "phosphor-react-native";
 import SearchView from "@/components/SearchView";
 import { productFilters } from "@/utils/defaultData";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { useAuthStore } from "@/store/store";
 import {
@@ -36,7 +36,10 @@ import { useSafeLocation } from "@/utils/helpers";
 import ProductCard from "@/components/universal/ProductCard";
 import { Image } from "react-native";
 import FloatingCart from "@/components/universal/FloatingCart";
-import BottomSheet from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import VariantSheet from "@/components/BottomSheets/VariantSheet";
 import { useQuery } from "@tanstack/react-query";
@@ -215,6 +218,20 @@ const Product = () => {
       },
     });
   };
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+        style={[props.style, styles.backdrop]}
+        // onPress={handleClosePress}
+      />
+    ),
+    []
+  );
 
   const renderItem = ({ item }: any) => {
     return (
@@ -438,6 +455,7 @@ const Product = () => {
           enableDynamicSizing={false}
           enablePanDownToClose
           onClose={() => setProduct(null)}
+          backdropComponent={renderBackdrop}
         >
           <VariantSheet
             product={product ? product : null}
@@ -516,5 +534,13 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(5),
     borderBottomWidth: 0.5,
     borderBottomColor: colors.NEUTRAL300,
+  },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 1)",
   },
 });

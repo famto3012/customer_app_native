@@ -9,11 +9,11 @@ const HomeDelivery = () => {
     <View style={styles.container}>
       <Address />
 
-      <Instructions />
+      <Instructions placeholder="Instructions (if any)" />
 
       <ItemList />
 
-      <Instructions />
+      <Instructions placeholder="Instruction to merchant" />
     </View>
   );
 };

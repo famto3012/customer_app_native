@@ -67,7 +67,7 @@ const BusinessCategories: FC<{ query: string }> = ({ query }) => {
         scrollEnabled={false}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
-        numColumns={3}
+        numColumns={4}
       />
     </View>
   );
