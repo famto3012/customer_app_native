@@ -13,6 +13,7 @@ import Animated, {
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { router } from "expo-router";
+import { useMutation } from "@tanstack/react-query";
 
 const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
@@ -24,15 +25,15 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
     item.isFavorite ? setIsFavorite(true) : setIsFavorite(false);
   }, [item.isFavorite]);
 
-  const handleFavorite = async () => {
-    const res = await toggleMerchantFavorite(item.id, selectedBusiness);
-
-    if (res) {
+  const handleFavoriteMutation = useMutation({
+    mutationKey: ["merchant-favorite", item.id],
+    mutationFn: () => toggleMerchantFavorite(item.id, selectedBusiness),
+    onSuccess: () => {
       setIsFavorite(!isFavorite);
       scale.value = 1.2;
-      scale.value = withSpring(1, { damping: 5, stiffness: 150 }); // Animate back to normal
-    }
-  };
+      scale.value = withSpring(1, { damping: 5, stiffness: 150 });
+    },
+  });
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -73,7 +74,10 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
           </Typo>
         )}
 
-        <Pressable style={{ padding: 5 }} onPress={handleFavorite}>
+        <Pressable
+          style={{ padding: 5 }}
+          onPress={() => handleFavoriteMutation.mutate()}
+        >
           <Animated.View style={animatedStyle}>
             {isFavorite ? (
               <Heart size={20} color={colors.RED} weight="fill" />

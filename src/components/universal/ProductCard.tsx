@@ -13,6 +13,7 @@ import {
 } from "@/service/universal";
 import { useAuthStore } from "@/store/store";
 import { router } from "expo-router";
+import { useMutation } from "@tanstack/react-query";
 
 const ProductCard: FC<{
   item: ProductProps;
@@ -27,7 +28,7 @@ const ProductCard: FC<{
 
   useEffect(() => {
     if (count !== null && count >= 0 && !item.variantAvailable) {
-      updateCartItem();
+      handleUpdateCartMutation.mutate();
     }
   }, [count]);
 
@@ -35,15 +36,11 @@ const ProductCard: FC<{
     cartCount ? setCount(cartCount) : setCount(null);
   }, [cartCount]);
 
-  const handleFavorite = async () => {
-    try {
-      const res = await toggleProductFavorite(item.productId);
-
-      if (res) setIsFavorite(!isFavorite);
-    } catch (err) {
-      console.log(`Error in toggling product favorite: ${err}`);
-    }
-  };
+  const handleFavoriteMutation = useMutation({
+    mutationKey: ["product-favorite", item.productId],
+    mutationFn: () => toggleProductFavorite(item.productId),
+    onSuccess: () => setIsFavorite(!isFavorite),
+  });
 
   const isUserAuthenticated = () => {
     if (!token) {
@@ -73,11 +70,13 @@ const ProductCard: FC<{
     }
   };
 
-  const updateCartItem = async () => {
-    const quantity = count ?? 0;
-    const res = await addProductToCart(item.productId, quantity);
-
-    if (res) {
+  const handleUpdateCartMutation = useMutation({
+    mutationKey: ["update-cart"],
+    mutationFn: () => {
+      const quantity = count ?? 0;
+      return addProductToCart(item.productId, quantity);
+    },
+    onSuccess: async () => {
       const floatingCartRes = await haveValidCart();
 
       useAuthStore.setState({
@@ -87,8 +86,8 @@ const ProductCard: FC<{
           cartId: floatingCartRes.cartId,
         },
       });
-    }
-  };
+    },
+  });
 
   return (
     <View style={styles.container}>
@@ -105,7 +104,7 @@ const ProductCard: FC<{
         />
 
         <Pressable
-          onPress={handleFavorite}
+          onPress={() => handleFavoriteMutation.mutate()}
           style={{ position: "absolute", right: 0, padding: scale(7) }}
         >
           <Heart

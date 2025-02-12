@@ -13,6 +13,7 @@ import { MapPinPlus } from "phosphor-react-native";
 import { router } from "expo-router";
 import { AddressProps } from "@/types";
 import { fetchUserAddress } from "@/service/userService";
+import { useQuery } from "@tanstack/react-query";
 
 const Address = () => {
   const [selected, setSelected] = useState<string>("home");
@@ -21,17 +22,16 @@ const Address = () => {
   const [work, setWork] = useState<AddressProps | null>(null);
   const [other, setOther] = useState<AddressProps[]>([]);
 
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["customer-address"],
+    queryFn: () => fetchUserAddress(),
+  });
+
   useEffect(() => {
-    const fetchAddress = async () => {
-      const res = await fetchUserAddress();
-
-      setHome(res.homeAddress);
-      setWork(res.workAddress);
-      setOther(res.otherAddress);
-    };
-
-    fetchAddress();
-  }, []);
+    setHome(data?.homeAddress);
+    setWork(data?.workAddress);
+    setOther(data?.otherAddress);
+  }, [data]);
 
   useEffect(() => {
     if (selected === "other") {

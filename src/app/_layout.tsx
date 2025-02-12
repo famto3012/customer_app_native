@@ -3,14 +3,19 @@ import {
   gestureHandlerRootHOC,
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 const RootLayout = () => {
   return (
-    <GestureHandlerRootView>
-      <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
-        <Stack.Screen name="index" />
-      </Stack>
-    </GestureHandlerRootView>
+    <QueryClientProvider client={queryClient}>
+      <GestureHandlerRootView>
+        <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
+          <Stack.Screen name="index" />
+        </Stack>
+      </GestureHandlerRootView>
+    </QueryClientProvider>
   );
 };
 

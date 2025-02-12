@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { scale, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
 import { colors, radius } from "@/constants/theme";
+import { router } from "expo-router";
 
 const ItemList = () => {
   return (
@@ -37,7 +38,7 @@ const ItemList = () => {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.addBtn}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.addBtn}>
         <Typo size={14} color={colors.PRIMARY}>
           Add More
         </Typo>

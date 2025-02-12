@@ -21,6 +21,7 @@
     "@react-native-firebase/auth": "^21.8.0",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
+    "@tanstack/react-query": "^5.66.0",
     "axios": "^1.7.9",
     "customer-app": "file:",
     "expo": "~52.0.25",
@@ -47,7 +48,8 @@
     "react-native-skeleton-placeholder": "^5.2.4",
     "react-native-svg": "15.8.0",
     "react-native-webview": "13.12.5",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.3",
+    "expo-av": "~15.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

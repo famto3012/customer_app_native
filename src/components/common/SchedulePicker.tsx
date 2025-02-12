@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   },
   pressable: {
     backgroundColor: colors.WHITE,
-    marginVertical: verticalScale(24),
+    marginVertical: verticalScale(10),
     paddingVertical: verticalScale(10),
     paddingHorizontal: scale(16),
     shadowColor: "#000",
