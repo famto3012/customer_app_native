@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
-import { FC, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { scale, verticalScale } from "@/utils/styling";
 import { Microphone, StopCircle, Trash } from "phosphor-react-native";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
@@ -8,7 +8,12 @@ import { getRecordingPermissions } from "@/utils/helpers";
 import { Audio } from "expo-av";
 import Typo from "../Typo";
 
-const Instructions: FC<{ placeholder: string }> = ({ placeholder }) => {
+const Instructions: FC<{
+  placeholder: string;
+  onRecordComplete: (data: string) => void;
+  onChangeText: (data: string) => void;
+}> = ({ placeholder, onRecordComplete, onChangeText }) => {
+  const textInstruction = useRef<string>("");
   const [voiceInstruction, setVoiceInstruction] = useState<string | null>(null);
   const [voiceRecording, setVoiceRecording] = useState<Audio.Recording | null>(
     null
@@ -16,6 +21,10 @@ const Instructions: FC<{ placeholder: string }> = ({ placeholder }) => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
+
+  useEffect(() => {
+    onChangeText(textInstruction?.current);
+  }, [textInstruction]);
 
   const startRecording = async () => {
     const hasPermission = await getRecordingPermissions();
@@ -37,9 +46,11 @@ const Instructions: FC<{ placeholder: string }> = ({ placeholder }) => {
       if (voiceRecording) {
         await voiceRecording.stopAndUnloadAsync();
         const uri = voiceRecording.getURI();
-        setVoiceInstruction(uri);
-        setIsRecording(false);
-        // onRecordComplete(uri);
+        if (uri) {
+          setVoiceInstruction(uri);
+          setIsRecording(false);
+          onRecordComplete(uri);
+        }
       }
     } catch (error) {
       console.log(`Error while stopping recording voice: ${error}`);
@@ -76,7 +87,7 @@ const Instructions: FC<{ placeholder: string }> = ({ placeholder }) => {
       setIsPlaying(false);
     }
     setVoiceInstruction(null);
-    // onRecordComplete(null);
+    onRecordComplete("");
   };
 
   return (

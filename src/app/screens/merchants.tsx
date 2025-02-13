@@ -115,7 +115,7 @@ const Merchants = () => {
         }}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          !isLoading ? (
+          !isLoading && !merchants?.length ? (
             <View
               style={{
                 flex: 1,

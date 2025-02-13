@@ -8,16 +8,18 @@ import {
 import { scale, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
 import { colors } from "@/constants/theme";
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { MapPinPlus } from "phosphor-react-native";
 import { router } from "expo-router";
 import { AddressProps } from "@/types";
 import { fetchUserAddress } from "@/service/userService";
 import { useQuery } from "@tanstack/react-query";
 
-const Address = () => {
+const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
+  onSelect,
+}) => {
   const [selected, setSelected] = useState<string>("home");
-  const [selectedOther, setSelectedOther] = useState<string>("");
+  const [selectedOtherId, setSelectedOtherId] = useState<string>("");
   const [home, setHome] = useState<AddressProps | null>(null);
   const [work, setWork] = useState<AddressProps | null>(null);
   const [other, setOther] = useState<AddressProps[]>([]);
@@ -35,17 +37,29 @@ const Address = () => {
 
   useEffect(() => {
     if (selected === "other") {
-      setSelectedOther(other[0]?.id);
+      setSelectedOtherId(other[0]?.id);
     } else {
-      setSelectedOther("");
+      setSelectedOtherId("");
     }
   }, [selected]);
+
+  const handleSelectAddress = (type: string) => {
+    setSelected(type);
+
+    type === "other"
+      ? setSelectedOtherId(other[0]?.id)
+      : setSelectedOtherId("");
+
+    if (onSelect) {
+      onSelect(selected, selectedOtherId);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.tabOptionContainer}>
         <TouchableOpacity
-          onPress={() => setSelected("home")}
+          onPress={() => handleSelectAddress("home")}
           style={[
             styles.tabOption,
             {
@@ -64,7 +78,7 @@ const Address = () => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => setSelected("work")}
+          onPress={() => handleSelectAddress("work")}
           style={[
             styles.tabOption,
             {
@@ -83,7 +97,7 @@ const Address = () => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => setSelected("other")}
+          onPress={() => handleSelectAddress("other")}
           style={[
             styles.tabOption,
             {
@@ -178,18 +192,18 @@ const Address = () => {
           data={other}
           renderItem={({ item }) => (
             <Pressable
-              onPress={() => setSelectedOther(item.id)}
+              onPress={() => setSelectedOtherId(item.id)}
               style={{
                 marginTop: 15,
                 borderWidth: 1,
                 padding: 10,
                 borderRadius: 5,
                 borderColor:
-                  selectedOther === item.id
+                  selectedOtherId === item.id
                     ? colors.PRIMARY
                     : colors.NEUTRAL300,
                 backgroundColor:
-                  selectedOther === item.id ? "#E5FAFA" : "transparent",
+                  selectedOtherId === item.id ? "#E5FAFA" : "transparent",
               }}
             >
               <Typo

@@ -3,40 +3,99 @@ import { scale, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
 import { colors, radius } from "@/constants/theme";
 import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { addProductToCart, getCustomerCart } from "@/service/universal";
+import { UniversalItems } from "@/types";
 
 const ItemList = () => {
+  const [items, setItems] = useState<UniversalItems[]>([]);
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["customer-cart"],
+    queryFn: () => getCustomerCart(),
+  });
+
+  useEffect(() => {
+    setItems(data?.items);
+  }, [data]);
+
+  const handleUpdateCartMutation = useMutation({
+    mutationKey: ["update-cart"],
+    mutationFn: async ({
+      productId,
+      quantity,
+      variantTypeId,
+    }: {
+      productId: string;
+      quantity: number;
+      variantTypeId: string;
+    }): Promise<boolean> =>
+      addProductToCart(productId, quantity, variantTypeId),
+
+    onSuccess: async (_, { productId, quantity }) => {
+      setItems((prev) =>
+        prev
+          .map((item) =>
+            item.productId.id === productId ? { ...item, quantity } : item
+          )
+          .filter((item) => item.quantity > 0)
+      );
+    },
+  });
+
   return (
     <View style={styles.container}>
       <Typo size={14} fontFamily="SemiBold" color={colors.NEUTRAL800}>
         Added Items
       </Typo>
 
-      <View style={styles.itemContainer}>
-        <View>
-          <Typo size={13} color={colors.NEUTRAL900}>
-            Chicken Mandi
-          </Typo>
-          <Typo size={14} color={colors.NEUTRAL900} fontFamily="SemiBold">
-            ₹ 250
-          </Typo>
-        </View>
+      {items?.map((product) => (
+        <View style={styles.itemContainer}>
+          <View>
+            <Typo size={13} color={colors.NEUTRAL900}>
+              {product?.productId?.productName}
+            </Typo>
+            <Typo size={14} color={colors.NEUTRAL900} fontFamily="SemiBold">
+              ₹ {product?.price}
+            </Typo>
+          </View>
 
-        <View style={[styles.actionBtn]}>
-          <TouchableOpacity style={styles.btn}>
-            <Typo size={14} color={colors.PRIMARY}>
-              -
+          <View style={[styles.actionBtn]}>
+            <TouchableOpacity
+              onPress={() =>
+                handleUpdateCartMutation.mutate({
+                  productId: product.productId.id,
+                  quantity: product.quantity - 1,
+                  variantTypeId: product?.variantTypeId || "",
+                })
+              }
+              style={styles.btn}
+            >
+              <Typo size={14} color={colors.PRIMARY}>
+                -
+              </Typo>
+            </TouchableOpacity>
+            <Typo size={16} color={colors.PRIMARY} fontFamily="Medium">
+              {product?.quantity}
             </Typo>
-          </TouchableOpacity>
-          <Typo size={16} color={colors.PRIMARY} fontFamily="Medium">
-            2
-          </Typo>
-          <TouchableOpacity style={styles.btn}>
-            <Typo size={14} color={colors.PRIMARY}>
-              +
-            </Typo>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() =>
+                handleUpdateCartMutation.mutate({
+                  productId: product.productId.id,
+                  quantity: product.quantity + 1,
+                  variantTypeId: product?.variantTypeId || "",
+                })
+              }
+              style={styles.btn}
+            >
+              <Typo size={14} color={colors.PRIMARY}>
+                +
+              </Typo>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      ))}
 
       <TouchableOpacity onPress={() => router.back()} style={styles.addBtn}>
         <Typo size={14} color={colors.PRIMARY}>
