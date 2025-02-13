@@ -12,7 +12,7 @@ import Animated, {
 import { scale, verticalScale } from "@/utils/styling";
 import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import OrderList from "@/components/orders/OrderList";
-import SchduledOrderList from "@/components/orders/SchduledOrderList";
+import ScheduledOrderList from "@/components/orders/ScheduledOrderList";
 
 const TAB_WIDTH = scale((SCREEN_WIDTH - 40) / 2);
 
@@ -35,7 +35,7 @@ const order = () => {
 
   return (
     <ScreenWrapper>
-      <Header title={"Orders"} />
+      <Header title="Orders" />
 
       <View style={styles.tabContainer}>
         <View style={styles.tab}>
@@ -77,7 +77,7 @@ const order = () => {
           <Animated.View style={[styles.indicator, animatedIndicator]} />
         </View>
       </View>
-      {orderType === "Order" ? <OrderList /> : <SchduledOrderList />}
+      {orderType === "Order" ? <OrderList /> : <ScheduledOrderList />}
     </ScreenWrapper>
   );
 };

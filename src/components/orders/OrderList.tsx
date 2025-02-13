@@ -1,8 +1,7 @@
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
-import React from "react";
-import { verticalScale } from "@/utils/styling";
+import { Image, ScrollView, StyleSheet, View } from "react-native";
+import { scale, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
-import { colors } from "@/constants/theme";
+import { colors, radius } from "@/constants/theme";
 
 const OrderList = () => {
   return (
@@ -13,109 +12,116 @@ const OrderList = () => {
       }}
       showsVerticalScrollIndicator={false}
     >
-      {/* Order List */}
+      {/* Home Delivery & Take Away */}
       <View style={styles.orderItem}>
         <View style={styles.orderItemHeader}>
           <Image
             source={require("@/assets/icons/shopping-cart.webp")}
             resizeMode="cover"
-            style={{
-              width: verticalScale(55),
-              height: verticalScale(55),
-              marginTop: 14,
-            }}
+            style={styles.image}
           />
-          <View style={styles.orderItemHeaderContent}>
-            <Typo size={18} color={colors.NEUTRAL900} fontFamily="Medium">
-              Burj Al Mandhi
-            </Typo>
-            <Typo size={14} color={colors.NEUTRAL400} fontFamily="Regular">
-              Thiruvananthapuram
-            </Typo>
-            <Typo size={13} color={colors.PRIMARY} fontFamily="Regular">
-              24th Apr 2024 | 09:35PM
-            </Typo>
-          </View>
-          <View style={{ marginLeft: 5 }}>
-            <Typo size={12} color={colors.GREEN} fontFamily="Regular">
+          <View style={styles.orderDetail}>
+            <View>
+              <Typo size={16} color={colors.NEUTRAL900} fontFamily="Medium">
+                Burj Al Mandhi
+              </Typo>
+              <Typo size={12} color={colors.NEUTRAL400}>
+                Thiruvananthapuram
+              </Typo>
+              <Typo
+                size={12}
+                color={colors.PRIMARY}
+                style={{ paddingTop: verticalScale(10) }}
+              >
+                24th Apr 2024 | 09:35PM
+              </Typo>
+            </View>
+
+            <Typo size={12} color={colors.GREEN} style={styles.completed}>
               Completed
             </Typo>
           </View>
         </View>
+
         <View style={styles.orderItemFooter}>
-          <Typo size={16} color={colors.PRIMARY} fontFamily="Regular">
+          <Typo size={13} color={colors.PRIMARY} fontFamily="Medium">
             Grand Total
           </Typo>
           <Typo size={16} color={colors.NEUTRAL900} fontFamily="SemiBold">
-            638
+            ₹ 638
           </Typo>
         </View>
       </View>
-      {/* Order List */}
+
+      {/* Pick and Drop */}
       <View style={styles.orderItem}>
         <View style={styles.orderItemHeader}>
           <Image
             source={require("@/assets/icons/shipping.webp")}
             resizeMode="cover"
-            style={{
-              width: verticalScale(55),
-              height: verticalScale(55),
-            }}
+            style={styles.image}
           />
-          <View style={{ marginTop: 5, ...styles.orderItemHeaderContent }}>
-            <Typo size={18} color={colors.NEUTRAL900} fontFamily="Medium">
-              Pick & Drop
-            </Typo>
-            <Typo size={13} color={colors.PRIMARY} fontFamily="Regular">
-              24th Apr 2024 | 09:35PM
-            </Typo>
-          </View>
-          <View style={{ marginLeft: 5, marginTop: 5 }}>
-            <Typo size={12} color={colors.GREEN} fontFamily="Regular">
+
+          <View style={styles.orderDetail}>
+            <View>
+              <Typo size={16} color={colors.NEUTRAL900} fontFamily="Medium">
+                Pick & Drop
+              </Typo>
+              <Typo size={12} color={colors.PRIMARY}>
+                24th Apr 2024 | 09:35PM
+              </Typo>
+            </View>
+            <Typo size={12} color={colors.GREEN} style={styles.completed}>
               Completed
             </Typo>
           </View>
         </View>
-        <View style={styles.orderItemFooter}>
-          <Typo size={16} color={colors.PRIMARY} fontFamily="Regular">
+
+        <View
+          style={[styles.orderItemFooter, { marginTop: verticalScale(15) }]}
+        >
+          <Typo size={13} color={colors.PRIMARY} fontFamily="Medium">
             Grand Total
           </Typo>
           <Typo size={16} color={colors.NEUTRAL900} fontFamily="SemiBold">
-            638
+            ₹ 638
           </Typo>
         </View>
       </View>
+
       {/* Order List */}
       <View style={styles.orderItem}>
         <View style={styles.orderItemHeader}>
           <Image
             source={require("@/assets/icons/notes.webp")}
             resizeMode="cover"
-            style={{
-              width: verticalScale(55),
-              height: verticalScale(55),
-            }}
+            style={styles.image}
           />
-          <View style={{ marginTop: 5, ...styles.orderItemHeaderContent }}>
-            <Typo size={18} color={colors.NEUTRAL900} fontFamily="Medium">
-              Custom Order
-            </Typo>
-            <Typo size={13} color={colors.PRIMARY} fontFamily="Regular">
-              24th Apr 2024 | 09:35PM
-            </Typo>
-          </View>
-          <View style={{ marginLeft: 5, marginTop: 5 }}>
-            <Typo size={12} color={colors.GREEN} fontFamily="Regular">
+
+          <View style={styles.orderDetail}>
+            <View>
+              <Typo size={16} color={colors.NEUTRAL900} fontFamily="Medium">
+                Custom Order
+              </Typo>
+              <Typo size={12} color={colors.PRIMARY}>
+                24th Apr 2024 | 09:35PM
+              </Typo>
+            </View>
+
+            <Typo size={12} color={colors.GREEN} style={styles.completed}>
               Completed
             </Typo>
           </View>
         </View>
-        <View style={styles.orderItemFooter}>
-          <Typo size={16} color={colors.PRIMARY} fontFamily="Regular">
+
+        <View
+          style={[styles.orderItemFooter, { marginTop: verticalScale(15) }]}
+        >
+          <Typo size={13} color={colors.PRIMARY} fontFamily="Medium">
             Grand Total
           </Typo>
           <Typo size={16} color={colors.NEUTRAL900} fontFamily="SemiBold">
-            638
+            ₹ 638
           </Typo>
         </View>
       </View>
@@ -127,31 +133,51 @@ export default OrderList;
 
 const styles = StyleSheet.create({
   orderItem: {
-    backgroundColor: "#fff",
-    padding: 15,
-    marginLeft: 20,
-    marginRight: 20,
-    marginBottom: 10,
-    borderRadius: 10,
+    backgroundColor: colors.WHITE,
+    marginHorizontal: scale(20),
+    marginVertical: verticalScale(12),
+    borderRadius: radius._10,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -5 }, // Small negative height moves shadow above
-    shadowOpacity: 0.15, // Subtle but visible
+    shadowOffset: { width: 0, height: -5 },
+    shadowOpacity: 0.15,
     shadowRadius: 10,
     elevation: 2,
   },
   orderItemHeader: {
+    paddingHorizontal: scale(10),
+    marginTop: verticalScale(10),
     display: "flex",
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-  },
-  orderItemHeaderContent: {
-    marginLeft: -25,
   },
   orderItemFooter: {
     display: "flex",
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
     marginTop: 10,
-    paddingLeft: 5,
+    paddingHorizontal: scale(12),
+    paddingVertical: verticalScale(12),
+    backgroundColor: colors.NEUTRAL100,
+    borderBottomLeftRadius: radius._10,
+    borderBottomRightRadius: radius._10,
+  },
+  image: {
+    width: scale(40),
+    height: scale(40),
+    marginRight: scale(15),
+  },
+  orderDetail: {
+    flexDirection: "row",
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  completed: {
+    backgroundColor: colors.NEUTRAL100,
+    paddingVertical: verticalScale(4),
+    paddingHorizontal: scale(8),
+    borderRadius: radius._20,
   },
 });
