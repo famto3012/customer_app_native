@@ -276,3 +276,31 @@ export const clearCart = async (cartId: string) => {
     return false;
   }
 };
+
+export const getCustomerCart = async () => {
+  try {
+    const res = await appAxios.get(`/customers/get-cart`);
+
+    return res.status === 200 ? res.data.data : null;
+  } catch (err) {
+    console.error(`Error in getting cart:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return null;
+  }
+};
+
+export const confirmOrder = async (cartDetail: any) => {
+  try {
+    const res = await appAxios.post(
+      `/customers/cart/add-details`,
+      cartDetail,
+      {}
+    );
+
+    return res.status === 200 ? true : false;
+  } catch (err) {
+    console.error(`Error in clearing cart:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return false;
+  }
+};

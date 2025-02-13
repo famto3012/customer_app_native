@@ -146,3 +146,17 @@ export type AddressProps = {
   landmark: string;
   coordinates: number[];
 };
+
+export type UniversalItems = {
+  productId: ProductId;
+  quantity: number;
+  price: number;
+  variantTypeId?: string;
+};
+
+interface ProductId {
+  id: string;
+  productName: string;
+  description?: string;
+  productImageURL?: string;
+}
