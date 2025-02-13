@@ -1,44 +1,102 @@
-import { Image, ScrollView, StyleSheet, View } from "react-native";
+import {
+  FlatList,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  RefreshControl, // ✅ Import RefreshControl
+} from "react-native";
 import { scale, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
 import { colors, radius } from "@/constants/theme";
+import { useQuery } from "@tanstack/react-query";
+import { getOrderList } from "@/service/orderService";
+import { useEffect, useState, useCallback } from "react";
+import { OrderItemProps } from "@/types";
+import { SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
 
 const OrderList = () => {
-  return (
-    <ScrollView
-      contentContainerStyle={{
-        paddingBottom: verticalScale(120),
-        paddingTop: verticalScale(20),
-      }}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Home Delivery & Take Away */}
-      <View style={styles.orderItem}>
+  const [orderList, setOrderList] = useState<OrderItemProps[]>([]);
+  const [refreshing, setRefreshing] = useState(false); // ✅ Add refreshing state
+
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["orderList"],
+    queryFn: () => getOrderList(),
+  });
+
+  useEffect(() => {
+    if (data) setOrderList(data);
+  }, [data]);
+
+  // ✅ Refresh function to manually fetch the data again
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch(); // ✅ Calls the API again
+    setRefreshing(false);
+  }, [refetch]);
+
+  const renderItem = ({ item }: any) => {
+    return (
+      <Pressable style={styles.orderItem}>
         <View style={styles.orderItemHeader}>
-          <Image
-            source={require("@/assets/icons/shopping-cart.webp")}
-            resizeMode="cover"
-            style={styles.image}
-          />
+          {item.deliveryMode === "Home Delivery" ||
+          item.deliveryMode === "Take Away" ? (
+            <Image
+              source={require("@/assets/icons/shopping-cart.webp")}
+              resizeMode="cover"
+              style={styles.image}
+            />
+          ) : item.deliveryMode === "Pick and Drop" ? (
+            <Image
+              source={require("@/assets/icons/shipping.webp")}
+              resizeMode="cover"
+              style={styles.image}
+            />
+          ) : (
+            <Image
+              source={require("@/assets/icons/notes.webp")}
+              resizeMode="cover"
+              style={styles.image}
+            />
+          )}
+
           <View style={styles.orderDetail}>
             <View>
               <Typo size={16} color={colors.NEUTRAL900} fontFamily="Medium">
-                Burj Al Mandhi
+                {item.deliveryMode === "Home Delivery" ||
+                item.deliveryMode === "Take Away"
+                  ? item.merchantName
+                  : item.deliveryMode}
               </Typo>
               <Typo size={12} color={colors.NEUTRAL400}>
-                Thiruvananthapuram
+                {item.deliveryMode === "Home Delivery" ||
+                item.deliveryMode === "Take Away"
+                  ? item.displayAddress
+                  : ""}
               </Typo>
               <Typo
                 size={12}
                 color={colors.PRIMARY}
                 style={{ paddingTop: verticalScale(10) }}
               >
-                24th Apr 2024 | 09:35PM
+                {item.orderDate} | {item.orderTime}
               </Typo>
             </View>
 
-            <Typo size={12} color={colors.GREEN} style={styles.completed}>
-              Completed
+            <Typo
+              size={12}
+              color={
+                item.orderStatus === "On-going" ||
+                item.orderStatus === "Pending"
+                  ? colors.YELLOW
+                  : item.orderStatus === "Completed"
+                  ? colors.GREEN
+                  : colors.RED
+              }
+              style={styles.completed}
+            >
+              {item.orderStatus}
             </Typo>
           </View>
         </View>
@@ -48,84 +106,53 @@ const OrderList = () => {
             Grand Total
           </Typo>
           <Typo size={16} color={colors.NEUTRAL900} fontFamily="SemiBold">
-            ₹ 638
+            ₹ {item.grandTotal}
           </Typo>
         </View>
-      </View>
+      </Pressable>
+    );
+  };
 
-      {/* Pick and Drop */}
-      <View style={styles.orderItem}>
-        <View style={styles.orderItemHeader}>
-          <Image
-            source={require("@/assets/icons/shipping.webp")}
-            resizeMode="cover"
-            style={styles.image}
-          />
-
-          <View style={styles.orderDetail}>
-            <View>
-              <Typo size={16} color={colors.NEUTRAL900} fontFamily="Medium">
-                Pick & Drop
-              </Typo>
-              <Typo size={12} color={colors.PRIMARY}>
-                24th Apr 2024 | 09:35PM
-              </Typo>
-            </View>
-            <Typo size={12} color={colors.GREEN} style={styles.completed}>
-              Completed
-            </Typo>
+  return (
+    <FlatList
+      data={orderList}
+      renderItem={renderItem}
+      keyExtractor={(item) => item.orderId}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        // ✅ Attach RefreshControl
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      ListEmptyComponent={
+        !isLoading && !orderList?.length ? (
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              height: SCREEN_HEIGHT - verticalScale(300),
+            }}
+          >
+            <Image
+              source={require("@/assets/images/order.webp")}
+              resizeMode="contain"
+              style={styles.orderImage}
+            />
           </View>
-        </View>
-
-        <View
-          style={[styles.orderItemFooter, { marginTop: verticalScale(15) }]}
-        >
-          <Typo size={13} color={colors.PRIMARY} fontFamily="Medium">
-            Grand Total
-          </Typo>
-          <Typo size={16} color={colors.NEUTRAL900} fontFamily="SemiBold">
-            ₹ 638
-          </Typo>
-        </View>
-      </View>
-
-      {/* Order List */}
-      <View style={styles.orderItem}>
-        <View style={styles.orderItemHeader}>
-          <Image
-            source={require("@/assets/icons/notes.webp")}
-            resizeMode="cover"
-            style={styles.image}
-          />
-
-          <View style={styles.orderDetail}>
-            <View>
-              <Typo size={16} color={colors.NEUTRAL900} fontFamily="Medium">
-                Custom Order
-              </Typo>
-              <Typo size={12} color={colors.PRIMARY}>
-                24th Apr 2024 | 09:35PM
-              </Typo>
-            </View>
-
-            <Typo size={12} color={colors.GREEN} style={styles.completed}>
-              Completed
-            </Typo>
+        ) : (
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              height: SCREEN_HEIGHT - verticalScale(250),
+            }}
+          >
+            <Typo>Loading...</Typo>
           </View>
-        </View>
-
-        <View
-          style={[styles.orderItemFooter, { marginTop: verticalScale(15) }]}
-        >
-          <Typo size={13} color={colors.PRIMARY} fontFamily="Medium">
-            Grand Total
-          </Typo>
-          <Typo size={16} color={colors.NEUTRAL900} fontFamily="SemiBold">
-            ₹ 638
-          </Typo>
-        </View>
-      </View>
-    </ScrollView>
+        )
+      }
+    />
   );
 };
 
@@ -179,5 +206,9 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(4),
     paddingHorizontal: scale(8),
     borderRadius: radius._20,
+  },
+  orderImage: {
+    width: scale(340),
+    height: scale(340),
   },
 });

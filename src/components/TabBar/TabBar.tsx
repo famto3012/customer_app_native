@@ -8,7 +8,7 @@ import { Text } from "@react-navigation/elements";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { colors } from "@/constants/theme";
 import TabBarButton from "./TabBarButton";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -29,6 +29,13 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   };
 
   const tabPositionX = useSharedValue(buttonWidth * state.index);
+
+  useEffect(() => {
+    tabPositionX.value = withSpring(buttonWidth * state.index, {
+      damping: 15,
+      stiffness: 120,
+    });
+  }, [state.index]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -64,9 +71,9 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           const label =
-            options.tabBarLabel !== undefined
+            typeof options.tabBarLabel === "string"
               ? options.tabBarLabel
-              : options.title !== undefined
+              : typeof options.title === "string"
               ? options.title
               : route.name;
 

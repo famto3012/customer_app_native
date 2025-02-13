@@ -146,3 +146,27 @@ export type AddressProps = {
   landmark: string;
   coordinates: number[];
 };
+
+export type OrderItemProps = {
+  orderId: string;
+  merchantName: string;
+  displayAddress: string;
+  deliveryMode: string;
+  orderStatus: string;
+  orderDate: string;
+  orderTime: string;
+  grandTotal: number;
+};
+
+export type ScheduledOrderItemProps = {
+  orderId: string;
+  merchantName: string;
+  displayAddress: string;
+  deliveryMode: string;
+  startDate: string;
+  endDate: string;
+  time: string;
+  orderStatus: string;
+  numberOfDays: number;
+  grandTotal: number;
+};

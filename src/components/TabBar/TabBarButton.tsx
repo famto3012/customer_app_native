@@ -18,8 +18,8 @@ const TabBarButton = ({
   color,
   label,
 }: {
-  onPress: Function;
-  onLongPress: Function;
+  onPress: () => void;
+  onLongPress: () => void;
   isFocused: boolean;
   routeName: string;
   color: string;
