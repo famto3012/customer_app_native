@@ -135,7 +135,17 @@ const Checkout = () => {
           </View>
 
           {/* Content Based on Selection */}
-          {deliveryMode === "Home Delivery" ? <HomeDelivery /> : <TakeAway />}
+          {deliveryMode === "Home Delivery" ? (
+            <HomeDelivery
+              onAgentVoice={() => {}}
+              onAgentInstruction={() => {}}
+              onMerchantVoice={() => {}}
+              onMerchantInstruction={() => {}}
+              onAddressSelect={() => {}}
+            />
+          ) : (
+            <TakeAway />
+          )}
         </ScrollView>
 
         <View style={styles.confirmContainer}>
