@@ -34,13 +34,20 @@ const ItemList = () => {
       addProductToCart(productId, quantity, variantTypeId),
 
     onSuccess: async (_, { productId, quantity }) => {
-      setItems((prev) =>
-        prev
+      setItems((prev) => {
+        const updatedItems = prev
           .map((item) =>
             item.productId.id === productId ? { ...item, quantity } : item
           )
-          .filter((item) => item.quantity > 0)
-      );
+          .filter((item) => item.quantity > 0);
+
+        // If cart is empty, navigate back
+        if (updatedItems.length === 0) {
+          router.back();
+        }
+
+        return updatedItems;
+      });
     },
   });
 
@@ -50,8 +57,8 @@ const ItemList = () => {
         Added Items
       </Typo>
 
-      {items?.map((product) => (
-        <View style={styles.itemContainer}>
+      {items?.map((product, index) => (
+        <View style={styles.itemContainer} key={index + 1}>
           <View>
             <Typo size={13} color={colors.NEUTRAL900}>
               {product?.productId?.productName}
