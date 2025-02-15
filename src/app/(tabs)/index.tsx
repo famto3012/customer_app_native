@@ -27,8 +27,11 @@ import FloatingPreparingOrder from "@/components/universal/FloatingPreparingOrde
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getOngoingOrder } from "@/service/orderService";
 import { useFocusEffect } from "@react-navigation/native";
+import { useAuthStore } from "@/store/store";
 
 const Home = () => {
+  const { token } = useAuthStore.getState();
+
   useEffect(() => {
     requestLocationPermission();
   }, []);
@@ -38,11 +41,12 @@ const Home = () => {
   const { data } = useQuery({
     queryKey: ["ongoingOrder"],
     queryFn: () => getOngoingOrder(),
+    enabled: !!token,
   });
 
   useFocusEffect(
     useCallback(() => {
-      queryClient.invalidateQueries(["ongoingOrder"]); // Refetch the query when the screen is focused
+      queryClient.invalidateQueries({ queryKey: ["ongoingOrder"] });
     }, [queryClient])
   );
 
@@ -114,6 +118,7 @@ const Home = () => {
           {/* <FloatingPreparingOrder /> */}
         </ScreenWrapper>
       </ScrollView>
+
       <View style={styles.floatingContainer}>
         <FloatingPreparingOrder />
       </View>

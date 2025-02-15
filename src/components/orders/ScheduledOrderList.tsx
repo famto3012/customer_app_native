@@ -1,13 +1,5 @@
-import {
-  FlatList,
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import { FlatList, Image, Pressable, StyleSheet, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
 import { scale, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
 import { colors, radius } from "@/constants/theme";
@@ -17,6 +9,7 @@ import { getScheduledOrderList } from "@/service/orderService";
 import { SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
 import { RefreshControl } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import { useAuthStore } from "@/store/store";
 
 const ScheduledOrderList = () => {
   const [scheduledOrderList, setScheduledOrderList] = useState<
@@ -25,26 +18,28 @@ const ScheduledOrderList = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [isScreenActive, setIsScreenActive] = useState(true);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { token } = useAuthStore.getState();
+
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["scheduledOrderList"],
     queryFn: () => getScheduledOrderList(),
+    enabled: !!token,
   });
 
   useEffect(() => {
-    if (data) setScheduledOrderList(data);
-    // console.log(data);
+    data && setScheduledOrderList(data);
   }, [data]);
 
   useFocusEffect(
     useCallback(() => {
       setIsScreenActive(true);
-      return () => setIsScreenActive(false); // Reset on screen blur
+      return () => setIsScreenActive(false);
     }, [])
   );
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await refetch(); // ✅ Calls the API again
+    await refetch();
     setRefreshing(false);
   }, [refetch]);
 
