@@ -16,12 +16,14 @@ import { useQuery } from "@tanstack/react-query";
 import { getScheduledOrderList } from "@/service/orderService";
 import { SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
 import { RefreshControl } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 const ScheduledOrderList = () => {
   const [scheduledOrderList, setScheduledOrderList] = useState<
     ScheduledOrderItemProps[]
   >([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [isScreenActive, setIsScreenActive] = useState(true);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["scheduledOrderList"],
@@ -32,6 +34,13 @@ const ScheduledOrderList = () => {
     if (data) setScheduledOrderList(data);
     // console.log(data);
   }, [data]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsScreenActive(true);
+      return () => setIsScreenActive(false); // Reset on screen blur
+    }, [])
+  );
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -206,14 +215,19 @@ const ScheduledOrderList = () => {
     //     </View>
     //   </View>
     // </ScrollView>
+
     <FlatList
-      data={scheduledOrderList}
+      data={isScreenActive ? scheduledOrderList : []}
       renderItem={renderItem}
       keyExtractor={(item) => item.orderId}
       showsVerticalScrollIndicator={false}
       refreshControl={
         // ✅ Attach RefreshControl
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          enabled={isScreenActive}
+        />
       }
       ListEmptyComponent={
         !isLoading && !scheduledOrderList?.length ? (

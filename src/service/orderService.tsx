@@ -32,3 +32,19 @@ export const getScheduledOrderList = async () => {
     return [];
   }
 };
+
+export const getOngoingOrder = async () => {
+  try {
+    const res = await appAxios.get("/customers/current-ongoing-orders");
+
+    if (res.status === 200) {
+      return res.data;
+    } else {
+      throw new Error("Failed to fetch current ongoing orders");
+    }
+  } catch (err) {
+    console.error(`Error in getting current ongoing orders:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return [];
+  }
+};

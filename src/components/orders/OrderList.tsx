@@ -15,10 +15,12 @@ import { getOrderList } from "@/service/orderService";
 import { useEffect, useState, useCallback } from "react";
 import { OrderItemProps } from "@/types";
 import { SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
+import { useFocusEffect } from "@react-navigation/native";
 
 const OrderList = () => {
   const [orderList, setOrderList] = useState<OrderItemProps[]>([]);
   const [refreshing, setRefreshing] = useState(false); // ✅ Add refreshing state
+  const [isScreenActive, setIsScreenActive] = useState(true);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["orderList"],
@@ -28,6 +30,13 @@ const OrderList = () => {
   useEffect(() => {
     if (data) setOrderList(data);
   }, [data]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsScreenActive(true);
+      return () => setIsScreenActive(false); // Reset on screen blur
+    }, [])
+  );
 
   // ✅ Refresh function to manually fetch the data again
   const onRefresh = useCallback(async () => {
@@ -115,10 +124,11 @@ const OrderList = () => {
 
   return (
     <FlatList
-      data={orderList}
+      data={isScreenActive ? orderList : []}
       renderItem={renderItem}
       keyExtractor={(item) => item.orderId}
       showsVerticalScrollIndicator={false}
+      // removeClippedSubviews={false}
       refreshControl={
         // ✅ Attach RefreshControl
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

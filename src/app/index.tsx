@@ -41,7 +41,7 @@ const Main = () => {
 
       <Image
         source={require("@/assets/images/splash-screen.png")}
-        style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
+        style={{ width: "100%", height: "100%" }}
         resizeMode="cover"
       />
     </View>
