@@ -171,17 +171,26 @@ export type ScheduledOrderItemProps = {
   grandTotal: number;
 };
 
-export type UniversalItems = {
+export type CartProps = {
+  showCart: boolean;
+  cartId: string;
+  customerId: string;
+  merchantId: string;
+  items: Item[];
+  deliveryOption: null;
+  itemLength: number;
+};
+
+interface Item {
   productId: ProductId;
   quantity: number;
   price: number;
-  variantTypeId?: string;
-};
+  variantTypeId: null;
+}
 
 interface ProductId {
   id: string;
   productName: string;
-  description?: string;
-  productImageURL?: string;
+  description: string;
+  productImageURL: string;
 }
-

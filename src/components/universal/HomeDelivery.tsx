@@ -4,8 +4,10 @@ import Address from "../common/Address";
 import Instructions from "../common/Instructions";
 import ItemList from "./ItemList";
 import { FC } from "react";
+import { CartProps } from "@/types";
 
 interface HomeDeliveryProps {
+  items: CartProps["items"];
   onAgentVoice: (data: string) => void;
   onAgentInstruction: (data: string) => void;
   onMerchantVoice: (data: string) => void;
@@ -14,6 +16,7 @@ interface HomeDeliveryProps {
 }
 
 const HomeDelivery: FC<HomeDeliveryProps> = ({
+  items,
   onAgentVoice,
   onAgentInstruction,
   onMerchantVoice,
@@ -36,7 +39,7 @@ const HomeDelivery: FC<HomeDeliveryProps> = ({
         onChangeText={(data) => onAgentInstruction(data)}
       />
 
-      <ItemList />
+      <ItemList items={items} />
 
       <Instructions
         placeholder="Instruction to merchant"

@@ -62,7 +62,7 @@ const ProductCard: FC<{
 
   const handleIncrement = () => {
     if (!isUserAuthenticated()) return;
-
+    console.log("Button Pressed");
     if (item.variantAvailable) {
       openVariant?.(item);
     } else {

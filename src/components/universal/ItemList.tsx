@@ -3,22 +3,18 @@ import { scale, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
 import { colors, radius } from "@/constants/theme";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { addProductToCart, getCustomerCart } from "@/service/universal";
-import { UniversalItems } from "@/types";
+import { FC, useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { addProductToCart } from "@/service/universal";
+import { CartProps } from "@/types";
+import { useAuthStore } from "@/store/store";
 
-const ItemList = () => {
-  const [items, setItems] = useState<UniversalItems[]>([]);
-
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["customer-cart"],
-    queryFn: () => getCustomerCart(),
-  });
+const ItemList: FC<{ items: CartProps["items"] }> = ({ items }) => {
+  const [cartItems, setCartItems] = useState<CartProps["items"]>([]);
 
   useEffect(() => {
-    setItems(data?.items);
-  }, [data]);
+    setCartItems(items);
+  }, [items]);
 
   const handleUpdateCartMutation = useMutation({
     mutationKey: ["update-cart"],
@@ -34,15 +30,22 @@ const ItemList = () => {
       addProductToCart(productId, quantity, variantTypeId),
 
     onSuccess: async (_, { productId, quantity }) => {
-      setItems((prev) => {
+      setCartItems((prev) => {
         const updatedItems = prev
           .map((item) =>
             item.productId.id === productId ? { ...item, quantity } : item
           )
           .filter((item) => item.quantity > 0);
 
-        // If cart is empty, navigate back
+        // If cart is empty, navigate back and reset cart
         if (updatedItems.length === 0) {
+          useAuthStore.setState({
+            cart: {
+              showCart: false,
+              merchant: "",
+              cartId: "",
+            },
+          });
           router.back();
         }
 
@@ -57,7 +60,7 @@ const ItemList = () => {
         Added Items
       </Typo>
 
-      {items?.map((product, index) => (
+      {cartItems?.map((product, index) => (
         <View style={styles.itemContainer} key={index + 1}>
           <View>
             <Typo size={13} color={colors.NEUTRAL900}>
