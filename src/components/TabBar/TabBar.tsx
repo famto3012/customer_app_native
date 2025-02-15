@@ -1,10 +1,4 @@
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  LayoutChangeEvent,
-} from "react-native";
-import { Text } from "@react-navigation/elements";
+import { View, StyleSheet, LayoutChangeEvent } from "react-native";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { colors } from "@/constants/theme";
 import TabBarButton from "./TabBarButton";
@@ -20,6 +14,8 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const [dimensions, setDimensions] = useState({ height: 20, width: 100 });
 
   const buttonWidth = dimensions.width / state.routes.length;
+  const buttonSize = buttonWidth * 0.4;
+  const marginHorizontal = (buttonWidth - buttonSize) / 2;
 
   const onTabBarLayout = (e: LayoutChangeEvent) => {
     setDimensions({
@@ -61,10 +57,10 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             {
               position: "absolute",
               backgroundColor: colors.PRIMARY,
-              borderRadius: 30,
-              marginHorizontal: 38,
-              height: dimensions.height - 27,
-              width: buttonWidth - 78,
+              marginHorizontal: marginHorizontal,
+              borderRadius: buttonSize / 2,
+              height: buttonSize,
+              width: buttonSize,
             },
           ]}
         />
