@@ -67,7 +67,7 @@ const BusinessCategories: FC<{ query: string }> = ({ query }) => {
         scrollEnabled={false}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
-        numColumns={4}
+        numColumns={3}
       />
     </View>
   );
@@ -88,11 +88,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.NEUTRAL100,
     paddingVertical: scale(10),
     borderRadius: radius._10,
-    margin: scale(5),
+    marginBottom: scale(15),
+    marginEnd: scale(6),
     maxWidth: SCREEN_WIDTH / 3 - scale(15),
   },
   listContainer: {
     paddingBottom: verticalScale(10),
+    marginTop: verticalScale(10),
   },
   image: {
     width: scale(65),

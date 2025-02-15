@@ -2,10 +2,9 @@ import {
   FlatList,
   Image,
   Pressable,
-  ScrollView,
   StyleSheet,
   View,
-  RefreshControl, // ✅ Import RefreshControl
+  RefreshControl,
 } from "react-native";
 import { scale, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
@@ -16,15 +15,19 @@ import { useEffect, useState, useCallback } from "react";
 import { OrderItemProps } from "@/types";
 import { SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
 import { useFocusEffect } from "@react-navigation/native";
+import { useAuthStore } from "@/store/store";
 
 const OrderList = () => {
   const [orderList, setOrderList] = useState<OrderItemProps[]>([]);
-  const [refreshing, setRefreshing] = useState(false); // ✅ Add refreshing state
+  const [refreshing, setRefreshing] = useState(false);
   const [isScreenActive, setIsScreenActive] = useState(true);
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { token } = useAuthStore.getState();
+
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["orderList"],
     queryFn: () => getOrderList(),
+    enabled: !!token,
   });
 
   useEffect(() => {
@@ -34,14 +37,13 @@ const OrderList = () => {
   useFocusEffect(
     useCallback(() => {
       setIsScreenActive(true);
-      return () => setIsScreenActive(false); // Reset on screen blur
+      return () => setIsScreenActive(false);
     }, [])
   );
 
-  // ✅ Refresh function to manually fetch the data again
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await refetch(); // ✅ Calls the API again
+    await refetch();
     setRefreshing(false);
   }, [refetch]);
 
@@ -128,9 +130,7 @@ const OrderList = () => {
       renderItem={renderItem}
       keyExtractor={(item) => item.orderId}
       showsVerticalScrollIndicator={false}
-      // removeClippedSubviews={false}
       refreshControl={
-        // ✅ Attach RefreshControl
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
       ListEmptyComponent={

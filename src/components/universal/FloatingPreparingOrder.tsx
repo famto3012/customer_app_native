@@ -3,21 +3,25 @@ import { colors, radius, spacingY } from "@/constants/theme";
 import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
 import Typo from "../Typo";
-import { XCircle } from "phosphor-react-native";
 import { FC, useCallback, useEffect, useState } from "react";
 import { router } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getOngoingOrder } from "@/service/orderService";
 import { useFocusEffect } from "@react-navigation/native";
+import { useAuthStore } from "@/store/store";
+
 const FloatingPreparingOrder: FC<{}> = ({}) => {
   const [showPopUp, setShowPopUp] = useState<boolean>(false);
   const [isScreenActive, setIsScreenActive] = useState(true);
+
+  const { token } = useAuthStore.getState();
+
   const queryClient = useQueryClient();
 
   const { data } = useQuery({
     queryKey: ["ongoingOrder"],
     queryFn: () => getOngoingOrder(),
-    enabled: !!isScreenActive,
+    enabled: !!token,
   });
 
   useEffect(() => {
@@ -32,13 +36,13 @@ const FloatingPreparingOrder: FC<{}> = ({}) => {
       return () => {
         setIsScreenActive(false);
         // setShowPopUp(false);
-      }; // Reset on screen blur
+      };
     }, [])
   );
 
   useFocusEffect(
     useCallback(() => {
-      queryClient.invalidateQueries(["ongoingOrder"]);
+      queryClient.invalidateQueries({ queryKey: ["ongoingOrder"] });
     }, [queryClient])
   );
 
