@@ -18,7 +18,7 @@ const BusinessCategories: FC<{ query: string }> = ({ query }) => {
   const { setSelectedBusiness } = useAuthStore.getState();
   const { latitude, longitude } = useSafeLocation();
 
-  const { data, isLoading, isError } = useQuery({
+  const { data } = useQuery({
     queryKey: ["business-category"],
     queryFn: () => getBusinessCategories(latitude, longitude, query),
   });

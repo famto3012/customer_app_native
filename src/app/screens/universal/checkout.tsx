@@ -1,19 +1,11 @@
 import {
-  KeyboardAvoidingView,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useMemo,
-  useCallback,
-} from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import SchedulePicker from "@/components/common/SchedulePicker";
@@ -35,17 +27,108 @@ import BottomSheet, {
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import ScheduleSheet from "@/components/BottomSheets/ScheduleSheet";
 import { router } from "expo-router";
+import {
+  confirmOrder,
+  getCustomerCart,
+  getMerchantDeliveryOption,
+} from "@/service/universal";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { CartProps } from "@/types";
+import { useAuthStore } from "@/store/store";
 
 const TAB_WIDTH = scale((SCREEN_WIDTH - 40) / 2);
 
+interface formDataProps {
+  deliveryMode: string;
+  businessCategoryId: string;
+  deliveryAddressType: string;
+  deliveryAddressOtherAddressId?: string;
+  newDeliveryAddress?: {
+    type: string;
+    fullName: string;
+    phoneNumber: string;
+    flat: string;
+    area: string;
+    landmark?: string;
+    coordinates: [latitude: number, longitude: number] | null;
+  };
+  instructionToMerchant?: string;
+  instructionToDeliveryAgent?: string;
+  voiceInstructionToMerchant: any;
+  voiceInstructionToAgent: any;
+  ifScheduled?: {
+    startDate: string;
+    endDate: string;
+    ime: string;
+  } | null;
+  isSuperMarketOrder: boolean;
+}
+
 const Checkout = () => {
   const [deliveryMode, setDeliveryMode] = useState<string>("Home Delivery");
+  const [cart, setCart] = useState<CartProps | null>(null);
+  const [showScheduleOption, setShowScheduleOption] = useState<boolean>(false);
+
+  const { selectedBusiness } = useAuthStore.getState();
+
+  const [formData, setFormData] = useState<formDataProps>({
+    deliveryMode,
+    businessCategoryId: selectedBusiness?.toString() ?? "",
+    deliveryAddressType: "",
+    deliveryAddressOtherAddressId: "",
+    newDeliveryAddress: {
+      type: "",
+      fullName: "",
+      phoneNumber: "",
+      flat: "",
+      area: "",
+      landmark: "",
+      coordinates: null,
+    },
+    instructionToMerchant: "",
+    instructionToDeliveryAgent: "",
+    voiceInstructionToMerchant: null,
+    voiceInstructionToAgent: null,
+    ifScheduled: {
+      startDate: "",
+      endDate: "",
+      ime: "",
+    },
+    isSuperMarketOrder: false,
+  });
 
   const indicatorPosition = useSharedValue(0);
 
   const scheduleSheetRef = useRef<BottomSheet>(null);
 
   const variantSheetSnapPoints = useMemo(() => ["80%"], []);
+
+  const { data: cartData } = useQuery({
+    queryKey: ["customer-cart"],
+    queryFn: () => getCustomerCart(),
+  });
+
+  const { data: deliveryOption } = useQuery({
+    queryKey: ["merchant-delivery-option", cart?.merchantId],
+    queryFn: () =>
+      getMerchantDeliveryOption(cart?.merchantId?.toString() ?? ""),
+    enabled: !!cart?.merchantId,
+  });
+
+  useEffect(() => {
+    setFormData({
+      ...formData,
+      businessCategoryId: selectedBusiness?.toString() ?? "",
+    });
+  }, [selectedBusiness]);
+
+  useEffect(() => {
+    cartData && setCart(cartData);
+  }, [cartData]);
+
+  useEffect(() => {
+    setShowScheduleOption(!!deliveryOption);
+  }, [deliveryOption]);
 
   useEffect(() => {
     indicatorPosition.value = withTiming(
@@ -74,6 +157,49 @@ const Checkout = () => {
     []
   );
 
+  const handleConfirmOrderMutation = useMutation({
+    mutationKey: ["confirm-order"],
+    mutationFn: (data: FormData) => confirmOrder(data),
+    onSuccess: (data) => {
+      router.push({
+        pathname: "/screens/universal/bill",
+        params: {
+          cartId: data.cartId,
+        },
+      });
+    },
+  });
+
+  const handleConfirm = (data: formDataProps) => {
+    console.log(data);
+    return;
+
+    const formDataObject = new FormData();
+
+    function appendFormData(value: any, key: string) {
+      if (value instanceof File) {
+        formDataObject.append(key, value);
+      } else if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          appendFormData(item, `${key}[${index}]`);
+        });
+      } else if (typeof value === "object" && value !== null) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          appendFormData(nestedValue, key ? `${key}[${nestedKey}]` : nestedKey);
+        });
+      } else if (value !== undefined && value !== null) {
+        formDataObject.append(key, value);
+      }
+    }
+
+    Object.entries(data).forEach(([key, value]) => {
+      appendFormData(value, key);
+      console.log(value, key);
+    });
+
+    handleConfirmOrderMutation.mutate(formDataObject);
+  };
+
   return (
     <GestureHandlerRootView>
       <ScreenWrapper>
@@ -85,10 +211,11 @@ const Checkout = () => {
           }}
           showsVerticalScrollIndicator={false}
         >
-          <SchedulePicker
-            visible={true}
-            onPress={() => scheduleSheetRef.current?.expand()}
-          />
+          {showScheduleOption && (
+            <SchedulePicker
+              onPress={() => scheduleSheetRef.current?.expand()}
+            />
+          )}
 
           {/* Delivery Mode Tabs */}
           <View style={styles.tabContainer}>
@@ -137,11 +264,26 @@ const Checkout = () => {
           {/* Content Based on Selection */}
           {deliveryMode === "Home Delivery" ? (
             <HomeDelivery
-              onAgentVoice={() => {}}
-              onAgentInstruction={() => {}}
-              onMerchantVoice={() => {}}
-              onMerchantInstruction={() => {}}
-              onAddressSelect={() => {}}
+              items={cart?.items ? cart.items : []}
+              onAgentVoice={(data) =>
+                setFormData({ ...formData, voiceInstructionToAgent: data })
+              }
+              onAgentInstruction={(data) => {
+                setFormData({ ...formData, instructionToDeliveryAgent: data });
+              }}
+              onMerchantVoice={(data) =>
+                setFormData({ ...formData, voiceInstructionToMerchant: data })
+              }
+              onMerchantInstruction={(data) =>
+                setFormData({ ...formData, instructionToMerchant: data })
+              }
+              onAddressSelect={(type, otherId) =>
+                setFormData({
+                  ...formData,
+                  deliveryAddressType: type,
+                  deliveryAddressOtherAddressId: otherId,
+                })
+              }
             />
           ) : (
             <TakeAway />
@@ -150,7 +292,7 @@ const Checkout = () => {
 
         <View style={styles.confirmContainer}>
           <TouchableOpacity
-            onPress={() => router.push("/screens/universal/bill")}
+            onPress={() => handleConfirm(formData)}
             style={styles.confirmBtn}
           >
             <Typo size={14} color={colors.WHITE}>

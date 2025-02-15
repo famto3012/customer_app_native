@@ -5,14 +5,11 @@ import { scale, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
 import { CaretRight, XCircle } from "phosphor-react-native";
 
-const SchedulePicker: FC<{ visible: boolean; onPress: () => void }> = ({
-  visible,
-  onPress,
-}) => {
+const SchedulePicker: FC<{ onPress: () => void }> = ({ onPress }) => {
   const [selectedDate, setSelectedDate] = useState<string>("");
 
   return (
-    <View style={[styles.container, { display: visible ? "flex" : "none" }]}>
+    <View style={[styles.container]}>
       <Pressable onPress={onPress} style={styles.pressable}>
         <Image
           source={require("@/assets/icons/calendar-edit.webp")}

@@ -289,18 +289,36 @@ export const getCustomerCart = async () => {
   }
 };
 
-export const confirmOrder = async (cartDetail: any) => {
+export const getMerchantDeliveryOption = async (merchantId: string) => {
   try {
-    const res = await appAxios.post(
-      `/customers/cart/add-details`,
-      cartDetail,
-      {}
+    const res = await appAxios.get(
+      `/customers/merchant/${merchantId}/delivery-option`
     );
 
-    return res.status === 200 ? true : false;
+    if (res.status === 200) {
+      return res.data.data !== "On-demand";
+    }
+
+    return true; // Default to true if status is not 200
+  } catch (err) {
+    console.error(`Error in getting merchant delivery option:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return false; // Ensure a boolean is returned
+  }
+};
+
+export const confirmOrder = async (cartDetail: any) => {
+  try {
+    const res = await appAxios.post(`/customers/cart/add-details`, cartDetail, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return res.status === 200 ? res.data.cartId : "";
   } catch (err) {
     console.error(`Error in clearing cart:`, err);
     Alert.alert("Error", "Something went wrong!");
-    return false;
+    return "";
   }
 };
