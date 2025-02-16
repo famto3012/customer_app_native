@@ -35,6 +35,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { CartProps } from "@/types";
 import { useAuthStore } from "@/store/store";
+import Button from "@/components/Button";
 
 const TAB_WIDTH = scale((SCREEN_WIDTH - 40) / 2);
 
@@ -59,7 +60,7 @@ interface formDataProps {
   ifScheduled?: {
     startDate: string;
     endDate: string;
-    ime: string;
+    time: string;
   } | null;
   isSuperMarketOrder: boolean;
 }
@@ -92,7 +93,7 @@ const Checkout = () => {
     ifScheduled: {
       startDate: "",
       endDate: "",
-      ime: "",
+      time: "",
     },
     isSuperMarketOrder: false,
   });
@@ -161,6 +162,7 @@ const Checkout = () => {
     mutationKey: ["confirm-order"],
     mutationFn: (data: FormData) => confirmOrder(data),
     onSuccess: (data) => {
+      console.log("data : ", data);
       router.push({
         pathname: "/screens/universal/bill",
         params: {
@@ -171,8 +173,8 @@ const Checkout = () => {
   });
 
   const handleConfirm = (data: formDataProps) => {
-    console.log(data);
-    return;
+    // console.log(data);
+    // return;
 
     const formDataObject = new FormData();
 
@@ -277,13 +279,15 @@ const Checkout = () => {
               onMerchantInstruction={(data) =>
                 setFormData({ ...formData, instructionToMerchant: data })
               }
-              onAddressSelect={(type, otherId) =>
+              onAddressSelect={(type, otherId) => {
+                console.log("type", type);
+                console.log("otherId", otherId);
                 setFormData({
                   ...formData,
                   deliveryAddressType: type,
                   deliveryAddressOtherAddressId: otherId,
-                })
-              }
+                });
+              }}
             />
           ) : (
             <TakeAway />
@@ -291,14 +295,19 @@ const Checkout = () => {
         </ScrollView>
 
         <View style={styles.confirmContainer}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => handleConfirm(formData)}
             style={styles.confirmBtn}
           >
             <Typo size={14} color={colors.WHITE}>
               Confirm Order detail
             </Typo>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
+          <Button
+            title="Confirm Order detail"
+            onPress={() => handleConfirm(formData)}
+            isLoading={handleConfirmOrderMutation.isPending}
+          />
         </View>
       </ScreenWrapper>
 
