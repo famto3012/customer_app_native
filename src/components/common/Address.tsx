@@ -51,7 +51,7 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
       : setSelectedOtherId("");
 
     if (onSelect) {
-      onSelect(selected, selectedOtherId);
+      type === "other" ? onSelect(type, other[0]?.id) : onSelect(type, "");
     }
   };
 
@@ -192,7 +192,12 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
           data={other}
           renderItem={({ item }) => (
             <Pressable
-              onPress={() => setSelectedOtherId(item.id)}
+              onPress={() => {
+                setSelectedOtherId(item.id);
+                if (onSelect) {
+                  onSelect("other", item.id);
+                }
+              }}
               style={{
                 marginTop: 15,
                 borderWidth: 1,
