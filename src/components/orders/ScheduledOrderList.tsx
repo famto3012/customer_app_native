@@ -39,7 +39,7 @@ const ScheduledOrderList = () => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await refetch();
+    if (token) await refetch();
     setRefreshing(false);
   }, [refetch]);
 
