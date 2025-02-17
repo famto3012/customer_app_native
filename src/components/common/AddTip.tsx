@@ -1,23 +1,53 @@
 import { View, Pressable, TextInput } from "react-native";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import Typo from "../Typo";
 import { colors, spacingX } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { addUniversalTip } from "@/service/universal";
 
 interface AddTipProps {
-  onSelectTip: (value: number) => void;
+  previousTip: number;
 }
 
-const AddTip: FC<AddTipProps> = ({ onSelectTip }) => {
+const AddTip: FC<AddTipProps> = ({ previousTip }) => {
   const [toggleInput, setToggleInput] = useState<boolean>(false);
   const [customTip, setCustomTip] = useState<string>("");
   const [selectedTip, setSelectedTip] = useState<number | null>(null);
 
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (previousTip === 10 || previousTip === 20 || previousTip === 50) {
+      setSelectedTip(previousTip);
+      setCustomTip("");
+    } else if (previousTip > 0) {
+      setSelectedTip(previousTip);
+      setCustomTip(previousTip.toString());
+      setToggleInput(true);
+    }
+  }, [previousTip]);
+
+  const handleAddTipMutation = useMutation({
+    mutationKey: ["universal-tip"],
+    mutationFn: (tip: number) => addUniversalTip(tip),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["universal-bill"] });
+    },
+  });
+
   const chooseTip = (value: number) => {
-    setCustomTip("");
+    if (value === selectedTip) {
+      setSelectedTip(null);
+      setCustomTip("");
+      handleAddTipMutation.mutate(0);
+      return;
+    }
+
     setToggleInput(false);
+    setCustomTip("");
     setSelectedTip(value);
-    onSelectTip(value);
+    handleAddTipMutation.mutate(value);
   };
 
   return (
@@ -76,8 +106,14 @@ const AddTip: FC<AddTipProps> = ({ onSelectTip }) => {
             onChangeText={setCustomTip}
             onSubmitEditing={() => {
               const value = parseFloat(customTip);
-              if (!isNaN(value)) {
-                onSelectTip(value);
+              if (!isNaN(value) && value > 0) {
+                setSelectedTip(value);
+                handleAddTipMutation.mutate(value);
+              } else if (customTip === "") {
+                handleAddTipMutation.mutate(0);
+                setSelectedTip(null);
+                setCustomTip("");
+                setToggleInput(false);
               }
             }}
           />

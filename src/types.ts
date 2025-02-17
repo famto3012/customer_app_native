@@ -143,7 +143,7 @@ export type AddressProps = {
   phoneNumber: string;
   flat: string;
   area: string;
-  landmark: string;
+  landmark?: string;
   coordinates: number[];
 };
 

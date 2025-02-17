@@ -1,4 +1,4 @@
-import { ActivityIndicator, StyleSheet, TouchableOpacity } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet } from "react-native";
 
 import Typo from "./Typo";
 
@@ -7,7 +7,7 @@ import { colors, radius } from "@/constants/theme";
 
 const Button = ({ title, onPress, style, isLoading }: ButtonProps) => {
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={onPress}
       style={[styles.container, style]}
       disabled={isLoading}
@@ -19,7 +19,7 @@ const Button = ({ title, onPress, style, isLoading }: ButtonProps) => {
           {title}
         </Typo>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

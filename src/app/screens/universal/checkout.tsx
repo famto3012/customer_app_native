@@ -162,20 +162,20 @@ const Checkout = () => {
     mutationKey: ["confirm-order"],
     mutationFn: (data: FormData) => confirmOrder(data),
     onSuccess: (data) => {
-      console.log("data : ", data);
       router.push({
         pathname: "/screens/universal/bill",
         params: {
-          cartId: data.cartId,
+          cartId: data,
+          deliveryMode,
         },
       });
+    },
+    onError: () => {
+      console.log("Error in confirming order");
     },
   });
 
   const handleConfirm = (data: formDataProps) => {
-    // console.log(data);
-    // return;
-
     const formDataObject = new FormData();
 
     function appendFormData(value: any, key: string) {
@@ -196,7 +196,6 @@ const Checkout = () => {
 
     Object.entries(data).forEach(([key, value]) => {
       appendFormData(value, key);
-      console.log(value, key);
     });
 
     handleConfirmOrderMutation.mutate(formDataObject);
@@ -280,8 +279,6 @@ const Checkout = () => {
                 setFormData({ ...formData, instructionToMerchant: data })
               }
               onAddressSelect={(type, otherId) => {
-                console.log("type", type);
-                console.log("otherId", otherId);
                 setFormData({
                   ...formData,
                   deliveryAddressType: type,
@@ -295,14 +292,6 @@ const Checkout = () => {
         </ScrollView>
 
         <View style={styles.confirmContainer}>
-          {/* <TouchableOpacity
-            onPress={() => handleConfirm(formData)}
-            style={styles.confirmBtn}
-          >
-            <Typo size={14} color={colors.WHITE}>
-              Confirm Order detail
-            </Typo>
-          </TouchableOpacity> */}
           <Button
             title="Confirm Order detail"
             onPress={() => handleConfirm(formData)}
