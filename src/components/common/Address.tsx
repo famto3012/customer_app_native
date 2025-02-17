@@ -30,9 +30,9 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
   });
 
   useEffect(() => {
-    setHome(data?.homeAddress);
-    setWork(data?.workAddress);
-    setOther(data?.otherAddress);
+    setHome(data?.homeAddress || null);
+    setWork(data?.workAddress || null);
+    setOther(data?.otherAddress || []);
   }, [data]);
 
   useEffect(() => {
@@ -53,6 +53,62 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
     if (onSelect) {
       type === "other" ? onSelect(type, other[0]?.id) : onSelect(type, "");
     }
+  };
+
+  const renderAddress = (address: AddressProps | null) => {
+    if (!address) {
+      return (
+        <View
+          style={{
+            marginTop: 15,
+            borderWidth: 1,
+            padding: 10,
+            borderRadius: 5,
+            borderColor: colors.NEUTRAL200,
+            backgroundColor: colors.NEUTRAL200,
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
+            No address available
+          </Typo>
+        </View>
+      );
+    }
+
+    return (
+      <View
+        style={{
+          marginTop: 15,
+          borderWidth: 1,
+          padding: 10,
+          borderRadius: 5,
+          borderColor: colors.PRIMARY,
+          backgroundColor: "#E5FAFA",
+        }}
+      >
+        <Typo
+          size={14}
+          color={colors.NEUTRAL900}
+          fontFamily="Medium"
+          style={{ paddingBottom: verticalScale(3) }}
+        >
+          {address?.fullName}
+        </Typo>
+        <Typo
+          size={13}
+          color={colors.NEUTRAL900}
+          style={{ paddingBottom: verticalScale(5) }}
+        >
+          {address?.phoneNumber}
+        </Typo>
+        <Typo size={12} color={colors.NEUTRAL500}>
+          {address?.flat}, {address?.area}, {address?.landmark}
+        </Typo>
+      </View>
+    );
   };
 
   return (
@@ -123,69 +179,9 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
         </TouchableOpacity>
       </View>
 
-      {selected === "home" && (
-        <View
-          style={{
-            marginTop: 15,
-            borderWidth: 1,
-            padding: 10,
-            borderRadius: 5,
-            borderColor: colors.PRIMARY,
-            backgroundColor: "#E5FAFA",
-          }}
-        >
-          <Typo
-            size={14}
-            color={colors.NEUTRAL900}
-            fontFamily="Medium"
-            style={{ paddingBottom: verticalScale(3) }}
-          >
-            {home?.fullName}
-          </Typo>
-          <Typo
-            size={13}
-            color={colors.NEUTRAL900}
-            style={{ paddingBottom: verticalScale(5) }}
-          >
-            {home?.phoneNumber}
-          </Typo>
-          <Typo size={12} color={colors.NEUTRAL500}>
-            {home?.flat}, {home?.area}, {home?.landmark}
-          </Typo>
-        </View>
-      )}
+      {selected === "home" && renderAddress(home)}
 
-      {selected === "work" && (
-        <View
-          style={{
-            marginTop: 15,
-            borderWidth: 1,
-            padding: 10,
-            borderRadius: 5,
-            borderColor: colors.PRIMARY,
-            backgroundColor: "#E5FAFA",
-          }}
-        >
-          <Typo
-            size={14}
-            color={colors.NEUTRAL900}
-            fontFamily="Medium"
-            style={{ paddingBottom: verticalScale(3) }}
-          >
-            {work?.fullName}
-          </Typo>
-          <Typo
-            size={13}
-            color={colors.NEUTRAL900}
-            style={{ paddingBottom: verticalScale(5) }}
-          >
-            {work?.phoneNumber}
-          </Typo>
-          <Typo size={12} color={colors.NEUTRAL500}>
-            {work?.flat}, {work?.area}, {work?.landmark}
-          </Typo>
-        </View>
-      )}
+      {selected === "work" && renderAddress(work)}
 
       {selected === "other" && (
         <FlatList

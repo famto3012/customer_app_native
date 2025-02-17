@@ -3,10 +3,18 @@ import { scale, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
 import { CaretRight } from "phosphor-react-native";
 import { colors } from "@/constants/theme";
+import { FC } from "react";
+import { router } from "expo-router";
 
-const PromoCode = () => {
+const PromoCode: FC<{ deliveryMode: string }> = ({ deliveryMode }) => {
   return (
     <Pressable
+      onPress={() =>
+        router.push({
+          pathname: "/screens/common/promo-code",
+          params: { deliveryMode },
+        })
+      }
       style={{
         paddingVertical: 15,
         paddingHorizontal: 10,

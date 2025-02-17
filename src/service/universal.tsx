@@ -322,3 +322,47 @@ export const confirmOrder = async (cartDetail: any) => {
     return "";
   }
 };
+
+export const getCartBill = async (cartId: string) => {
+  try {
+    const res = await appAxios.get(`/customers/get-cart-bill`, {
+      params: {
+        cartId,
+      },
+    });
+
+    return res.status === 200 ? res.data.billDetail : null;
+  } catch (err) {
+    console.error(`Error in getting cart bill:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return null;
+  }
+};
+
+export const addUniversalTip = async (tip: number) => {
+  try {
+    const res = await appAxios.post(`/customers/add-tip`, {
+      tip,
+    });
+
+    return res.status === 200 ? true : false;
+  } catch (err) {
+    console.error(`Error in adding tip:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return false;
+  }
+};
+
+export const placeUniversalOrder = async (paymentMode: string) => {
+  try {
+    const res = await appAxios.post(`/customers/confirm-order`, {
+      paymentMode,
+    });
+
+    return res.status === 200 ? res.data : null;
+  } catch (err) {
+    console.error(`Error in placing order:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return null;
+  }
+};

@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -13,18 +14,65 @@ import Typo from "@/components/Typo";
 import { colors, radius } from "@/constants/theme";
 import PromoCode from "@/components/common/Promocode";
 import BillDetail from "@/components/common/BillDetail";
-import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+  SCREEN_WIDTH,
+} from "@gorhom/bottom-sheet";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getCartBill, placeUniversalOrder } from "@/service/universal";
+import { router, useLocalSearchParams } from "expo-router";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { CaretUp } from "phosphor-react-native";
+import PaymentOptionSheet from "@/components/BottomSheets/common/PaymentOptionSheet";
 
 const Bill = () => {
+  const [selectedPaymentMode, setSelectedPaymentMode] =
+    useState<string>("Online-payment");
+
+  const paymentSheetRef = useRef<BottomSheet>(null);
+
+  const paymentSheetSnapPoints = useMemo(() => ["40%"], []);
+
+  const { cartId, deliveryMode } = useLocalSearchParams();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["universal-bill"],
+    queryFn: () => getCartBill(cartId.toString()),
+  });
+
+  const placeOrderMutation = useMutation({
+    mutationKey: ["place-universal-order"],
+    mutationFn: () => placeUniversalOrder(selectedPaymentMode),
+    onSuccess: (data) => {
+      if (data?.orderId) {
+        router.replace({ pathname: "/(tabs)" });
+      }
+    },
+  });
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+        style={[props.style, styles.backdrop]}
+      />
+    ),
+    []
+  );
+
   return (
     <ScreenWrapper>
       <ScrollView>
         <Header title="Checkout" />
 
-        <AddTip onSelectTip={() => {}} />
+        <AddTip previousTip={data?.addedTip ?? 0} />
 
         <View style={styles.promoContainer}>
-          <PromoCode />
+          <PromoCode deliveryMode={deliveryMode?.toString()} />
         </View>
 
         <View style={styles.billContainer}>
@@ -32,7 +80,7 @@ const Bill = () => {
             Bill Summary
           </Typo>
 
-          <BillDetail />
+          <BillDetail data={data} isLoading={isLoading} />
         </View>
       </ScrollView>
 
@@ -52,89 +100,84 @@ const Bill = () => {
           }}
         >
           <View>
-            <Typo size={13} style={{ color: "#adb5bd" }}>
+            <Typo size={13} color={colors.NEUTRAL400}>
               Pay
             </Typo>
             <Pressable
-              onPress={() => {}}
+              onPress={() => paymentSheetRef.current?.expand()}
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                paddingVertical: 5,
+                paddingVertical: verticalScale(5),
                 position: "relative",
               }}
             >
               <Typo
                 fontFamily="Medium"
                 size={14}
+                color={colors.NEUTRAL900}
                 style={{
-                  color: "#343a40",
                   marginRight: 10,
                   minWidth: SCREEN_WIDTH * 0.3,
                 }}
               >
-                Online
+                {selectedPaymentMode}
               </Typo>
 
-              {/* <Ionicons
-                name={showPaymentOptions ? "chevron-down" : "chevron-up"}
-                size={RFValue(16, screenHeight)}
-                color="black"
-                style={{ borderWidth: 1, padding: 2, borderRadius: 8 }}
-              /> */}
-            </Pressable>
-
-            {/* {showPaymentOptions && (
               <View
                 style={{
-                  position: "absolute",
-                  top: -150,
-                  left: -10,
-                  backgroundColor: "white",
-                  paddingHorizontal: 20,
-                  width: screenWidth * 0.5,
-                  paddingVertical: 10,
-                  zIndex: 10,
-                  shadowColor: "#000",
-                  shadowOffset: {
-                    width: 0,
-                    height: 2,
-                  },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 3.84,
-                  elevation: 5,
-                  borderRadius: 5,
+                  borderWidth: 1,
+                  borderRadius: radius._6,
+                  paddingVertical: verticalScale(2),
+                  paddingHorizontal: scale(1.5),
                 }}
               >
-                {["Online-payment", "Pay on delivery", "Famto cash"].map(
-                  (value) => (
-                    <Pressable
-                      key={value}
-                      style={{ paddingVertical: 10 }}
-                      onPress={() => choosePaymentMode(value)}
-                    >
-                      <CustomText>{value}</CustomText>
-                    </Pressable>
-                  )
-                )}
+                <CaretUp size={scale(15)} />
               </View>
-            )} */}
+            </Pressable>
           </View>
 
           <TouchableOpacity
+            onPress={() => placeOrderMutation.mutate()}
             style={{
               backgroundColor: colors.PRIMARY,
               flex: 1,
               paddingVertical: verticalScale(10),
-              borderRadius: radius._10,
+              borderRadius: radius._30,
             }}
           >
-            <Typo size={14} style={{ textAlign: "center", color: "white" }}>
-              Place Order
-            </Typo>
+            {placeOrderMutation.isPending ? (
+              <ActivityIndicator size="small" color={colors.WHITE} />
+            ) : (
+              <Typo size={14} style={{ textAlign: "center", color: "white" }}>
+                Place Order
+              </Typo>
+            )}
           </TouchableOpacity>
         </View>
       </View>
+
+      <BottomSheet
+        ref={paymentSheetRef}
+        index={-1}
+        snapPoints={paymentSheetSnapPoints}
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+      >
+        <PaymentOptionSheet
+          onSelect={(value) => {
+            setSelectedPaymentMode(value);
+          }}
+          value={selectedPaymentMode}
+          onConfirm={() => paymentSheetRef.current?.close()}
+          grandTotal={
+            data?.discountedGrandTotal
+              ? data.discountedGrandTotal
+              : data?.originalGrandTotal
+          }
+        />
+      </BottomSheet>
     </ScreenWrapper>
   );
 };
@@ -158,5 +201,13 @@ const styles = StyleSheet.create({
   billContainer: {
     marginHorizontal: scale(20),
     marginTop: verticalScale(20),
+  },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 1)",
   },
 });
