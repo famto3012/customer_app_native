@@ -1,9 +1,7 @@
 import { View, Image } from "react-native";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
-import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { SCREEN_HEIGHT, SCREEN_WIDTH } from "@/utils/styling";
 import { useAuthStore } from "@/store/store";
 import { resetAndNavigate } from "@/utils/navigation";
 
@@ -23,10 +21,10 @@ const Main = () => {
       const timeOut = setTimeout(() => {
         if (token) {
           resetAndNavigate("/(tabs)");
-        } else if (!token) {
-          resetAndNavigate("/auth");
         } else if (newUser) {
           setNewUser(false);
+          resetAndNavigate("/notification-permission");
+        } else if (!token) {
           resetAndNavigate("/auth");
         }
       }, 3000);
