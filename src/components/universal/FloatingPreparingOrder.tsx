@@ -3,54 +3,15 @@ import { colors, radius, spacingY } from "@/constants/theme";
 import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
 import Typo from "../Typo";
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC } from "react";
 import { router } from "expo-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getOngoingOrder } from "@/service/orderService";
-import { useFocusEffect } from "@react-navigation/native";
-import { useAuthStore } from "@/store/store";
 
-const FloatingPreparingOrder: FC<{}> = ({}) => {
-  const [showPopUp, setShowPopUp] = useState<boolean>(false);
-  const [isScreenActive, setIsScreenActive] = useState(true);
-
-  const { token } = useAuthStore.getState();
-
-  const queryClient = useQueryClient();
-
-  const { data } = useQuery({
-    queryKey: ["ongoingOrder"],
-    queryFn: () => getOngoingOrder(),
-    enabled: !!token,
-  });
-
-  useEffect(() => {
-    if (data?.length > 0) {
-      setShowPopUp(true);
-    }
-  }, [data]);
-
-  useFocusEffect(
-    useCallback(() => {
-      setIsScreenActive(true);
-      return () => {
-        setIsScreenActive(false);
-        // setShowPopUp(false);
-      };
-    }, [])
-  );
-
-  useFocusEffect(
-    useCallback(() => {
-      queryClient.invalidateQueries({ queryKey: ["ongoingOrder"] });
-    }, [queryClient])
-  );
-
-  return showPopUp && isScreenActive ? (
+const FloatingPreparingOrder: FC<{ data: any }> = ({ data }) => {
+  return (
     <Animated.View
       entering={FadeInUp.springify().damping(12).stiffness(100)}
       exiting={FadeOutDown.springify().damping(10).stiffness(80)}
-      style={styles.container}
+      style={[styles.container, { display: data?.length ? "flex" : "none" }]}
     >
       <Image
         source={require("@/assets/images/preparing-order.webp")}
@@ -70,7 +31,6 @@ const FloatingPreparingOrder: FC<{}> = ({}) => {
         <Typo size={12} color={colors.NEUTRAL800}>
           Exp delivery at{" "}
           <Typo size={12} color={colors.PRIMARY}>
-            {" "}
             {data?.[0].deliveryTime}
           </Typo>
         </Typo>
@@ -78,13 +38,8 @@ const FloatingPreparingOrder: FC<{}> = ({}) => {
 
       <Pressable
         onPress={() => {
-          //   setShowPopUp(false);
-          // navigation.navigate("Order");
           router.push({
             pathname: "/order",
-            // params: {
-            //   cartId,
-            // },
           });
         }}
         style={styles.checkoutBtn}
@@ -96,7 +51,7 @@ const FloatingPreparingOrder: FC<{}> = ({}) => {
         />
       </Pressable>
     </Animated.View>
-  ) : null;
+  );
 };
 
 export default FloatingPreparingOrder;
@@ -111,10 +66,6 @@ const styles = StyleSheet.create({
     borderRadius: radius._10,
     alignItems: "center",
     justifyContent: "space-between",
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 4 },
-    // shadowOpacity: 0.3,
-    // shadowRadius: 4,
     elevation: 5,
     flexDirection: "row",
   },

@@ -50,14 +50,17 @@ const Home = () => {
     }, [queryClient])
   );
 
-  const hasFloatingOrder = data?.length > 0;
+  const handleLogout = () => {
+    queryClient.clear();
+    logout();
+  };
 
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: hasFloatingOrder ? verticalScale(70) : 0,
+          paddingBottom: data?.length ? verticalScale(70) : 0,
         }}
       >
         <ScreenWrapper>
@@ -100,7 +103,7 @@ const Home = () => {
                     Discounts Now!
                   </Typo>
                 </View>
-                <Pressable onPress={() => logout()} style={styles.pressable}>
+                <Pressable onPress={handleLogout} style={styles.pressable}>
                   <Typo size={14} fontFamily="Medium" color={colors.WHITE}>
                     Order Now
                   </Typo>
@@ -115,12 +118,11 @@ const Home = () => {
           </ImageBackground>
           <TopService />
           <BusinessCategories query="" />
-          {/* <FloatingPreparingOrder /> */}
         </ScreenWrapper>
       </ScrollView>
 
       <View style={styles.floatingContainer}>
-        <FloatingPreparingOrder />
+        <FloatingPreparingOrder data={data} />
       </View>
     </View>
   );
@@ -155,7 +157,7 @@ const styles = StyleSheet.create({
   },
   floatingContainer: {
     position: "absolute",
-    bottom: verticalScale(10), // Adjust this to set where it stops scrolling
+    bottom: verticalScale(10),
     marginHorizontal: "auto",
   },
 });
