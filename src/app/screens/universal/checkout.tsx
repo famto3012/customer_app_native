@@ -140,6 +140,11 @@ const Checkout = () => {
     );
   }, [deliveryMode]);
 
+  const toggleDeliveryMode = (value: string) => {
+    setDeliveryMode(value);
+    setFormData({ ...formData, deliveryMode: value });
+  };
+
   const animatedIndicator = useAnimatedStyle(() => ({
     transform: [{ translateX: indicatorPosition.value }],
   }));
@@ -223,7 +228,7 @@ const Checkout = () => {
             <View style={styles.tab}>
               {/* Home Delivery Tab */}
               <Pressable
-                onPress={() => setDeliveryMode("Home Delivery")}
+                onPress={() => toggleDeliveryMode("Home Delivery")}
                 style={styles.tabOption}
               >
                 <Typo
@@ -241,7 +246,7 @@ const Checkout = () => {
 
               {/* Take Away Tab */}
               <Pressable
-                onPress={() => setDeliveryMode("Take Away")}
+                onPress={() => toggleDeliveryMode("Take Away")}
                 style={styles.tabOption}
               >
                 <Typo
@@ -287,7 +292,16 @@ const Checkout = () => {
               }}
             />
           ) : (
-            <TakeAway />
+            <TakeAway
+              items={cart?.items ? cart.items : []}
+              merchantId={cart?.merchantId || ""}
+              onMerchantVoice={(data) =>
+                setFormData({ ...formData, voiceInstructionToMerchant: data })
+              }
+              onMerchantInstruction={(data) =>
+                setFormData({ ...formData, instructionToMerchant: data })
+              }
+            />
           )}
         </ScrollView>
 

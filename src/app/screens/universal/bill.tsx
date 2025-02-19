@@ -25,6 +25,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { CaretUp } from "phosphor-react-native";
 import PaymentOptionSheet from "@/components/BottomSheets/common/PaymentOptionSheet";
+import { useAuthStore } from "@/store/store";
 
 const Bill = () => {
   const [selectedPaymentMode, setSelectedPaymentMode] =
@@ -47,6 +48,13 @@ const Bill = () => {
     onSuccess: (data) => {
       if (data?.orderId) {
         router.replace({ pathname: "/(tabs)" });
+        useAuthStore.setState({
+          cart: {
+            showCart: false,
+            merchant: "",
+            cartId: "",
+          },
+        });
       }
     },
   });
