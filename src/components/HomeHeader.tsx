@@ -5,8 +5,20 @@ import { scale, verticalScale } from "@/utils/styling";
 import Typo from "./Typo";
 import { colors, spacingX } from "@/constants/theme";
 import { router } from "expo-router";
+import { UserProfileProps } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import { fetchUserProfile } from "@/service/userService";
+import { useAuthStore } from "@/store/store";
 
 const HomeHeader = () => {
+  const { token } = useAuthStore.getState();
+
+  const { data, isLoading } = useQuery<UserProfileProps | null>({
+    queryKey: ["customer-profile"],
+    queryFn: fetchUserProfile,
+    enabled: !!token,
+  });
+
   return (
     <View
       style={{
@@ -39,11 +51,15 @@ const HomeHeader = () => {
         </View>
       </View>
 
-      <Pressable onPress={() => router.push("/screens/profile")}>
+      <Pressable onPress={() => router.push("/screens/user/profile")}>
         <Image
-          source={{
-            uri: "https://plus.unsplash.com/premium_photo-1689539137236-b68e436248de?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cGVyc29ufGVufDB8fDB8fHww",
-          }}
+          source={
+            data?.imageURL
+              ? {
+                  uri: data?.imageURL,
+                }
+              : require("@/assets/images/default-user.webp")
+          }
           style={{
             height: verticalScale(45),
             width: verticalScale(45),

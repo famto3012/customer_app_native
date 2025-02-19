@@ -194,3 +194,11 @@ interface ProductId {
   description: string;
   productImageURL: string;
 }
+
+export type UserProfileProps = {
+  customerId: string;
+  fullName: string;
+  email: string;
+  imageURL: string;
+  phoneNumber: string;
+};
