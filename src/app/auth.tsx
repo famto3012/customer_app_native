@@ -6,7 +6,7 @@ import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius, spacingX } from "@/constants/theme";
 import Input from "@/components/Input";
 import { useEffect, useRef, useState } from "react";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { requestLocationPermission } from "@/utils/helpers";
 import { resetAndNavigate } from "@/utils/navigation";
 
@@ -14,6 +14,8 @@ const Auth = () => {
   const phoneNumberRef = useRef<string>("");
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const { showSkip } = useLocalSearchParams();
 
   useEffect(() => {
     requestLocationPermission();
@@ -49,6 +51,7 @@ const Auth = () => {
           flexDirection: "row",
           justifyContent: "flex-end",
           marginEnd: scale(20),
+          display: Boolean(showSkip) ? "none" : "flex",
         }}
       >
         <Pressable

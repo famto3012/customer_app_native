@@ -4,6 +4,8 @@ import { scale, verticalScale } from "@/utils/styling";
 import { colors } from "@/constants/theme";
 import { FC, useEffect, useState } from "react";
 import Button from "@/components/Button";
+import { useQuery } from "@tanstack/react-query";
+import { fetchLoyaltyAndFamtoCash } from "@/service/userService";
 
 const PaymentOptionSheet: FC<{
   onSelect: (data: string) => void;
@@ -12,6 +14,11 @@ const PaymentOptionSheet: FC<{
   grandTotal: number;
 }> = ({ onSelect, value, onConfirm, grandTotal }) => {
   const [selected, setSelected] = useState<string>("");
+
+  const { data } = useQuery({
+    queryKey: ["loyalty-and-famto-cash"],
+    queryFn: () => fetchLoyaltyAndFamtoCash(),
+  });
 
   useEffect(() => {
     setSelected(value);
@@ -32,10 +39,10 @@ const PaymentOptionSheet: FC<{
 
       <Pressable
         onPress={() => {
-          if (5 < grandTotal) {
+          if (data?.walletBalance < grandTotal) {
             Alert.alert(
               "Low Balance",
-              "Your Famto Cash balance is insufficient to make the payment"
+              "Your Famto Cash balance is insufficient to make the current payment"
             );
 
             return;
@@ -47,7 +54,7 @@ const PaymentOptionSheet: FC<{
         <Typo size={14} fontFamily="Medium" color={colors.NEUTRAL900}>
           Famto Cash{" "}
           <Typo size={13} color={colors.NEUTRAL400}>
-            (Balance: 300)
+            (Balance: {data?.walletBalance})
           </Typo>
         </Typo>
 

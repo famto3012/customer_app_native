@@ -4,8 +4,29 @@ import { colors, radius } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
 import ItemList from "./ItemList";
 import Instructions from "../common/Instructions";
+import { CartProps } from "@/types";
+import { FC } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getMerchantData } from "@/service/universal";
 
-const TakeAway = () => {
+interface TakeAwayProps {
+  items: Pick<CartProps, "items">["items"];
+  merchantId: Pick<CartProps, "merchantId">["merchantId"];
+  onMerchantVoice: (data: string) => void;
+  onMerchantInstruction: (data: string) => void;
+}
+
+const TakeAway: FC<TakeAwayProps> = ({
+  items,
+  merchantId,
+  onMerchantVoice,
+  onMerchantInstruction,
+}) => {
+  const { data: merchantData } = useQuery({
+    queryKey: ["merchant-data", merchantId],
+    queryFn: () => getMerchantData(merchantId),
+  });
+
   return (
     <>
       <View style={styles.addressContainer}>
@@ -18,10 +39,10 @@ const TakeAway = () => {
         >
           <View>
             <Typo size={14} fontFamily="Medium" color={colors.NEUTRAL800}>
-              Burj Al Mandi
+              {merchantData?.merchantName}
             </Typo>
             <Typo size={13} color={colors.NEUTRAL800}>
-              +91 9778438763
+              {merchantData?.phoneNumber}
             </Typo>
           </View>
 
@@ -41,15 +62,18 @@ const TakeAway = () => {
 
         <View>
           <Typo size={12} style={{ paddingTop: verticalScale(10) }}>
-            Revathi, A18, Lekshmi Nagar, Kesavadasapuram, Trivandrum, Kerala
-            695004
+            {merchantData?.displayAddress}
           </Typo>
         </View>
       </View>
 
-      <ItemList />
+      <ItemList items={items} />
 
-      <Instructions placeholder="Instruction to merchant" />
+      <Instructions
+        placeholder="Instruction to merchant"
+        onRecordComplete={(data) => onMerchantVoice(data)}
+        onChangeText={(data) => onMerchantInstruction(data)}
+      />
     </>
   );
 };

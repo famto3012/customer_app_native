@@ -139,8 +139,8 @@ export const getAllProducts = async (
 
 export const getMerchantData = async (
   merchantId: string,
-  latitude: number,
-  longitude: number
+  latitude?: number,
+  longitude?: number
 ) => {
   try {
     const res = await appAxios.get("/customers/merchant-data", {

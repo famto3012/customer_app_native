@@ -4,53 +4,31 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
-  Platform,
+  Modal,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { scale, verticalScale } from "@/utils/styling";
+import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
 import { colors, radius, spacingX } from "@/constants/theme";
 import { Clock } from "phosphor-react-native";
 import { scheduleDetails } from "@/utils/defaultData";
 import { useState } from "react";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import CalendarPicker from "react-native-calendar-picker";
 
 const ScheduleSheet = () => {
-  const [date, setDate] = useState(new Date());
-  const [showPicker, setShowPicker] = useState(false);
-  const [mode, setMode] = useState<"date" | "time">("date");
-  const [formattedDate, setFormattedDate] = useState("DD/MM/YYYY");
-  const [formattedTime, setFormattedTime] = useState("HH:MM");
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [show, setShow] = useState<boolean>(false);
 
-  const showDateTimePicker = (currentMode: "date" | "time") => {
-    setMode(currentMode);
-    setShowPicker(true);
-  };
-
-  const onChange = (event: any, selectedDate?: Date) => {
-    if (selectedDate) {
-      setShowPicker(false);
-
-      if (mode === "date") {
-        setDate(selectedDate);
-        setFormattedDate(
-          selectedDate.toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          })
-        );
-        showDateTimePicker("time"); // Open time picker after date selection
-      } else if (mode === "time") {
-        setFormattedTime(
-          selectedDate.toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        );
-      }
-    } else {
-      setShowPicker(false);
+  const onDateChange = (date: Date, type: string) => {
+    if (type === "START_DATE") {
+      setStartDate(date);
+      setEndDate(date); // Reset end date when a new start date is selected
+    } else if (type === "END_DATE" && date >= startDate!) {
+      setEndDate(date);
+    } else if (!startDate) {
+      setStartDate(date); // For single date selection, set as start date
     }
   };
 
@@ -90,10 +68,10 @@ const ScheduleSheet = () => {
         </Typo>
 
         <Pressable
-          onPress={() => showDateTimePicker("date")}
+          onPress={() => setShow(true)}
           style={styles.selectionContainer}
         >
-          <Typo size={14}>{formattedDate}</Typo>
+          <Typo size={14}>Date</Typo>
           <Image
             source={require("@/assets/icons/calendar.webp")}
             style={{ width: scale(24), height: scale(24) }}
@@ -111,11 +89,8 @@ const ScheduleSheet = () => {
           Select Time
         </Typo>
 
-        <Pressable
-          onPress={() => showDateTimePicker("time")}
-          style={styles.selectionContainer}
-        >
-          <Typo size={14}>{formattedTime}</Typo>
+        <Pressable onPress={() => {}} style={styles.selectionContainer}>
+          <Typo size={14}>Time</Typo>
           <Clock />
         </Pressable>
 
@@ -139,16 +114,32 @@ const ScheduleSheet = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Date & Time Picker */}
-      {showPicker && (
-        <DateTimePicker
-          value={date}
-          mode={mode}
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={onChange}
-          minimumDate={new Date()}
-        />
-      )}
+      <Modal
+        visible={show}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShow(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setShow(false)}>
+          <View style={styles.modalContainer}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContent}>
+                <CalendarPicker
+                  allowRangeSelection
+                  allowBackwardRangeSelect
+                  startDate={startDate}
+                  endDate={endDate}
+                  onDateChange={onDateChange}
+                  minDate={new Date()}
+                  selectedDayStyle={styles.selectedDayStyle}
+                  selectedDayColor={colors.PRIMARY}
+                  width={SCREEN_WIDTH - 70}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 };
@@ -203,5 +194,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(20),
     borderRadius: radius._20,
     width: "90%",
+  },
+  selectedDayStyle: {
+    backgroundColor: colors.PRIMARY,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    maxHeight: "70%", // Prevent overflowing
   },
 });
