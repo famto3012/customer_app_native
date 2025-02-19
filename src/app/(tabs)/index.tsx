@@ -20,7 +20,6 @@ import {
 } from "@/utils/styling";
 import TopService from "@/components/TopService";
 import BusinessCategories from "@/components/universal/BusinessCategories";
-import { logout } from "@/service/authService";
 import { useCallback, useEffect } from "react";
 import { requestLocationPermission } from "@/utils/helpers";
 import FloatingPreparingOrder from "@/components/universal/FloatingPreparingOrder";
@@ -49,11 +48,6 @@ const Home = () => {
       queryClient.invalidateQueries({ queryKey: ["ongoingOrder"] });
     }, [queryClient])
   );
-
-  const handleLogout = () => {
-    queryClient.clear();
-    logout();
-  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -103,7 +97,7 @@ const Home = () => {
                     Discounts Now!
                   </Typo>
                 </View>
-                <Pressable onPress={handleLogout} style={styles.pressable}>
+                <Pressable onPress={() => {}} style={styles.pressable}>
                   <Typo size={14} fontFamily="Medium" color={colors.WHITE}>
                     Order Now
                   </Typo>

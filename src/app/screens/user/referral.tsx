@@ -1,0 +1,188 @@
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  ToastAndroid,
+} from "react-native";
+import React, { useState } from "react";
+import ScreenWrapper from "@/components/ScreenWrapper";
+import Header from "@/components/Header";
+import { scale, verticalScale } from "@/utils/styling";
+import Typo from "@/components/Typo";
+import { colors, radius, spacingX } from "@/constants/theme";
+import { referralDetails } from "@/utils/defaultData";
+import Button from "@/components/Button";
+import { Clipboard as ClipBoardIcon } from "phosphor-react-native";
+import { useQuery } from "@tanstack/react-query";
+import { getReferralCode } from "@/service/userService";
+import * as Clipboard from "expo-clipboard";
+
+interface ReferralProps {
+  appLink: string;
+  referralCode: string;
+}
+
+const Referral = () => {
+  const [enabled, setEnabled] = useState<boolean>(false);
+
+  const { data, isLoading } = useQuery<ReferralProps>({
+    queryKey: ["referral", enabled],
+    queryFn: getReferralCode,
+    enabled,
+  });
+
+  const copyToClipboard = async () => {
+    const link =
+      "Your referral code is: " + data?.referralCode + "\n" + data?.appLink;
+
+    await Clipboard.setStringAsync(link);
+    ToastAndroid.showWithGravity(
+      "Link copied",
+      ToastAndroid.LONG,
+      ToastAndroid.CENTER
+    );
+  };
+
+  return (
+    <ScreenWrapper>
+      <Header title="Refer & Earn" />
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Top Section */}
+        <View style={styles.topContainer}>
+          <Image
+            source={require("@/assets/images/loyalty-point.webp")}
+            style={styles.image}
+          />
+
+          <Typo
+            size={15}
+            fontFamily="SemiBold"
+            color={colors.NEUTRAL900}
+            style={styles.earnText}
+          >
+            Earn 50 Famto cash for each friend you refer!
+          </Typo>
+        </View>
+
+        {/* Referral Steps */}
+        <View style={styles.stepsContainer}>
+          {referralDetails?.map((detail, index) => (
+            <View
+              key={index}
+              style={[
+                styles.stepWrapper,
+                {
+                  alignItems:
+                    index === referralDetails.length - 1
+                      ? "flex-start"
+                      : "center",
+                },
+              ]}
+            >
+              {/* Number Circle */}
+              <View style={styles.circle}>
+                <Typo size={18} fontFamily="Medium" color={colors.WHITE}>
+                  {index + 1}
+                </Typo>
+              </View>
+
+              {/* Vertical Line */}
+              {index !== referralDetails.length - 1 && (
+                <View style={styles.line} />
+              )}
+
+              {/* Step Description */}
+              <Typo size={13} color={colors.NEUTRAL900} style={styles.stepText}>
+                {detail}
+              </Typo>
+            </View>
+          ))}
+        </View>
+
+        <Pressable
+          onPress={copyToClipboard}
+          style={[
+            styles.codeContainer,
+            { display: data?.referralCode ? "flex" : "none" },
+          ]}
+        >
+          <Typo size={13} style={{ flex: 1 }}>
+            Your code is: {data?.referralCode}
+          </Typo>
+          <ClipBoardIcon weight="fill" color={colors.NEUTRAL500} />
+        </Pressable>
+      </ScrollView>
+
+      <View style={styles.btnContainer}>
+        <Button
+          title="Get the link"
+          onPress={() => setEnabled(true)}
+          isLoading={isLoading}
+        />
+      </View>
+    </ScreenWrapper>
+  );
+};
+
+export default Referral;
+
+const styles = StyleSheet.create({
+  topContainer: {
+    alignItems: "center",
+  },
+  image: {
+    height: verticalScale(250),
+    width: scale(250),
+    resizeMode: "cover",
+  },
+  earnText: {
+    width: "80%",
+    textAlign: "center",
+    paddingTop: verticalScale(15),
+  },
+  stepsContainer: {
+    marginHorizontal: scale(20),
+    marginTop: verticalScale(10),
+  },
+  stepWrapper: {
+    flexDirection: "row",
+    gap: spacingX._15,
+    marginBottom: verticalScale(30),
+  },
+  circle: {
+    height: verticalScale(40),
+    width: scale(40),
+    backgroundColor: colors.PRIMARY,
+    borderRadius: 99,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  line: {
+    height: verticalScale(50),
+    width: 1,
+    backgroundColor: colors.NEUTRAL300,
+    position: "absolute",
+    left: scale(20),
+    top: verticalScale(40),
+  },
+  stepText: {
+    width: "80%",
+  },
+  btnContainer: {
+    marginTop: "auto",
+    paddingVertical: verticalScale(30),
+    paddingHorizontal: scale(20),
+  },
+  codeContainer: {
+    backgroundColor: colors.NEUTRAL200,
+    marginHorizontal: scale(20),
+    paddingHorizontal: scale(10),
+    paddingVertical: verticalScale(12),
+    borderRadius: radius._10,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+});
