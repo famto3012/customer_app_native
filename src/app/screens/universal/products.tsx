@@ -16,7 +16,7 @@ import { CaretUp, Clock, Star, XCircle } from "phosphor-react-native";
 import SearchView from "@/components/SearchView";
 import { productFilters } from "@/utils/defaultData";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useAuthStore } from "@/store/store";
 import {
   AddVariantProps,
@@ -268,7 +268,7 @@ const Product = () => {
         <FlatList
           data={category}
           ListHeaderComponent={
-            <View>
+            <>
               <View style={styles.merchantOuter}>
                 <Header title="Products" />
 
@@ -358,7 +358,9 @@ const Product = () => {
               <View style={{ paddingHorizontal: scale(20) }}>
                 <SearchView
                   placeholder="Search Dishes / Products"
-                  onPress={() => {}}
+                  onPress={() =>
+                    router.push("/screens/universal/product-search")
+                  }
                 />
 
                 <FlatList
@@ -371,7 +373,7 @@ const Product = () => {
                   contentContainerStyle={{ marginVertical: verticalScale(15) }}
                 />
               </View>
-            </View>
+            </>
           }
           renderItem={({ item }) => (
             <View style={styles.categoryContainer}>

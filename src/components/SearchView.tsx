@@ -13,6 +13,7 @@ const SearchView: FC<{
   return (
     <View style={[{ marginTop: verticalScale(16) }, style]}>
       <Pressable
+        onPress={onPress}
         style={{
           flexDirection: "row",
           alignItems: "center",

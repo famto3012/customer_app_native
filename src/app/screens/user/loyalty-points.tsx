@@ -1,4 +1,6 @@
 import { Image, StyleSheet, View } from "react-native";
+import { Audio, AVPlaybackStatusSuccess } from "expo-av";
+import { useState } from "react";
 import { scale, verticalScale } from "@/utils/styling";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
@@ -7,9 +9,54 @@ import { colors, radius, spacingX } from "@/constants/theme";
 import { loyaltyDetails } from "@/utils/defaultData";
 
 const LoyaltyPoints = () => {
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const playOrStopSound = async () => {
+    try {
+      if (sound && isPlaying) {
+        await sound.stopAsync();
+        await sound.unloadAsync();
+        setSound(null);
+        setIsPlaying(false);
+      } else {
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          {
+            uri: "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FLoyality.mp3?alt=media&token=8adcd03b-cf3a-4cca-b02c-2a46f08da406",
+          },
+          { shouldPlay: true }
+        );
+
+        setSound(newSound);
+        setIsPlaying(true);
+
+        newSound.setOnPlaybackStatusUpdate((status) => {
+          if (
+            status.isLoaded &&
+            (status as AVPlaybackStatusSuccess).didJustFinish
+          ) {
+            setIsPlaying(false);
+            setSound(null);
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error playing/stopping sound:", error);
+    }
+  };
+
   return (
     <ScreenWrapper>
-      <Header title="Loyalty Points" />
+      <Header
+        title="Loyalty Points"
+        showRightIcon
+        icon={
+          isPlaying
+            ? require("@/assets/icons/volume-slash.webp")
+            : require("@/assets/icons/volume-high.webp")
+        }
+        onPress={playOrStopSound}
+      />
 
       <View style={{ alignItems: "center" }}>
         <Image

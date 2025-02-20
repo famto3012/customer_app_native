@@ -28,6 +28,7 @@ export type HeaderProps = {
   showLeftIcon?: boolean;
   showRightIcon?: boolean;
   iconSize?: number;
+  onPress?: () => void;
 };
 
 export type ButtonProps = {

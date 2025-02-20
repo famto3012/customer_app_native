@@ -27,6 +27,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getOngoingOrder } from "@/service/orderService";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAuthStore } from "@/store/store";
+import { router } from "expo-router";
 
 const Home = () => {
   const { token } = useAuthStore.getState();
@@ -76,7 +77,7 @@ const Home = () => {
                 <HomeHeader />
                 <SearchView
                   placeholder="Search Business category"
-                  onPress={() => {}}
+                  onPress={() => router.push("/screens/universal/home-search")}
                   style={{ marginHorizontal: scale(20) }}
                 />
                 <View style={{ marginTop: verticalScale(24) }}>

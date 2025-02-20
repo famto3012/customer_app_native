@@ -46,7 +46,7 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
         if (!item.status) return null;
 
         router.push({
-          pathname: "/screens/products",
+          pathname: "/screens/universal/products",
           params: { merchantId: item.id },
         });
       }}
