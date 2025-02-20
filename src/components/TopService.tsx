@@ -20,7 +20,7 @@ const TopService = () => {
         }}
       >
         <Pressable
-          onPress={() => router.push("/screens/pick-and-drop-home")}
+          onPress={() => router.push("/screens/pickAndDrop/pick-and-drop-home")}
           style={styles.serviceCard}
         >
           <Image
@@ -38,7 +38,10 @@ const TopService = () => {
           </View>
         </Pressable>
 
-        <Pressable style={styles.serviceCard}>
+        <Pressable
+          onPress={() => router.push("/screens/customOrder/custom-order-home")}
+          style={styles.serviceCard}
+        >
           <Image
             source={require("@/assets/images/sticky-note 1.webp")}
             style={{ height: verticalScale(40), width: verticalScale(40) }}

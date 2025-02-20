@@ -117,7 +117,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
 const styles = StyleSheet.create({
   tabBarContainer: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.WHITE,
   },
   shadowView: {
     position: "absolute",

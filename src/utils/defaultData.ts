@@ -50,14 +50,14 @@ export const profileOptions: {
     image: require("@/assets/icons/gift.webp"),
   },
   {
-    label: "Rate Us",
-    route: "/screens/user/referral",
-    image: require("@/assets/icons/star.webp"),
-  },
-  {
     label: "Settings",
     route: "/screens/user/settings",
     image: require("@/assets/icons/setting.webp"),
+  },
+  {
+    label: "Rate Us",
+    route: "/screens/user/referral",
+    image: require("@/assets/icons/star.webp"),
   },
   {
     label: "About Us",

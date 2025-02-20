@@ -17,6 +17,12 @@ import { useAuthStore } from "@/store/store";
 import { fetchUserProfile } from "@/service/userService";
 import { logout } from "@/service/authService";
 import { UserProfileProps } from "@/types";
+import { useCallback, useMemo, useRef } from "react";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
+import LogoutSheet from "@/components/BottomSheets/user/LogoutSheet";
 
 const Profile = () => {
   const { token } = useAuthStore.getState();
@@ -28,10 +34,27 @@ const Profile = () => {
     enabled: !!token,
   });
 
+  const logoutSheetRef = useRef<BottomSheet>(null);
+
+  const logoutSheetSnapPoints = useMemo(() => ["28%"], []);
+
   const handleLogout = () => {
     queryClient.clear();
     logout();
   };
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+        style={[props.style, styles.backdrop]}
+      />
+    ),
+    []
+  );
 
   return (
     <ScreenWrapper>
@@ -52,32 +75,51 @@ const Profile = () => {
                 style={styles.profileImage}
               />
 
-              <Pressable
-                onPress={() => router.push("/screens/user/edit-profile")}
-                style={styles.editBtn}
-              >
-                <Image
-                  source={require("@/assets/icons/edit.webp")}
-                  style={{ height: verticalScale(20), width: scale(20) }}
-                  resizeMode="cover"
-                />
-              </Pressable>
+              {token && (
+                <Pressable
+                  onPress={() => router.push("/screens/user/edit-profile")}
+                  style={styles.editBtn}
+                >
+                  <Image
+                    source={require("@/assets/icons/edit.webp")}
+                    style={{ height: verticalScale(20), width: scale(20) }}
+                    resizeMode="cover"
+                  />
+                </Pressable>
+              )}
             </View>
           </View>
 
           <View style={{ gap: spacingY._5 }}>
-            <Typo
-              fontFamily="Medium"
-              size={18}
-              color={colors.NEUTRAL900}
-              textProps={{ numberOfLines: 1 }}
-              style={{ width: 150 }}
-            >
-              {data?.fullName || ""}
-            </Typo>
-            <Typo size={14} color={colors.NEUTRAL800}>
-              {data?.phoneNumber || ""}
-            </Typo>
+            {token ? (
+              <>
+                <Typo
+                  fontFamily="Medium"
+                  size={18}
+                  color={colors.NEUTRAL900}
+                  textProps={{ numberOfLines: 1 }}
+                  style={{ width: 150 }}
+                >
+                  {data?.fullName || ""}
+                </Typo>
+                <Typo size={14} color={colors.NEUTRAL800}>
+                  {data?.phoneNumber || ""}
+                </Typo>
+              </>
+            ) : (
+              <>
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({ pathname: "/auth", params: { showSkip: 0 } })
+                  }
+                  style={styles.authBtn}
+                >
+                  <Typo size={13} color={colors.WHITE}>
+                    Login / SignUp
+                  </Typo>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </View>
 
@@ -85,7 +127,14 @@ const Profile = () => {
           {profileOptions?.map((option, index) => (
             <View key={index}>
               <TouchableOpacity
-                onPress={() => router.push(option.route as any)}
+                onPress={() => {
+                  token || ["Rate Us", "About Us"].includes(option.label)
+                    ? router.push(option.route as any)
+                    : router.push({
+                        pathname: "/auth",
+                        params: { showSkip: 0 },
+                      });
+                }}
                 style={styles.pressableContainer}
               >
                 <Image
@@ -94,7 +143,15 @@ const Profile = () => {
                   resizeMode="cover"
                 />
 
-                <Typo size={14} color={colors.NEUTRAL800} style={{ flex: 1 }}>
+                <Typo
+                  size={14}
+                  color={
+                    token || ["Rate Us", "About Us"].includes(option.label)
+                      ? colors.NEUTRAL800
+                      : colors.NEUTRAL400
+                  }
+                  style={{ flex: 1 }}
+                >
                   {option.label}
                 </Typo>
 
@@ -109,7 +166,7 @@ const Profile = () => {
           ))}
 
           <TouchableOpacity
-            onPress={handleLogout}
+            onPress={() => logoutSheetRef.current?.expand()}
             style={styles.pressableContainer}
           >
             <Image
@@ -129,6 +186,20 @@ const Profile = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <BottomSheet
+        ref={logoutSheetRef}
+        index={-1}
+        snapPoints={logoutSheetSnapPoints}
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+      >
+        <LogoutSheet
+          onCancel={() => logoutSheetRef.current?.close()}
+          onConfirm={handleLogout}
+        />
+      </BottomSheet>
     </ScreenWrapper>
   );
 };
@@ -200,5 +271,19 @@ const styles = StyleSheet.create({
     borderWidth: 0.2,
     marginVertical: verticalScale(10),
     borderColor: colors.NEUTRAL400,
+  },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 1)",
+  },
+  authBtn: {
+    backgroundColor: colors.PRIMARY,
+    paddingHorizontal: scale(20),
+    paddingVertical: verticalScale(15),
+    borderRadius: radius._30,
   },
 });

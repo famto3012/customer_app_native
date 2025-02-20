@@ -1,4 +1,4 @@
-import { View, StyleSheet, Pressable } from "react-native";
+import { View, StyleSheet, Pressable, Image } from "react-native";
 import { CaretLeft, Info } from "phosphor-react-native";
 import { colors } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
@@ -12,10 +12,11 @@ const Header = ({
   showLeftIcon = true,
   showRightIcon = false,
   icon,
+  onPress,
 }: HeaderProps) => {
   return (
     <View style={styles.container}>
-      <View style={styles.emptyIcon}>
+      <View style={styles.iconContainer}>
         {showLeftIcon && (
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <CaretLeft
@@ -36,10 +37,13 @@ const Header = ({
         {title}
       </Typo>
 
-      <View style={styles.emptyIcon}>
+      <View style={styles.iconContainer}>
         {showRightIcon && (
-          <Pressable style={styles.rightIcon}>
-            <Info size={24} />
+          <Pressable onPress={onPress} style={styles.rightIcon}>
+            <Image
+              source={icon}
+              style={{ width: scale(24), height: verticalScale(24) }}
+            />
           </Pressable>
         )}
       </View>
@@ -57,9 +61,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   backButton: { padding: scale(2) },
-  emptyIcon: { flex: 1 },
+  iconContainer: { flex: 1 },
   rightIcon: {
-    width: "100%",
-    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    justifyContent: "center",
+
+    paddingVertical: verticalScale(5),
   },
 });
