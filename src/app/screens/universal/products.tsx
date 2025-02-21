@@ -28,6 +28,7 @@ import {
   addProductToCart,
   getAllCategory,
   getAllProducts,
+  getCustomerCart,
   getMerchantBanners,
   getMerchantData,
   haveValidCart,
@@ -42,7 +43,8 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import VariantSheet from "@/components/BottomSheets/VariantSheet";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useFocusEffect } from "@react-navigation/native";
 
 const { height } = Dimensions.get("window");
 
@@ -74,6 +76,14 @@ const Product = () => {
     fetchCategory();
   }, [merchantId, selectedBusiness]);
 
+  useFocusEffect(
+    useCallback(() => {
+      category.forEach((item) => {
+        fetchProduct(item.categoryId);
+      });
+    }, [category])
+  );
+
   const fetchCategory = async () => {
     if (!merchantId || !selectedBusiness || loadingMore) return;
 
@@ -103,7 +113,7 @@ const Product = () => {
       1, // Always start with page 1 for products
       PRODUCT_LIMIT
     );
-
+    console.log("Products fetched");
     setCategoryProducts((prev) => ({
       ...prev,
       [categoryId]: res,

@@ -132,6 +132,10 @@ const Checkout = () => {
   }, [deliveryOption]);
 
   useEffect(() => {
+    console.log("formData", formData);
+  }, [formData]);
+
+  useEffect(() => {
     indicatorPosition.value = withTiming(
       deliveryMode === "Home Delivery" ? 0 : TAB_WIDTH,
       {

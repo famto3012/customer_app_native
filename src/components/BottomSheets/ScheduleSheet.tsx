@@ -4,32 +4,95 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
-  Modal,
-  TouchableWithoutFeedback,
 } from "react-native";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { BottomSheetScrollView, SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
 import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
 import { colors, radius, spacingX } from "@/constants/theme";
 import { Clock } from "phosphor-react-native";
 import { scheduleDetails } from "@/utils/defaultData";
 import { useState } from "react";
-import CalendarPicker from "react-native-calendar-picker";
+
+import { DatePickerModal } from "react-native-paper-dates";
+import { TimePickerModal } from "react-native-paper-dates";
 
 const ScheduleSheet = () => {
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const [show, setShow] = useState<boolean>(false);
+  const [selectedDates, setSelectedDates] = useState<{
+    startDate: Date | null;
+    endDate: Date | null;
+  }>({
+    startDate: null,
+    endDate: null,
+  });
+  const [selectedTime, setSelectedTime] = useState<{
+    hours: Number | null;
+    minutes: Number | null;
+  }>({
+    hours: null,
+    minutes: null,
+  });
+  const [hours, setHours] = useState<number>(0);
+  const [minutes, setMinutes] = useState<number>(0);
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
 
-  const onDateChange = (date: Date, type: string) => {
-    if (type === "START_DATE") {
-      setStartDate(date);
-      setEndDate(date); // Reset end date when a new start date is selected
-    } else if (type === "END_DATE" && date >= startDate!) {
-      setEndDate(date);
-    } else if (!startDate) {
-      setStartDate(date); // For single date selection, set as start date
+  const getDefaultTime = () => {
+    const now = new Date();
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+
+    if (
+      selectedDates.startDate &&
+      selectedDates.endDate &&
+      selectedDates.startDate?.toDateString() ===
+        selectedDates.endDate?.toDateString()
+    ) {
+      hours += 1; // Set 1 hour after current time
+      if (hours >= 24) {
+        hours = 1;
+      }
     }
+
+    setHours(hours);
+    setMinutes(minutes);
+    // return { hours, minutes };
+  };
+
+  const onDateChange = (data: any) => {
+    console.log("Date selected:", data);
+
+    const startDate = new Date(data.startDate);
+    let endDate = data.endDate ? new Date(data.endDate) : new Date(startDate);
+
+    // If no endDate is provided or if startDate and endDate are the same, set endDate to startDate + 1 day
+    if (!data.endDate || startDate.toDateString() === endDate.toDateString()) {
+      endDate.setUTCDate(startDate.getUTCDate() + 1);
+      endDate.setUTCHours(18, 29, 59, 999);
+    } else {
+      // If startDate and endDate are different, set endDate to 18:29:59.999 UTC (which is 23:59:59.999 IST)
+      endDate.setUTCDate(endDate.getUTCDate() + 1);
+      endDate.setUTCHours(18, 29, 59, 999);
+    }
+
+    console.log("Final EndDate:", endDate);
+    console.log("StartDate:", startDate);
+
+    setSelectedDates({
+      startDate: startDate,
+      endDate: endDate,
+    });
+
+    setShowDatePicker(false);
+    getDefaultTime();
+  };
+
+  const onTimeChange = (data: any) => {
+    console.log("Time selected:", data);
+    setSelectedTime({
+      hours: data.hours,
+      minutes: data.minutes,
+    });
+    setShowTimePicker(false);
   };
 
   return (
@@ -66,18 +129,40 @@ const ScheduleSheet = () => {
         >
           Select Date or Date Range
         </Typo>
-
         <Pressable
-          onPress={() => setShow(true)}
+          onPress={() => setShowDatePicker(true)}
           style={styles.selectionContainer}
         >
-          <Typo size={14}>Date</Typo>
+          <Typo size={14}>
+            {selectedDates.startDate
+              ? `${selectedDates.startDate.toDateString()}${
+                  selectedDates.endDate
+                    ? " - " + selectedDates.endDate.toDateString()
+                    : ""
+                }`
+              : "Select Date"}
+          </Typo>
           <Image
             source={require("@/assets/icons/calendar.webp")}
             style={{ width: scale(24), height: scale(24) }}
             resizeMode="cover"
           />
         </Pressable>
+
+        <DatePickerModal
+          locale="en"
+          mode="range"
+          visible={showDatePicker}
+          onDismiss={() => setShowDatePicker(false)}
+          presentationStyle="pageSheet"
+          animationType="fade"
+          validRange={{
+            startDate: new Date(new Date().setDate(new Date().getDate() - 1)),
+          }}
+          startDate={selectedDates.startDate || new Date()}
+          endDate={selectedDates.endDate || new Date()}
+          onConfirm={onDateChange}
+        />
 
         {/* Time Picker */}
         <Typo
@@ -89,10 +174,28 @@ const ScheduleSheet = () => {
           Select Time
         </Typo>
 
-        <Pressable onPress={() => {}} style={styles.selectionContainer}>
-          <Typo size={14}>Time</Typo>
+        <Pressable
+          onPress={() => {
+            setShowTimePicker(true);
+          }}
+          style={styles.selectionContainer}
+        >
+          <Typo size={14}>
+            {" "}
+            {selectedTime.hours !== null && selectedTime.hours !== undefined
+              ? `${selectedTime.hours} : ${selectedTime.minutes ?? "00"}`
+              : "Select Time"}
+          </Typo>
           <Clock />
         </Pressable>
+
+        <TimePickerModal
+          visible={showTimePicker}
+          onDismiss={() => setShowTimePicker(false)}
+          onConfirm={onTimeChange}
+          hours={hours}
+          minutes={minutes}
+        />
 
         {/* Schedule Details */}
         <View style={styles.detailsContainer}>
@@ -113,33 +216,6 @@ const ScheduleSheet = () => {
           </Typo>
         </TouchableOpacity>
       </View>
-
-      <Modal
-        visible={show}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setShow(false)}
-      >
-        <TouchableWithoutFeedback onPress={() => setShow(false)}>
-          <View style={styles.modalContainer}>
-            <TouchableWithoutFeedback>
-              <View style={styles.modalContent}>
-                <CalendarPicker
-                  allowRangeSelection
-                  allowBackwardRangeSelect
-                  startDate={startDate}
-                  endDate={endDate}
-                  onDateChange={onDateChange}
-                  minDate={new Date()}
-                  selectedDayStyle={styles.selectedDayStyle}
-                  selectedDayColor={colors.PRIMARY}
-                  width={SCREEN_WIDTH - 70}
-                />
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
     </View>
   );
 };
@@ -202,13 +278,27 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0,0,0,0.5)", // Semi-transparent background
   },
   modalContent: {
-    width: "80%",
-    backgroundColor: "white",
+    width: SCREEN_WIDTH * 0.9, // Keep it responsive
+    backgroundColor: colors.WHITE, // Use white or theme color
     borderRadius: 10,
     padding: 20,
-    maxHeight: "70%", // Prevent overflowing
+    height: SCREEN_HEIGHT * 0.4, // Adjust height if needed
+    // alignSelf: "center", // Ensures it's centered in modal
+    marginTop: 10, // Adds space from the top
+    // marginLeft: SCREEN_HEIGHT * 0.023, // Adds space from the left
+    margin: "auto",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+  },
+  toggleButton: {
+    marginTop: verticalScale(10),
+    backgroundColor: colors.PRIMARY,
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
   },
 });
