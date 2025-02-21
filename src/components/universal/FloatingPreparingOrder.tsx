@@ -31,7 +31,7 @@ const FloatingPreparingOrder: FC<{ data: any }> = ({ data }) => {
         <Typo size={12} color={colors.NEUTRAL800}>
           Exp delivery at{" "}
           <Typo size={12} color={colors.PRIMARY}>
-            {data?.[0].deliveryTime}
+            {data?.[0]?.deliveryTime}
           </Typo>
         </Typo>
       </View>

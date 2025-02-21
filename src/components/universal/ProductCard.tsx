@@ -33,6 +33,7 @@ const ProductCard: FC<{
   }, [count]);
 
   useEffect(() => {
+    console.log("Cart count", cartCount);
     cartCount ? setCount(cartCount) : setCount(null);
   }, [cartCount]);
 

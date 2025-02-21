@@ -30,9 +30,18 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
   });
 
   useEffect(() => {
-    setHome(data?.homeAddress || null);
-    setWork(data?.workAddress || null);
-    setOther(data?.otherAddress || []);
+    if (data) {
+      setHome(data?.homeAddress || null);
+      setWork(data?.workAddress || null);
+      setOther(data?.otherAddress || []);
+
+      setSelected("home");
+      setSelectedOtherId("");
+
+      if (onSelect) {
+        onSelect("home", "");
+      }
+    }
   }, [data]);
 
   useEffect(() => {
