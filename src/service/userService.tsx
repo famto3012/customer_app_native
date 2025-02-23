@@ -90,3 +90,27 @@ export const getReferralCode = async () => {
     return null;
   }
 };
+
+export const getTemporaryOrder = async () => {
+  try {
+    const res = await appAxios.get(`/customers/get-temporary-order`);
+
+    return res.status === 200 ? res.data : [];
+  } catch (err: any) {
+    console.error(`Error in getting temporary order:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return null;
+  }
+};
+
+export const getAppBanner = async () => {
+  try {
+    const res = await appAxios.get(`/admin/app-banner/get-app-banner`);
+
+    return res.status === 200 ? res.data.data : [];
+  } catch (err: any) {
+    console.error(`Error in getting app banner:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return null;
+  }
+};

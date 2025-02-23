@@ -41,7 +41,7 @@ const BillDetail: FC<{ data: UniversalBillProps; isLoading: boolean }> = ({
           {field}
         </Typo>
         <Typo fontFamily="Medium" size={16} color={colors.NEUTRAL800}>
-          {`₹ ${value}`}
+          {`₹ ${String(value)}`}
         </Typo>
       </View>
     );

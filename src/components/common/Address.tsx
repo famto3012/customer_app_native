@@ -14,6 +14,7 @@ import { router } from "expo-router";
 import { AddressProps } from "@/types";
 import { fetchUserAddress } from "@/service/userService";
 import { useQuery } from "@tanstack/react-query";
+import { useAuthStore } from "@/store/store";
 
 const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
   onSelect,
@@ -24,9 +25,12 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
   const [work, setWork] = useState<AddressProps | null>(null);
   const [other, setOther] = useState<AddressProps[]>([]);
 
-  const { data, isLoading, isError } = useQuery({
+  const { token } = useAuthStore.getState();
+
+  const { data } = useQuery({
     queryKey: ["customer-address"],
     queryFn: () => fetchUserAddress(),
+    enabled: !!token,
   });
 
   useEffect(() => {
@@ -34,13 +38,6 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
       setHome(data?.homeAddress || null);
       setWork(data?.workAddress || null);
       setOther(data?.otherAddress || []);
-
-      setSelected("home");
-      setSelectedOtherId("");
-
-      if (onSelect) {
-        onSelect("home", "");
-      }
     }
   }, [data]);
 

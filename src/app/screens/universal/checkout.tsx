@@ -75,7 +75,7 @@ const Checkout = () => {
   const [formData, setFormData] = useState<formDataProps>({
     deliveryMode,
     businessCategoryId: selectedBusiness?.toString() ?? "",
-    deliveryAddressType: "",
+    deliveryAddressType: "home",
     deliveryAddressOtherAddressId: "",
     newDeliveryAddress: {
       type: "",

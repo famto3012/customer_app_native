@@ -16,6 +16,7 @@ import { OrderItemProps } from "@/types";
 import { SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAuthStore } from "@/store/store";
+import LottieView from "lottie-react-native";
 
 const OrderList = () => {
   const [orderList, setOrderList] = useState<OrderItemProps[]>([]);
@@ -53,22 +54,25 @@ const OrderList = () => {
         <View style={styles.orderItemHeader}>
           {item.deliveryMode === "Home Delivery" ||
           item.deliveryMode === "Take Away" ? (
-            <Image
-              source={require("@/assets/icons/shopping-cart.webp")}
-              resizeMode="cover"
-              style={styles.image}
+            <LottieView
+              source={require("@/assets/images/universal-order.json")} // Path to your Lottie JSON file
+              autoPlay
+              loop
+              style={styles.image} // Adjust size as needed
             />
           ) : item.deliveryMode === "Pick and Drop" ? (
-            <Image
-              source={require("@/assets/icons/shipping.webp")}
-              resizeMode="cover"
-              style={styles.image}
+            <LottieView
+              source={require("@/assets/images/pick-drop-order.json")} // Path to your Lottie JSON file
+              autoPlay
+              loop
+              style={styles.image} // Adjust size as needed
             />
           ) : (
-            <Image
-              source={require("@/assets/icons/notes.webp")}
-              resizeMode="cover"
-              style={styles.image}
+            <LottieView
+              source={require("@/assets/images/custom-order.json")} // Path to your Lottie JSON file
+              autoPlay
+              loop
+              style={styles.image} // Adjust size as needed
             />
           )}
 

@@ -28,6 +28,9 @@ import { getOngoingOrder } from "@/service/orderService";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAuthStore } from "@/store/store";
 import { router } from "expo-router";
+import { getAppBanner } from "@/service/userService";
+import { interpolate } from "react-native-reanimated";
+import Carousel, { TAnimationStyle } from "react-native-reanimated-carousel";
 
 const Home = () => {
   const { token } = useAuthStore.getState();
@@ -44,18 +47,43 @@ const Home = () => {
     enabled: !!token,
   });
 
+  const { data: bannerData } = useQuery({
+    queryKey: ["app-banner"],
+    queryFn: () => getAppBanner(),
+  });
+
   useFocusEffect(
     useCallback(() => {
       queryClient.invalidateQueries({ queryKey: ["ongoingOrder"] });
     }, [queryClient])
   );
 
+  const animationStyle: TAnimationStyle = useCallback((value: number) => {
+    "worklet";
+
+    const zIndex = Math.round(interpolate(value, [-1, 0, 1], [10, 20, 30])); // Ensure whole number
+    const scale = interpolate(value, [-1, 0, 1], [1.25, 1, 0.25]); // No rounding needed
+    const opacity = interpolate(value, [-0.75, 0, 1], [0, 1, 0]); // No rounding needed
+
+    return {
+      transform: [{ scale: Number(scale) }], // Ensuring it's a number
+      zIndex: zIndex, // Already rounded
+      opacity: Number(opacity), // Ensuring it's a number
+    };
+  }, []);
+
+  // useEffect(() => {
+  //   console.log("bannerData", bannerData);
+  // }, [bannerData]);
+
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.WHITE }}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: data?.length ? verticalScale(70) : 0,
+          marginTop: -20,
+          backgroundColor: colors.WHITE,
         }}
       >
         <ScreenWrapper>
@@ -64,7 +92,7 @@ const Home = () => {
             style={styles.imageBackground}
             resizeMode="cover"
           >
-            <LinearGradient
+            {/* <LinearGradient
               locations={[0, 0.1, 1]}
               colors={[
                 "rgba(255, 255, 255, 0.5)",
@@ -72,15 +100,18 @@ const Home = () => {
                 "rgba(0, 206, 209, 0.8)",
               ]}
               style={styles.gradient}
-            >
-              <View>
-                <HomeHeader />
-                <SearchView
-                  placeholder="Search Business category"
-                  onPress={() => router.push("/screens/universal/home-search")}
-                  style={{ marginHorizontal: scale(20) }}
-                />
-                <View style={{ marginTop: verticalScale(24) }}>
+            > */}
+
+            {/* <View> */}
+            <View style={styles.overlayContainer}>
+              <HomeHeader />
+              <SearchView
+                placeholder="Search Business category"
+                onPress={() => router.push("/screens/universal/home-search")}
+                style={{ marginHorizontal: scale(20) }}
+              />
+            </View>
+            {/* <View style={{ marginTop: verticalScale(24) }}>
                   <Typo
                     size={20}
                     fontFamily="SemiBold"
@@ -107,9 +138,37 @@ const Home = () => {
                   source={require("@/assets/images/home-burger.webp")}
                   style={styles.image}
                   resizeMode="contain"
+                /> */}
+            <Carousel
+              loop
+              style={{
+                width: SCREEN_WIDTH,
+                height: SCREEN_HEIGHT * 0.48,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              autoPlay
+              autoPlayInterval={4000}
+              scrollAnimationDuration={2000}
+              width={Math.round(SCREEN_WIDTH)} // Ensuring whole number
+              height={Math.round(SCREEN_HEIGHT * 0.48)} // Ensuring whole number
+              data={bannerData || []}
+              renderItem={({ item }) => (
+                <Image
+                  source={{ uri: item?.imageUrl }}
+                  resizeMode="cover"
+                  style={{
+                    width: SCREEN_WIDTH, // Round to avoid floating-point errors
+                    height: Math.round(SCREEN_HEIGHT * 0.48), // Round to avoid floating-point errors
+                    borderBottomLeftRadius: radius._30,
+                    borderBottomRightRadius: radius._30,
+                  }}
                 />
-              </View>
-            </LinearGradient>
+              )}
+              customAnimation={animationStyle}
+            />
+            {/* </View> */}
+            {/* </LinearGradient> */}
           </ImageBackground>
           <TopService />
           <BusinessCategories query="" />
@@ -154,5 +213,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: verticalScale(10),
     marginHorizontal: "auto",
+  },
+  overlayContainer: {
+    position: "absolute",
+    top: verticalScale(8), // Adjust as needed
+    left: 0,
+    right: 0,
+    zIndex: 100, // High zIndex to stay on top
+    elevation: 10, // For Android shadow effect
   },
 });
