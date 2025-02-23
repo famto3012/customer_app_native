@@ -6,7 +6,7 @@ export const colors = {
   TEXT: "#FFF",
   TEXT_LIGHT: "#E5E5E5",
   TEXT_LIGHTER: "#D4D4D4",
-  WHITE: "#FBFBFB",
+  WHITE: "#FFF",
   BLACK: "#333",
   YELLOW: "#FFB400",
   GREEN: "#5EC401",
