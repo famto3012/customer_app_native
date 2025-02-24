@@ -114,3 +114,26 @@ export const getAppBanner = async () => {
     return null;
   }
 };
+
+export const getFavoriteProducts = async () => {
+  try {
+    const res = await appAxios.get(`/customers/favorite-products`);
+
+    return res.status === 200 ? res.data : [];
+  } catch (err: any) {
+    console.error(`Error in getting favorite products:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return null;
+  }
+};
+export const getFavoriteMerchants = async () => {
+  try {
+    const res = await appAxios.get(`/customers/favorite-merchants`);
+
+    return res.status === 200 ? res.data.data : [];
+  } catch (err: any) {
+    console.error(`Error in getting favorite merchants:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return null;
+  }
+};

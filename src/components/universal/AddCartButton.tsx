@@ -10,13 +10,20 @@ const AddCartButton: FC<AddCartButtonProps> = ({
   onIncrement,
   onPress,
   count,
+  inventory,
 }) => {
   return (
     <View
       style={[
         styles.container,
         {
-          backgroundColor: count > 0 ? colors.WHITE : colors.PRIMARY,
+          backgroundColor:
+            count > 0
+              ? colors.WHITE
+              : inventory
+              ? colors.PRIMARY
+              : colors.WHITE,
+          borderColor: inventory ? colors.PRIMARY : colors.NEUTRAL500,
         },
       ]}
     >
@@ -43,8 +50,12 @@ const AddCartButton: FC<AddCartButtonProps> = ({
         </View>
       ) : (
         <Pressable onPress={onPress}>
-          <Typo size={14} color={colors.WHITE} style={styles.text}>
-            Add
+          <Typo
+            size={inventory ? 14 : 13}
+            color={inventory ? colors.WHITE : colors.NEUTRAL900}
+            style={styles.text}
+          >
+            {inventory ? "Add" : "Not Available"}
           </Typo>
         </Pressable>
       )}
@@ -63,7 +74,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: scale(-15),
     borderWidth: 1,
-    borderColor: colors.PRIMARY,
   },
   counterContainer: {
     flexDirection: "row",

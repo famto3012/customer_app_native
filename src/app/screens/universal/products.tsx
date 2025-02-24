@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
-import { colors, radius, spacingX } from "@/constants/theme";
+import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import Header from "@/components/Header";
 import { StatusBar } from "expo-status-bar";
 import Typo from "@/components/Typo";
@@ -40,11 +40,14 @@ import FloatingCart from "@/components/universal/FloatingCart";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
+  SCREEN_HEIGHT,
 } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import VariantSheet from "@/components/BottomSheets/VariantSheet";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useFocusEffect } from "@react-navigation/native";
+import Carousel, { TAnimationStyle } from "react-native-reanimated-carousel";
+import { interpolate } from "react-native-reanimated";
 
 const { height } = Dimensions.get("window");
 
@@ -243,6 +246,20 @@ const Product = () => {
     []
   );
 
+  const animationStyle: TAnimationStyle = useCallback((value: number) => {
+    "worklet";
+
+    const zIndex = Math.round(interpolate(value, [-1, 0, 1], [10, 20, 30])); // Ensure whole number
+    const scale = interpolate(value, [-1, 0, 1], [1.25, 1, 0.25]); // No rounding needed
+    const opacity = interpolate(value, [-0.75, 0, 1], [0, 1, 0]); // No rounding needed
+
+    return {
+      transform: [{ scale: Number(scale) }], // Ensuring it's a number
+      zIndex: zIndex, // Already rounded
+      opacity: Number(opacity), // Ensuring it's a number
+    };
+  }, []);
+
   const renderItem = ({ item }: any) => {
     return (
       <Pressable
@@ -287,6 +304,13 @@ const Product = () => {
                     <Typo size={20} color={colors.NEUTRAL900} fontWeight="bold">
                       {merchant?.merchantName}
                     </Typo>
+                    <Typo
+                      size={12}
+                      color={colors.NEUTRAL600}
+                      fontFamily="Medium"
+                    >
+                      {merchant?.displayAddress}
+                    </Typo>
 
                     <View style={styles.labels}>
                       <Clock size={scale(15)} />
@@ -303,13 +327,6 @@ const Product = () => {
                         fontFamily="Medium"
                       >
                         {merchant?.distanceInKM} km •
-                      </Typo>
-                      <Typo
-                        size={12}
-                        color={colors.NEUTRAL600}
-                        fontFamily="Medium"
-                      >
-                        {merchant?.displayAddress}
                       </Typo>
                     </View>
 
@@ -333,36 +350,36 @@ const Product = () => {
                 </View>
               </View>
 
-              <FlatList
-                data={banners}
-                horizontal
-                keyExtractor={(_, index) => index.toString()}
-                renderItem={({ item }) => (
-                  <View
+              <Carousel
+                loop
+                style={{
+                  width: SCREEN_WIDTH - 40,
+                  height: verticalScale(100),
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginVertical: spacingY._15,
+                  marginHorizontal: spacingX._15,
+                }}
+                autoPlay
+                autoPlayInterval={4000}
+                scrollAnimationDuration={2000}
+                width={Math.round(SCREEN_WIDTH - 40)} // Ensuring whole number
+                height={Math.round(verticalScale(100))} // Ensuring whole number
+                data={banners || []}
+                renderItem={({ item }: any) => (
+                  <Image
+                    source={{
+                      uri: item.imageURL,
+                    }}
                     style={{
-                      height: verticalScale(120),
-                      width: SCREEN_WIDTH - 40,
+                      width: "100%",
+                      height: "100%",
                       backgroundColor: "transparent",
                     }}
-                  >
-                    <Image
-                      source={{
-                        uri: item.imageURL,
-                      }}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        backgroundColor: "transparent",
-                      }}
-                      resizeMode="cover"
-                    />
-                  </View>
+                    resizeMode="cover"
+                  />
                 )}
-                contentContainerStyle={{
-                  paddingHorizontal: scale(20),
-                  marginTop: verticalScale(15),
-                }}
-                showsHorizontalScrollIndicator={false}
+                customAnimation={animationStyle}
               />
 
               <View style={{ paddingHorizontal: scale(20) }}>

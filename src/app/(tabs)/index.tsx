@@ -153,7 +153,7 @@ const Home = () => {
               width={Math.round(SCREEN_WIDTH)} // Ensuring whole number
               height={Math.round(SCREEN_HEIGHT * 0.48)} // Ensuring whole number
               data={bannerData || []}
-              renderItem={({ item }) => (
+              renderItem={({ item }: any) => (
                 <Image
                   source={{ uri: item?.imageUrl }}
                   resizeMode="cover"
