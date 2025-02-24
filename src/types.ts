@@ -96,6 +96,7 @@ export type CategoryProps = {
 
 export type ProductProps = {
   productId: string;
+  merchantId: string;
   productName: string;
   price: number;
   discountPrice: number | null;
@@ -117,6 +118,7 @@ export type AddCartButtonProps = {
   onDecrement: () => void;
   onPress: () => void;
   count: number;
+  inventory: boolean;
 };
 
 export type Variant = {

@@ -1,98 +1,41 @@
-import { Image, Pressable, StyleSheet, View } from "react-native";
-import { FC, useEffect, useState } from "react";
-import { ProductProps } from "@/types";
-import { scale, verticalScale } from "@/utils/styling";
-import Typo from "../Typo";
-import { colors, radius, spacingX } from "@/constants/theme";
-import AddCartButton from "./AddCartButton";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import React, { FC, useState } from "react";
 import { Heart } from "phosphor-react-native";
-import {
-  addProductToCart,
-  haveValidCart,
-  toggleProductFavorite,
-} from "@/service/universal";
-import { useAuthStore } from "@/store/store";
+import Typo from "@/components/Typo";
+import { colors, radius, spacingX } from "@/constants/theme";
+import { scale, verticalScale } from "@/utils/styling";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toggleProductFavorite } from "@/service/universal";
+import { ProductProps } from "@/types";
 import { router } from "expo-router";
-import { useMutation } from "@tanstack/react-query";
 import { Grayscale } from "react-native-color-matrix-image-filters";
 
-const ProductCard: FC<{
+const FavoriteProductCard: FC<{
   item: ProductProps;
-  openVariant?: (product: ProductProps) => void;
-  cartCount?: number | null;
-  showAddCart: boolean;
-}> = ({ item, openVariant, cartCount, showAddCart }) => {
+}> = ({ item }) => {
   const [isFavorite, setIsFavorite] = useState<boolean>(item.isFavorite);
-  const [count, setCount] = useState<number | null>(cartCount || null);
-
-  const { token } = useAuthStore.getState();
-
-  useEffect(() => {
-    if (count !== null && count >= 0 && !item.variantAvailable) {
-      handleUpdateCartMutation.mutate();
-    }
-  }, [count]);
-
-  useEffect(() => {
-    cartCount ? setCount(cartCount) : setCount(null);
-  }, [cartCount]);
+  const queryClient = useQueryClient();
 
   const handleFavoriteMutation = useMutation({
     mutationKey: ["product-favorite", item.productId],
     mutationFn: () => toggleProductFavorite(item.productId),
-    onSuccess: () => setIsFavorite(!isFavorite),
-  });
-
-  const isUserAuthenticated = () => {
-    if (!token) {
-      router.push("/auth");
-      return false;
-    }
-    return true;
-  };
-
-  const handleDecrement = () => {
-    if (!isUserAuthenticated()) return;
-
-    if (item.variantAvailable) {
-      console.log(`Variant available`);
-    } else {
-      setCount((prev) => (prev && prev > 0 ? prev - 1 : 0));
-    }
-  };
-
-  const handleIncrement = () => {
-    if (!isUserAuthenticated()) return;
-    if (!item.inventory) return;
-    console.log("Button Pressed");
-    if (item.variantAvailable) {
-      openVariant?.(item);
-    } else {
-      setCount((prev) => (prev ? prev + 1 : 1));
-    }
-  };
-
-  const handleUpdateCartMutation = useMutation({
-    mutationKey: ["update-cart"],
-    mutationFn: () => {
-      const quantity = count ?? 0;
-      return addProductToCart(item.productId, quantity);
-    },
-    onSuccess: async () => {
-      const floatingCartRes = await haveValidCart();
-
-      useAuthStore.setState({
-        cart: {
-          showCart: floatingCartRes.haveCart,
-          merchant: floatingCartRes.merchant,
-          cartId: floatingCartRes.cartId,
-        },
-      });
+    onSuccess: () => {
+      setIsFavorite(!isFavorite);
+      queryClient.invalidateQueries({ queryKey: ["favoriteProductList"] });
     },
   });
 
   return (
-    <View style={styles.container}>
+    <Pressable
+      style={styles.container}
+      onPress={() => {
+        if (!item.inventory) return;
+        router.push({
+          pathname: "/screens/universal/products",
+          params: { merchantId: item.merchantId },
+        });
+      }}
+    >
       <View>
         {!item.inventory ? (
           <Grayscale>
@@ -129,16 +72,6 @@ const ProductCard: FC<{
             weight={isFavorite ? "fill" : "regular"}
           />
         </Pressable>
-
-        {showAddCart && (
-          <AddCartButton
-            onDecrement={handleDecrement}
-            onIncrement={handleIncrement}
-            onPress={handleIncrement}
-            count={count ? count : 0}
-            inventory={item?.inventory}
-          />
-        )}
       </View>
 
       <View style={{ flex: 1, paddingTop: verticalScale(10) }}>
@@ -183,20 +116,21 @@ const ProductCard: FC<{
           color={colors.NEUTRAL400}
           textProps={{ numberOfLines: 3 }}
         >
-          {item.description}
+          {item?.description}
         </Typo>
       </View>
-    </View>
+    </Pressable>
   );
 };
 
-export default ProductCard;
+export default FavoriteProductCard;
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: verticalScale(40),
     flexDirection: "row",
     alignItems: "flex-start",
     gap: spacingX._15,
+    marginHorizontal: spacingX._15,
+    marginTop: verticalScale(20),
   },
 });

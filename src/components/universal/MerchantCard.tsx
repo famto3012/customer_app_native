@@ -13,13 +13,15 @@ import Animated, {
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { router } from "expo-router";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Grayscale } from "react-native-color-matrix-image-filters";
 
 const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const scale = useSharedValue(1);
 
   const { selectedBusiness } = useAuthStore.getState();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     item.isFavorite ? setIsFavorite(true) : setIsFavorite(false);
@@ -32,6 +34,7 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
       setIsFavorite(!isFavorite);
       scale.value = 1.2;
       scale.value = withSpring(1, { damping: 5, stiffness: 150 });
+      queryClient.invalidateQueries({ queryKey: ["favoriteMerchantList"] });
     },
   });
 
@@ -52,12 +55,21 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
       }}
     >
       <View style={{ position: "relative" }}>
-        <Image
-          source={{ uri: item.merchantImageURL }}
-          style={styles.image}
-          resizeMode="cover"
-        />
-        {!item.status && <View style={styles.overlay} />}
+        {!item.status ? (
+          <Grayscale>
+            <Image
+              source={{ uri: item.merchantImageURL }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+          </Grayscale>
+        ) : (
+          <Image
+            source={{ uri: item.merchantImageURL }}
+            style={styles.image}
+            resizeMode="cover"
+          />
+        )}
       </View>
 
       <View style={styles.ratingContainer}>
@@ -179,5 +191,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     borderTopLeftRadius: radius._10,
     borderTopRightRadius: radius._10,
+    filter: "grayscale(100%)",
   },
 });
