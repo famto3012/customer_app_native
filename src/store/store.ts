@@ -33,7 +33,7 @@ interface AuthStore {
   cart: { showCart: boolean; merchant: string; cartId: string };
   promoCode: string | null;
   orders: Order[];
-  biometricAuth: boolean; 
+  biometricAuth: boolean;
   setUserId: (userId: string) => void;
   setToken: (token: string) => void;
   setRefreshToken: (refreshToken: string) => void;
@@ -41,14 +41,10 @@ interface AuthStore {
   setSelectedBusiness: (business: string) => void;
   setNewUser: (newUser: boolean) => void;
   setPromoCode: (code: string) => void;
-  setCart: (cart: {
-    showCart: boolean;
-    merchant: string;
-    cartId: string;
-  }) => void;
-  addOrder: (order: Order) => void; // New method to add orders
-  clearOrders: () => void; // New method to clear orders
-  setBiometricAuth: (status: boolean) => void; // ✅ Setter function for biometricAuth
+  setCart: (cart: { showCart: boolean; merchant: string; cartId: string }) => void;
+  addOrder: (order: Order) => void;
+  clearOrders: () => void;
+  setBiometricAuth: (status: boolean) => void;
   clearStorage: () => void;
 }
 
@@ -63,7 +59,7 @@ export const useAuthStore = create<AuthStore>()(
       newUser: true,
       cart: { showCart: false, merchant: "", cartId: "" },
       promoCode: null,
-      orders: [], 
+      orders: [],
       biometricAuth: false,
 
       setUserId: (userId) => {
@@ -108,6 +104,7 @@ export const useAuthStore = create<AuthStore>()(
       clearOrders: () => {
         set({ orders: [] });
         secureStorage.removeItem("orders");
+      },
       setBiometricAuth: (status) => {
         set({ biometricAuth: status });
         secureStorage.setItem("biometricAuth", JSON.stringify(status));
