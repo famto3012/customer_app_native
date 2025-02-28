@@ -18,10 +18,15 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchLoyaltyAndFamtoCash } from "@/service/userService";
 import { useAuthStore } from "@/store/store";
 
+interface WalletProps {
+  walletBalance: string;
+  loyaltyPoints: number;
+}
+
 const Wallet = () => {
   const { token } = useAuthStore.getState();
 
-  const { data } = useQuery({
+  const { data } = useQuery<WalletProps>({
     queryKey: ["loyalty-and-famto-cash"],
     queryFn: () => fetchLoyaltyAndFamtoCash(),
     enabled: !!token,
@@ -44,7 +49,7 @@ const Wallet = () => {
           >
             <View>
               <Typo size={24} fontFamily="Bold" color={colors.WHITE}>
-                ₹ {data?.walletBalance || 0}
+                ₹ {data?.walletBalance}
               </Typo>
               <Typo size={14} color={colors.NEUTRAL350}>
                 Available balance
@@ -75,7 +80,7 @@ const Wallet = () => {
 
         <View style={styles.loyaltyContainer}>
           <Typo size={24} fontFamily="SemiBold" color={colors.NEUTRAL900}>
-            {data?.loyaltyPoints || 0} Points
+            {data?.loyaltyPoints} Points
           </Typo>
           <Typo size={14} color={colors.NEUTRAL400}>
             Loyalty points left for redemption

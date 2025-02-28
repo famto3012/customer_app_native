@@ -12,7 +12,7 @@ import { colors, radius, spacingX, spacingY } from "@/constants/theme";
 import Header from "@/components/Header";
 import { StatusBar } from "expo-status-bar";
 import Typo from "@/components/Typo";
-import { CaretUp, Clock, Star, XCircle } from "phosphor-react-native";
+import { CaretUp, Clock, Phone, Star, XCircle } from "phosphor-react-native";
 import SearchView from "@/components/SearchView";
 import { productFilters } from "@/utils/defaultData";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -28,7 +28,6 @@ import {
   addProductToCart,
   getAllCategory,
   getAllProducts,
-  getCustomerCart,
   getMerchantBanners,
   getMerchantData,
   haveValidCart,
@@ -40,11 +39,10 @@ import FloatingCart from "@/components/universal/FloatingCart";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
-  SCREEN_HEIGHT,
 } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import VariantSheet from "@/components/BottomSheets/VariantSheet";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useFocusEffect } from "@react-navigation/native";
 import Carousel, { TAnimationStyle } from "react-native-reanimated-carousel";
 import { interpolate } from "react-native-reanimated";
@@ -54,7 +52,6 @@ const { height } = Dimensions.get("window");
 const Product = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>("");
   const [category, setCategory] = useState<CategoryProps[]>([]);
-  const [merchant, setMerchant] = useState<MerchantDataProps>(null);
   const [categoryPage, setCategoryPage] = useState<number>(1);
   const [categoryProducts, setCategoryProducts] = useState<{
     [key: string]: ProductProps[];
@@ -123,14 +120,10 @@ const Product = () => {
     }));
   };
 
-  const { data: merchantData } = useQuery({
+  const { data: merchantData } = useQuery<MerchantDataProps>({
     queryKey: ["merchant-data", merchantId],
     queryFn: () => getMerchantData(merchantId.toString(), latitude, longitude),
   });
-
-  useEffect(() => {
-    setMerchant(merchantData);
-  }, [merchantData]);
 
   const fetchMerchantBanners = async () => {
     const res = await getMerchantBanners(merchantId.toString());
@@ -302,14 +295,14 @@ const Product = () => {
                 <View style={styles.merchantData}>
                   <View style={{ gap: scale(10) }}>
                     <Typo size={20} color={colors.NEUTRAL900} fontWeight="bold">
-                      {merchant?.merchantName}
+                      {merchantData?.merchantName}
                     </Typo>
                     <Typo
                       size={12}
                       color={colors.NEUTRAL600}
                       fontFamily="Medium"
                     >
-                      {merchant?.displayAddress}
+                      {merchantData?.displayAddress}
                     </Typo>
 
                     <View style={styles.labels}>
@@ -319,19 +312,19 @@ const Product = () => {
                         color={colors.NEUTRAL600}
                         fontFamily="Medium"
                       >
-                        {merchant?.deliveryTime} min •
+                        {merchantData?.deliveryTime} min •
                       </Typo>
                       <Typo
                         size={12}
                         color={colors.NEUTRAL600}
                         fontFamily="Medium"
                       >
-                        {merchant?.distanceInKM} km
+                        {merchantData?.distanceInKM} km
                       </Typo>
                     </View>
 
                     <Typo size={12} color={colors.NEUTRAL600}>
-                      {merchant?.description}
+                      {merchantData?.description}
                     </Typo>
                   </View>
 
@@ -343,7 +336,7 @@ const Product = () => {
                         weight="fill"
                       />
                       <Typo size={14} color={colors.WHITE}>
-                        {merchant?.rating}
+                        {merchantData?.rating}
                       </Typo>
                     </Pressable>
                   </View>
@@ -353,14 +346,7 @@ const Product = () => {
               {banners.length && (
                 <Carousel
                   loop
-                  style={{
-                    width: SCREEN_WIDTH - 40,
-                    height: verticalScale(100),
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginVertical: spacingY._15,
-                    marginHorizontal: spacingX._15,
-                  }}
+                  style={styles.merchantBanner}
                   autoPlay
                   autoPlayInterval={4000}
                   scrollAnimationDuration={2000}
@@ -372,11 +358,7 @@ const Product = () => {
                       source={{
                         uri: item.imageURL,
                       }}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        backgroundColor: "transparent",
-                      }}
+                      style={styles.bannerImage}
                       resizeMode="cover"
                     />
                   )}
@@ -406,15 +388,7 @@ const Product = () => {
           }
           renderItem={({ item }) => (
             <View style={styles.categoryContainer}>
-              <Pressable
-                style={{
-                  paddingTop: verticalScale(24),
-                  paddingBottom: verticalScale(32),
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
+              <Pressable style={styles.categoryBtn}>
                 <Typo size={16} color={colors.NEUTRAL900} fontFamily="SemiBold">
                   {item.categoryName}
                 </Typo>
@@ -462,15 +436,35 @@ const Product = () => {
                 style={{
                   paddingBottom: verticalScale(100),
                   paddingHorizontal: scale(20),
+                  gap: spacingY._15,
                 }}
               >
-                <View>
-                  <Typo>FSSAI</Typo>
-                  <Typo>FSSAI123456</Typo>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: spacingX._15,
+                  }}
+                >
+                  <Image
+                    source={require("@/assets/images/fssai.webp")}
+                    style={{ width: scale(30), height: verticalScale(15) }}
+                  />
+                  <Typo size={13} color={colors.NEUTRAL900}>
+                    {merchantData?.fssaiNumber}
+                  </Typo>
                 </View>
-                <View>
-                  <Typo>Phone</Typo>
-                  <Typo>+91 987465122</Typo>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: spacingX._15,
+                  }}
+                >
+                  <Phone size={scale(16)} />
+                  <Typo size={13} color={colors.NEUTRAL900}>
+                    {merchantData?.phoneNumber}
+                  </Typo>
                 </View>
               </View>
             )
@@ -573,5 +567,25 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: "rgba(0, 0, 0, 1)",
+  },
+  merchantBanner: {
+    width: SCREEN_WIDTH - 40,
+    height: verticalScale(100),
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: spacingY._15,
+    marginHorizontal: spacingX._15,
+  },
+  bannerImage: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "transparent",
+  },
+  categoryBtn: {
+    paddingTop: verticalScale(24),
+    paddingBottom: verticalScale(32),
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 });
