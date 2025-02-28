@@ -17,6 +17,7 @@ import { SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAuthStore } from "@/store/store";
 import LottieView from "lottie-react-native";
+import { router } from "expo-router";
 
 const OrderList = () => {
   const [orderList, setOrderList] = useState<OrderItemProps[]>([]);
@@ -50,7 +51,15 @@ const OrderList = () => {
 
   const renderItem = ({ item }: any) => {
     return (
-      <Pressable style={styles.orderItem}>
+      <Pressable
+        style={styles.orderItem}
+        onPress={() => {
+          router.push({
+            pathname: "/screens/user/OrderDetail",
+            params: { orderId: item.orderId },
+          });
+        }}
+      >
         <View style={styles.orderItemHeader}>
           {item.deliveryMode === "Home Delivery" ||
           item.deliveryMode === "Take Away" ? (
@@ -120,8 +129,14 @@ const OrderList = () => {
           <Typo size={13} color={colors.PRIMARY} fontFamily="Medium">
             Grand Total
           </Typo>
-          <Typo size={16} color={colors.NEUTRAL900} fontFamily="SemiBold">
-            ₹ {item.grandTotal}
+          <Typo
+            size={item?.grandTotal ? 16 : 12}
+            color={colors.NEUTRAL900}
+            fontFamily="SemiBold"
+          >
+            {item?.grandTotal
+              ? ` ₹ ${item?.grandTotal}`
+              : "Will be updated soon"}
           </Typo>
         </View>
       </Pressable>

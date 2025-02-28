@@ -32,7 +32,8 @@ interface AuthStore {
   newUser: boolean;
   cart: { showCart: boolean; merchant: string; cartId: string };
   promoCode: string | null;
-  orders: Order[]; // New orders array
+  orders: Order[];
+  biometricAuth: boolean; 
   setUserId: (userId: string) => void;
   setToken: (token: string) => void;
   setRefreshToken: (refreshToken: string) => void;
@@ -47,6 +48,7 @@ interface AuthStore {
   }) => void;
   addOrder: (order: Order) => void; // New method to add orders
   clearOrders: () => void; // New method to clear orders
+  setBiometricAuth: (status: boolean) => void; // ✅ Setter function for biometricAuth
   clearStorage: () => void;
 }
 
@@ -61,7 +63,8 @@ export const useAuthStore = create<AuthStore>()(
       newUser: true,
       cart: { showCart: false, merchant: "", cartId: "" },
       promoCode: null,
-      orders: [], // Initialize empty orders array
+      orders: [], 
+      biometricAuth: false,
 
       setUserId: (userId) => {
         set({ userId });
@@ -105,6 +108,9 @@ export const useAuthStore = create<AuthStore>()(
       clearOrders: () => {
         set({ orders: [] });
         secureStorage.removeItem("orders");
+      setBiometricAuth: (status) => {
+        set({ biometricAuth: status });
+        secureStorage.setItem("biometricAuth", JSON.stringify(status));
       },
       clearStorage: () => {
         set({
@@ -115,7 +121,8 @@ export const useAuthStore = create<AuthStore>()(
           selectedBusiness: null,
           cart: { showCart: false, merchant: "", cartId: "" },
           promoCode: null,
-          orders: [], // Clear orders
+          orders: [],
+          biometricAuth: false,
         });
         secureStorage.removeItem("userId");
         secureStorage.removeItem("token");
@@ -125,6 +132,7 @@ export const useAuthStore = create<AuthStore>()(
         secureStorage.removeItem("cart");
         secureStorage.removeItem("promoCode");
         secureStorage.removeItem("orders");
+        secureStorage.removeItem("biometricAuth");
       },
     }),
     {
