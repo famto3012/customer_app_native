@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Modal,
   BackHandler,
+  StyleSheet,
 } from "react-native";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
@@ -30,30 +31,22 @@ const Main = () => {
 
   const authenticate = async () => {
     try {
-      console.log("Starting Biometric Authentication");
-
       const result = await LocalAuthentication.authenticateAsync({
         promptMessage: "Authenticate to access Famto",
         disableDeviceFallback: false, // Allow PIN/Pattern fallback
       });
 
       if (result.success) {
-        console.log("Biometric Authentication Success");
         proceedNavigation();
       } else if (
         result.error === "user_cancel" ||
         result.error === "system_cancel"
       ) {
-        console.log("Authentication Canceled");
         setShowAuthModal(true); // Show custom unlock modal
       } else {
-        console.log(
-          "Biometric Authentication Failed. Prompting for Device Authentication."
-        );
         fallbackToDeviceAuth();
       }
     } catch (error) {
-      console.error("Biometric Authentication Error:", error);
       setShowAuthModal(true); // Show modal if error occurs
     }
   };
@@ -67,20 +60,16 @@ const Main = () => {
       });
 
       if (result.success) {
-        console.log("Device Authentication Success");
         proceedNavigation();
       } else if (
         result.error === "user_cancel" ||
         result.error === "system_cancel"
       ) {
-        console.log("Device Authentication Canceled");
         setShowAuthModal(true); // Show unlock modal
       } else {
-        console.log("Device Authentication Failed. Exiting App.");
         setShowAuthModal(true);
       }
     } catch (error) {
-      console.error("Device Authentication Error:", error);
       setShowAuthModal(true); // Show modal if error occurs
     }
   };
@@ -128,7 +117,7 @@ const Main = () => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Fingerprint size={32} style={{ color: colors.PRIMARY }} />
+            <Fingerprint size={32} color={colors.PRIMARY} />
             <Typo size={18} fontFamily="SemiBold" style={styles.modalTitle}>
               Famto is locked
             </Typo>
@@ -168,7 +157,7 @@ const Main = () => {
 
 export default Main;
 
-const styles = {
+const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     backgroundColor: "transparent", // Semi-transparent background
@@ -220,4 +209,4 @@ const styles = {
   unlockText: {
     color: colors.PRIMARY,
   },
-};
+});

@@ -14,7 +14,7 @@ import Button from "@/components/Button";
 import { router } from "expo-router";
 import Typo from "@/components/Typo";
 import { Info } from "phosphor-react-native";
-import CustomOrderBottomSheet from "./CustomOrderBottomSheet";
+import CustomOrderBottomSheet from "../../../components/BottomSheets/customOrder/CustomOrderBottomSheet";
 const CustomOrderHome = () => {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const variantSheetSnapPoints = useMemo(() => ["55%"], []);
