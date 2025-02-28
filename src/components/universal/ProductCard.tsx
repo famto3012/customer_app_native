@@ -45,7 +45,7 @@ const ProductCard: FC<{
 
   const isUserAuthenticated = () => {
     if (!token) {
-      router.push("/auth");
+      router.push({ pathname: "/auth", params: { showSkip: 0 } });
       return false;
     }
     return true;
@@ -64,7 +64,7 @@ const ProductCard: FC<{
   const handleIncrement = () => {
     if (!isUserAuthenticated()) return;
     if (!item.inventory) return;
-    console.log("Button Pressed");
+
     if (item.variantAvailable) {
       openVariant?.(item);
     } else {

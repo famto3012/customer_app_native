@@ -54,6 +54,7 @@ export type BusinessCategoryProps = {
 export type SearchProps = {
   placeHolder: string;
   onChangeText: (data: string) => void;
+  capitalize?: boolean;
 };
 
 export type AuthPayload = {

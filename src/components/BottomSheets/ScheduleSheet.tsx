@@ -1,4 +1,5 @@
 import {
+  Alert,
   Image,
   Pressable,
   StyleSheet,
@@ -11,12 +12,17 @@ import Typo from "../Typo";
 import { colors, radius, spacingX } from "@/constants/theme";
 import { Clock } from "phosphor-react-native";
 import { scheduleDetails } from "@/utils/defaultData";
-import { useState } from "react";
+import { FC, useState } from "react";
 
 import { DatePickerModal } from "react-native-paper-dates";
 import { TimePickerModal } from "react-native-paper-dates";
+import { formatDate, formatTime } from "@/utils/helpers";
 
-const ScheduleSheet = () => {
+interface ScheduleSheetProps {
+  onPress: (startDate: string, endDate: string, time: string) => void;
+}
+
+const ScheduleSheet: FC<ScheduleSheetProps> = ({ onPress }) => {
   const [selectedDates, setSelectedDates] = useState<{
     startDate: Date | null;
     endDate: Date | null;
@@ -25,8 +31,8 @@ const ScheduleSheet = () => {
     endDate: null,
   });
   const [selectedTime, setSelectedTime] = useState<{
-    hours: Number | null;
-    minutes: Number | null;
+    hours: number | null;
+    minutes: number | null;
   }>({
     hours: null,
     minutes: null,
@@ -59,8 +65,6 @@ const ScheduleSheet = () => {
   };
 
   const onDateChange = (data: any) => {
-    console.log("Date selected:", data);
-
     const startDate = new Date(data.startDate);
     let endDate = data.endDate ? new Date(data.endDate) : new Date(startDate);
 
@@ -74,9 +78,6 @@ const ScheduleSheet = () => {
       endDate.setUTCHours(18, 29, 59, 999);
     }
 
-    console.log("Final EndDate:", endDate);
-    console.log("StartDate:", startDate);
-
     setSelectedDates({
       startDate: startDate,
       endDate: endDate,
@@ -87,12 +88,31 @@ const ScheduleSheet = () => {
   };
 
   const onTimeChange = (data: any) => {
-    console.log("Time selected:", data);
     setSelectedTime({
       hours: data.hours,
       minutes: data.minutes,
     });
     setShowTimePicker(false);
+  };
+
+  const handleSchedule = () => {
+    if (!selectedDates.startDate || !selectedDates.endDate) {
+      Alert.alert(
+        "Warning",
+        "Please select a date / date range for your order"
+      );
+      return;
+    }
+    if (!selectedTime.hours || !selectedTime.minutes) {
+      Alert.alert("Warning", "Please select a time for your order");
+      return;
+    }
+
+    const start = formatDate(selectedDates.startDate);
+    const end = formatDate(selectedDates.endDate);
+    const time = formatTime(selectedTime.hours, selectedTime.minutes);
+
+    onPress(start, end, time);
   };
 
   return (
@@ -210,7 +230,10 @@ const ScheduleSheet = () => {
 
       {/* Schedule Button */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.scheduleButton}>
+        <TouchableOpacity
+          onPress={handleSchedule}
+          style={styles.scheduleButton}
+        >
           <Typo size={14} color={colors.WHITE}>
             Schedule
           </Typo>

@@ -1,10 +1,4 @@
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
@@ -69,6 +63,11 @@ const Checkout = () => {
   const [deliveryMode, setDeliveryMode] = useState<string>("Home Delivery");
   const [cart, setCart] = useState<CartProps | null>(null);
   const [showScheduleOption, setShowScheduleOption] = useState<boolean>(false);
+  const [schedule, setSchedule] = useState({
+    startDate: "",
+    endDate: "",
+    time: "",
+  });
 
   const { selectedBusiness } = useAuthStore.getState();
 
@@ -102,7 +101,7 @@ const Checkout = () => {
 
   const scheduleSheetRef = useRef<BottomSheet>(null);
 
-  const variantSheetSnapPoints = useMemo(() => ["80%"], []);
+  const scheduleSheetSnapPoints = useMemo(() => ["80%"], []);
 
   const { data: cartData } = useQuery({
     queryKey: ["customer-cart"],
@@ -130,10 +129,6 @@ const Checkout = () => {
   useEffect(() => {
     setShowScheduleOption(!!deliveryOption);
   }, [deliveryOption]);
-
-  useEffect(() => {
-    console.log("formData", formData);
-  }, [formData]);
 
   useEffect(() => {
     indicatorPosition.value = withTiming(
@@ -167,6 +162,42 @@ const Checkout = () => {
     []
   );
 
+  const handleSchedule = (startDate: string, endDate: string, time: string) => {
+    setFormData({
+      ...formData,
+      ifScheduled: {
+        startDate,
+        endDate,
+        time,
+      },
+    });
+
+    setSchedule({
+      startDate,
+      endDate,
+      time,
+    });
+
+    scheduleSheetRef.current?.close();
+  };
+
+  const clearSchedule = () => {
+    setFormData({
+      ...formData,
+      ifScheduled: {
+        startDate: "",
+        endDate: "",
+        time: "",
+      },
+    });
+
+    setSchedule({
+      startDate: "",
+      endDate: "",
+      time: "",
+    });
+  };
+
   const handleConfirmOrderMutation = useMutation({
     mutationKey: ["confirm-order"],
     mutationFn: (data: FormData) => confirmOrder(data),
@@ -174,13 +205,11 @@ const Checkout = () => {
       router.push({
         pathname: "/screens/universal/bill",
         params: {
-          cartId: data,
+          cartId: data.cartId,
+          merchantId: data.merchantId,
           deliveryMode,
         },
       });
-    },
-    onError: () => {
-      console.log("Error in confirming order");
     },
   });
 
@@ -224,6 +253,8 @@ const Checkout = () => {
           {showScheduleOption && (
             <SchedulePicker
               onPress={() => scheduleSheetRef.current?.expand()}
+              value={schedule}
+              onClearSchedule={clearSchedule}
             />
           )}
 
@@ -321,12 +352,16 @@ const Checkout = () => {
       <BottomSheet
         ref={scheduleSheetRef}
         index={-1}
-        snapPoints={variantSheetSnapPoints}
+        snapPoints={scheduleSheetSnapPoints}
         enableDynamicSizing={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
       >
-        <ScheduleSheet />
+        <ScheduleSheet
+          onPress={(startDate: string, endDate: string, time: string) =>
+            handleSchedule(startDate, endDate, time)
+          }
+        />
       </BottomSheet>
     </GestureHandlerRootView>
   );

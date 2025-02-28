@@ -123,9 +123,10 @@ export const getFavoriteProducts = async () => {
   } catch (err: any) {
     console.error(`Error in getting favorite products:`, err);
     Alert.alert("Error", "Something went wrong!");
-    return null;
+    return [];
   }
 };
+
 export const getFavoriteMerchants = async () => {
   try {
     const res = await appAxios.get(`/customers/favorite-merchants`);
@@ -133,6 +134,44 @@ export const getFavoriteMerchants = async () => {
     return res.status === 200 ? res.data.data : [];
   } catch (err: any) {
     console.error(`Error in getting favorite merchants:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return [];
+  }
+};
+
+export const getAvailablePromoCodes = async (
+  deliveryMode: string,
+  merchantId?: string,
+  query?: string
+) => {
+  try {
+    const res = await appAxios.get(`/customers/get-promocodes`, {
+      params: { deliveryMode, merchantId, query },
+    });
+
+    return res.status === 200 ? res.data : [];
+  } catch (err: any) {
+    console.error(`Error in getting promo codes:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return [];
+  }
+};
+
+export const removeAppliedPromoCode = async (
+  cartId: string,
+  deliveryMode: string
+) => {
+  try {
+    console.log("Remove promo", cartId, deliveryMode);
+
+    const res = await appAxios.put(`/customers/remove-promo-code`, {
+      cartId,
+      deliveryMode,
+    });
+
+    return res.status === 200 ? res.data.data : null;
+  } catch (err: any) {
+    console.error(`Error in removing promo code:`, err);
     Alert.alert("Error", "Something went wrong!");
     return null;
   }

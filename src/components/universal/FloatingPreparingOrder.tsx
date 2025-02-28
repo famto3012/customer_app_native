@@ -25,8 +25,6 @@ const FloatingPreparingOrder: FC<{ data: any }> = ({ data }) => {
     : require("@/assets/images/preparing-order.gif");
 
   useEffect(() => {
-    console.log("Temporary order", temporaryOrderData);
-
     if (temporaryOrderData) {
       const createdAt = new Date(temporaryOrderData.createdAt).getTime();
       const now = Date.now();
@@ -56,10 +54,6 @@ const FloatingPreparingOrder: FC<{ data: any }> = ({ data }) => {
       setShowInitialUI(false); // Ensure UI is hidden if no temporary order exists
     }
   }, [temporaryOrderData]); // Runs when `temporaryOrderData` changes
-
-  useEffect(() => {
-    console.log("showInitialUI", showInitialUI);
-  }, [showInitialUI]);
 
   return (
     <Animated.View

@@ -25,6 +25,7 @@ const FloatingCart: FC<{ onClearCart: () => void }> = ({ onClearCart }) => {
           merchant: "",
           cartId: "",
         },
+        promoCode: null,
       });
 
       onClearCart();

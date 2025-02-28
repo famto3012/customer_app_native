@@ -19,25 +19,55 @@ import BottomSheet, {
   BottomSheetBackdropProps,
   SCREEN_WIDTH,
 } from "@gorhom/bottom-sheet";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getCartBill, placeUniversalOrder } from "@/service/universal";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  applyUniversalPromoCode,
+  getCartBill,
+  placeUniversalOrder,
+} from "@/service/universal";
 import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useMemo, useRef, useState } from "react";
-import { CaretUp } from "phosphor-react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CaretUp, XCircle } from "phosphor-react-native";
 import PaymentOptionSheet from "@/components/BottomSheets/common/PaymentOptionSheet";
 import { useAuthStore } from "@/store/store";
+import { removeAppliedPromoCode } from "@/service/userService";
 
 const Bill = () => {
   const [selectedPaymentMode, setSelectedPaymentMode] =
     useState<string>("Online-payment");
+  const [promoCodeUsed, setPromoCodeUsed] = useState<string>("");
 
   const paymentSheetRef = useRef<BottomSheet>(null);
 
   const paymentSheetSnapPoints = useMemo(() => ["40%"], []);
 
-  const { cartId, deliveryMode } = useLocalSearchParams();
+  const { cartId, merchantId, deliveryMode } = useLocalSearchParams();
+  const { promoCode } = useAuthStore.getState();
 
-  const { data, isLoading } = useQuery({
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (promoCode?.toString()) {
+      setPromoCodeUsed(promoCode?.toString() || "");
+    }
+  }, [promoCode]);
+
+  const removePromoCodeMutation = useMutation<
+    void,
+    unknown,
+    { cartId: string; deliveryMode: string }
+  >({
+    mutationKey: ["remove-promo-code"],
+    mutationFn: ({ cartId, deliveryMode }) =>
+      removeAppliedPromoCode(cartId, deliveryMode),
+    onSuccess: () => {
+      setPromoCodeUsed("");
+      useAuthStore.setState({ promoCode: null });
+      queryClient.clear();
+    },
+  });
+
+  const { data, isLoading: billLoading } = useQuery({
     queryKey: ["universal-bill"],
     queryFn: () => getCartBill(cartId.toString()),
   });
@@ -47,7 +77,6 @@ const Bill = () => {
     mutationFn: () => placeUniversalOrder(selectedPaymentMode),
     onSuccess: (data) => {
       if (data?.orderId) {
-        router.replace({ pathname: "/(tabs)" });
         useAuthStore.setState({
           cart: {
             showCart: false,
@@ -55,6 +84,7 @@ const Bill = () => {
             cartId: "",
           },
         });
+        router.replace({ pathname: "/(tabs)" });
       }
     },
   });
@@ -80,15 +110,60 @@ const Bill = () => {
         <AddTip previousTip={data?.addedTip ?? 0} />
 
         <View style={styles.promoContainer}>
-          <PromoCode deliveryMode={deliveryMode?.toString()} />
+          <PromoCode
+            deliveryMode={deliveryMode?.toString()}
+            merchantId={merchantId?.toString()}
+            orderAmount={
+              data?.discountedGrandTotal
+                ? data.discountedGrandTotal
+                : data?.originalGrandTotal
+            }
+          />
         </View>
+
+        {promoCodeUsed && (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginHorizontal: scale(20),
+              marginTop: verticalScale(20),
+              backgroundColor: colors.NEUTRAL200,
+              paddingHorizontal: scale(10),
+              paddingVertical: verticalScale(8),
+              borderRadius: radius._6,
+            }}
+          >
+            <View style={{ flex: 1 }}>
+              <Typo size={13} color={colors.NEUTRAL900}>
+                Code Used:{" "}
+                <Typo size={14} fontFamily="SemiBold" color={colors.NEUTRAL900}>
+                  {promoCodeUsed}
+                </Typo>
+              </Typo>
+            </View>
+
+            <Pressable
+              onPress={() => {
+                if (cartId && deliveryMode) {
+                  removePromoCodeMutation.mutate({
+                    cartId: cartId.toString(),
+                    deliveryMode: deliveryMode.toString(),
+                  });
+                }
+              }}
+            >
+              <XCircle color={colors.RED} />
+            </Pressable>
+          </View>
+        )}
 
         <View style={styles.billContainer}>
           <Typo fontFamily="Medium" size={14} color={colors.NEUTRAL900}>
             Bill Summary
           </Typo>
 
-          <BillDetail data={data} isLoading={isLoading} />
+          <BillDetail data={data} isLoading={billLoading} />
         </View>
       </ScrollView>
 
