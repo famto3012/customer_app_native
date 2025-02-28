@@ -48,3 +48,42 @@ export const getOngoingOrder = async () => {
     return [];
   }
 };
+
+export const getOrderDetail = async (orderId: string) => {
+  try {
+    const res = await appAxios.get(`/customers/orders/${orderId}`);
+
+    if (res.status === 200) {
+      return res.data.data || {};
+    } else {
+      throw new Error("Failed to fetch order details");
+    }
+  } catch (err) {
+    console.error(`Error in getting order detail:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return [];
+  }
+};
+export const getScheduledOrderDetail = async (
+  orderId: string,
+  deliveryMode: string
+) => {
+  try {
+    const res = await appAxios.get(`/customers/scheduled-orders-detail`, {
+      params: {
+        orderId,
+        deliveryMode,
+      },
+    });
+
+    if (res.status === 200) {
+      return res.data || {};
+    } else {
+      throw new Error("Failed to fetch order details");
+    }
+  } catch (err) {
+    console.error(`Error in getting order detail:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return [];
+  }
+};

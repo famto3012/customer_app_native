@@ -11,6 +11,7 @@ import { RefreshControl } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAuthStore } from "@/store/store";
 import LottieView from "lottie-react-native";
+import { router } from "expo-router";
 
 const ScheduledOrderList = () => {
   const [scheduledOrderList, setScheduledOrderList] = useState<
@@ -46,7 +47,18 @@ const ScheduledOrderList = () => {
 
   const renderItem = ({ item }: any) => {
     return (
-      <Pressable style={styles.orderItem}>
+      <Pressable
+        style={styles.orderItem}
+        onPress={() => {
+          router.push({
+            pathname: "/screens/user/ScheduledOrderDetail",
+            params: {
+              orderId: item?.orderId,
+              deliveryMode: item?.deliveryMode,
+            },
+          });
+        }}
+      >
         <View style={styles.orderItemHeader}>
           {item.deliveryMode === "Home Delivery" ||
           item.deliveryMode === "Take Away" ? (
