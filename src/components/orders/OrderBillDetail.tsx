@@ -65,10 +65,10 @@ const OrderBillDetail: FC<{ data: UniversalBillProps; isLoading: boolean }> = ({
         field="Item Total"
         value={data?.itemTotal === null ? 0 : data?.itemTotal}
       />
-      <RenderBillField
-        field="Delivery Charges"
-        value={data?.deliveryCharge === null ? 0 : data?.deliveryCharge}
-      />
+      {typeof data?.deliveryCharge === "number" && data.deliveryCharge > 0 && (
+        <RenderBillField field="Delivery Charges" value={data.deliveryCharge} />
+      )}
+
       {data?.addedTip && <RenderBillField field="Tip" value={data?.addedTip} />}
 
       {data?.discountedAmount && (

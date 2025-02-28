@@ -24,9 +24,10 @@ import BottomSheet, {
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
 } from "@gorhom/bottom-sheet";
-import PickAndDropBottomSheet from "./pick-and-drop-bottomsheet";
+
 import { Info } from "phosphor-react-native";
 import { router } from "expo-router";
+import PickAndDropBottomSheet from "@/components/BottomSheets/pickAndDrop/pick-and-drop-bottomsheet";
 
 const images = [
   {
