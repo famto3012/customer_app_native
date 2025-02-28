@@ -38,10 +38,10 @@ const BillDetail: FC<{ data: UniversalBillProps; isLoading: boolean }> = ({
     return (
       <View style={styles.field}>
         <Typo fontFamily="Medium" size={14} color={colors.NEUTRAL800}>
-          {field}
+          {field.toString()}
         </Typo>
         <Typo fontFamily="Medium" size={16} color={colors.NEUTRAL800}>
-          {`₹ ${String(value)}`}
+          {`₹ ${value?.toFixed(2)}`}
         </Typo>
       </View>
     );
@@ -71,11 +71,17 @@ const BillDetail: FC<{ data: UniversalBillProps; isLoading: boolean }> = ({
             : data?.originalDeliveryCharge
         }
       />
-      {data?.addedTip && <RenderBillField field="Tip" value={data?.addedTip} />}
-
-      {data?.discountedAmount && (
-        <RenderBillField field={discountLabel} value={data?.discountedAmount} />
+      {typeof data?.addedTip === "number" && data.addedTip > 0 && (
+        <RenderBillField field="Tip" value={data.addedTip} />
       )}
+
+      {typeof data?.discountedAmount === "number" &&
+        data?.discountedAmount > 0 && (
+          <RenderBillField
+            field={discountLabel}
+            value={data?.discountedAmount}
+          />
+        )}
 
       <RenderBillField field="Sub Total" value={data?.subTotal} />
 

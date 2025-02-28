@@ -5,7 +5,11 @@ import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius } from "@/constants/theme";
 import { SearchProps } from "@/types";
 
-const Search = ({ placeHolder, onChangeText }: SearchProps) => {
+const Search = ({
+  placeHolder,
+  onChangeText,
+  capitalize = false,
+}: SearchProps) => {
   return (
     <View style={styles.container}>
       <MagnifyingGlass size={24} color={colors.PRIMARY} />
@@ -14,6 +18,7 @@ const Search = ({ placeHolder, onChangeText }: SearchProps) => {
         placeholder={placeHolder}
         placeholderTextColor={colors.NEUTRAL400}
         onChangeText={onChangeText}
+        autoCapitalize={capitalize ? "characters" : "none"}
       />
     </View>
   );

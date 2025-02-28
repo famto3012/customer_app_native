@@ -6,13 +6,17 @@ import { colors } from "@/constants/theme";
 import { FC } from "react";
 import { router } from "expo-router";
 
-const PromoCode: FC<{ deliveryMode: string }> = ({ deliveryMode }) => {
+const PromoCode: FC<{
+  deliveryMode: string;
+  merchantId: string;
+  orderAmount: number;
+}> = ({ deliveryMode, merchantId, orderAmount }) => {
   return (
     <Pressable
       onPress={() =>
         router.push({
           pathname: "/screens/common/promo-code",
-          params: { deliveryMode },
+          params: { deliveryMode, merchantId, orderAmount },
         })
       }
       style={{

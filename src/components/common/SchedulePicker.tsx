@@ -1,13 +1,15 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import React, { FC, useState } from "react";
-import { colors, radius, spacingX } from "@/constants/theme";
+import { Image, Pressable, StyleSheet, View } from "react-native";
+import { FC } from "react";
+import { colors, radius } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
 import { CaretRight, XCircle } from "phosphor-react-native";
 
-const SchedulePicker: FC<{ onPress: () => void }> = ({ onPress }) => {
-  const [selectedDate, setSelectedDate] = useState<string>("");
-
+const SchedulePicker: FC<{
+  onPress: () => void;
+  value: { startDate: string; endDate: string; time: string };
+  onClearSchedule: () => void;
+}> = ({ onPress, value, onClearSchedule }) => {
   return (
     <View style={[styles.container]}>
       <Pressable onPress={onPress} style={styles.pressable}>
@@ -39,23 +41,40 @@ const SchedulePicker: FC<{ onPress: () => void }> = ({ onPress }) => {
       <View
         style={[
           styles.footerContainer,
-          { display: selectedDate ? "flex" : "none" },
+          { display: value.time ? "flex" : "none" },
         ]}
       >
-        <View style={styles.dateContainer}>
-          <Typo
-            size={13}
-            color={colors.NEUTRAL500}
-            textProps={{ numberOfLines: 2 }}
-          >
-            Order Scheduled on{" "}
-            <Typo size={13} fontFamily="Medium" color={colors.NEUTRAL700}>
-              16 July 2025, 06:30 PM
+        {value?.startDate !== value?.endDate && (
+          <View style={styles.dateContainer}>
+            <Typo
+              size={13}
+              color={colors.NEUTRAL500}
+              textProps={{ numberOfLines: 2 }}
+            >
+              Order Scheduled from{" "}
+              <Typo size={13} fontFamily="Medium" color={colors.NEUTRAL700}>
+                {value.startDate} to {value.endDate}, {value.time}
+              </Typo>
             </Typo>
-          </Typo>
-        </View>
+          </View>
+        )}
 
-        <Pressable style={{ padding: scale(10) }}>
+        {value?.startDate === value?.endDate && (
+          <View style={styles.dateContainer}>
+            <Typo
+              size={13}
+              color={colors.NEUTRAL500}
+              textProps={{ numberOfLines: 2 }}
+            >
+              Order Scheduled on{" "}
+              <Typo size={13} fontFamily="Medium" color={colors.NEUTRAL700}>
+                {value.startDate}, {value.time}
+              </Typo>
+            </Typo>
+          </View>
+        )}
+
+        <Pressable onPress={onClearSchedule} style={{ padding: scale(10) }}>
           <XCircle color={colors.RED} />
         </Pressable>
       </View>

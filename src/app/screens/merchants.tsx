@@ -1,4 +1,10 @@
-import { FlatList, Pressable, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
 import { useEffect, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
@@ -115,7 +121,9 @@ const Merchants = () => {
         }}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          !isLoading && !merchants?.length ? (
+          isLoading ? (
+            <ActivityIndicator size="large" color={colors.PRIMARY} />
+          ) : !isLoading && !merchants?.length ? (
             <View
               style={{
                 flex: 1,
@@ -127,19 +135,7 @@ const Merchants = () => {
             >
               <Typo>Coming Soon...</Typo>
             </View>
-          ) : (
-            <View
-              style={{
-                flex: 1,
-                alignItems: "center",
-                justifyContent: "center",
-
-                height: SCREEN_HEIGHT - verticalScale(250),
-              }}
-            >
-              <Typo>Loading...</Typo>
-            </View>
-          )
+          ) : null
         }
       />
     </ScreenWrapper>

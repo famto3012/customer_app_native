@@ -18,6 +18,11 @@ const secureStorage = {
   },
 };
 
+interface Order {
+  orderId: string;
+  createdAt: Date;
+}
+
 interface AuthStore {
   userId: string | null;
   token: string | null;
@@ -26,17 +31,22 @@ interface AuthStore {
   selectedBusiness: string | null;
   newUser: boolean;
   cart: { showCart: boolean; merchant: string; cartId: string };
+  promoCode: string | null;
+  orders: Order[]; // New orders array
   setUserId: (userId: string) => void;
   setToken: (token: string) => void;
   setRefreshToken: (refreshToken: string) => void;
   setLocation: (location: { latitude: number; longitude: number }) => void;
   setSelectedBusiness: (business: string) => void;
   setNewUser: (newUser: boolean) => void;
+  setPromoCode: (code: string) => void;
   setCart: (cart: {
     showCart: boolean;
     merchant: string;
     cartId: string;
   }) => void;
+  addOrder: (order: Order) => void; // New method to add orders
+  clearOrders: () => void; // New method to clear orders
   clearStorage: () => void;
 }
 
@@ -50,6 +60,8 @@ export const useAuthStore = create<AuthStore>()(
       selectedBusiness: null,
       newUser: true,
       cart: { showCart: false, merchant: "", cartId: "" },
+      promoCode: null,
+      orders: [], // Initialize empty orders array
 
       setUserId: (userId) => {
         set({ userId });
@@ -76,8 +88,23 @@ export const useAuthStore = create<AuthStore>()(
         secureStorage.setItem("newUser", JSON.stringify(newUser));
       },
       setCart: (cart) => {
-        set({ cart }); // ✅ Properly updating `cart` object
+        set({ cart });
         secureStorage.setItem("cart", JSON.stringify(cart));
+      },
+      setPromoCode: (promoCode) => {
+        set({ promoCode });
+        secureStorage.setItem("promoCode", promoCode);
+      },
+      addOrder: (order) => {
+        set((state) => {
+          const updatedOrders = [...state.orders, order];
+          secureStorage.setItem("orders", JSON.stringify(updatedOrders));
+          return { orders: updatedOrders };
+        });
+      },
+      clearOrders: () => {
+        set({ orders: [] });
+        secureStorage.removeItem("orders");
       },
       clearStorage: () => {
         set({
@@ -87,6 +114,8 @@ export const useAuthStore = create<AuthStore>()(
           location: null,
           selectedBusiness: null,
           cart: { showCart: false, merchant: "", cartId: "" },
+          promoCode: null,
+          orders: [], // Clear orders
         });
         secureStorage.removeItem("userId");
         secureStorage.removeItem("token");
@@ -94,6 +123,8 @@ export const useAuthStore = create<AuthStore>()(
         secureStorage.removeItem("location");
         secureStorage.removeItem("selectedBusiness");
         secureStorage.removeItem("cart");
+        secureStorage.removeItem("promoCode");
+        secureStorage.removeItem("orders");
       },
     }),
     {

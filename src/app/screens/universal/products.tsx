@@ -116,7 +116,7 @@ const Product = () => {
       1, // Always start with page 1 for products
       PRODUCT_LIMIT
     );
-    console.log("Products fetched");
+
     setCategoryProducts((prev) => ({
       ...prev,
       [categoryId]: res,
@@ -326,7 +326,7 @@ const Product = () => {
                         color={colors.NEUTRAL600}
                         fontFamily="Medium"
                       >
-                        {merchant?.distanceInKM} km •
+                        {merchant?.distanceInKM} km
                       </Typo>
                     </View>
 
@@ -350,37 +350,39 @@ const Product = () => {
                 </View>
               </View>
 
-              <Carousel
-                loop
-                style={{
-                  width: SCREEN_WIDTH - 40,
-                  height: verticalScale(100),
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginVertical: spacingY._15,
-                  marginHorizontal: spacingX._15,
-                }}
-                autoPlay
-                autoPlayInterval={4000}
-                scrollAnimationDuration={2000}
-                width={Math.round(SCREEN_WIDTH - 40)} // Ensuring whole number
-                height={Math.round(verticalScale(100))} // Ensuring whole number
-                data={banners || []}
-                renderItem={({ item }: any) => (
-                  <Image
-                    source={{
-                      uri: item.imageURL,
-                    }}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      backgroundColor: "transparent",
-                    }}
-                    resizeMode="cover"
-                  />
-                )}
-                customAnimation={animationStyle}
-              />
+              {banners.length && (
+                <Carousel
+                  loop
+                  style={{
+                    width: SCREEN_WIDTH - 40,
+                    height: verticalScale(100),
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginVertical: spacingY._15,
+                    marginHorizontal: spacingX._15,
+                  }}
+                  autoPlay
+                  autoPlayInterval={4000}
+                  scrollAnimationDuration={2000}
+                  width={Math.round(SCREEN_WIDTH - 40)} // Ensuring whole number
+                  height={Math.round(verticalScale(100))} // Ensuring whole number
+                  data={banners || []}
+                  renderItem={({ item }: any) => (
+                    <Image
+                      source={{
+                        uri: item.imageURL,
+                      }}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        backgroundColor: "transparent",
+                      }}
+                      resizeMode="cover"
+                    />
+                  )}
+                  customAnimation={animationStyle}
+                />
+              )}
 
               <View style={{ paddingHorizontal: scale(20) }}>
                 <SearchView

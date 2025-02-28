@@ -315,11 +315,11 @@ export const confirmOrder = async (cartDetail: any) => {
       },
     });
 
-    return res.status === 200 ? res.data.cartId : "";
+    return res.status === 200 ? res.data : null;
   } catch (err) {
     console.error(`Error in clearing cart:`, err);
     Alert.alert("Error", "Something went wrong!");
-    return "";
+    return null;
   }
 };
 
@@ -362,6 +362,20 @@ export const placeUniversalOrder = async (paymentMode: string) => {
     return res.status === 200 ? res.data : null;
   } catch (err) {
     console.error(`Error in placing order:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return null;
+  }
+};
+
+export const applyUniversalPromoCode = async (promoCode: string) => {
+  try {
+    const res = await appAxios.post(`/customers/apply-promocode`, {
+      promoCode,
+    });
+
+    return res.status === 200 ? res.data : null;
+  } catch (err) {
+    console.error(`Error in applying promo code:`, err);
     Alert.alert("Error", "Something went wrong!");
     return null;
   }
