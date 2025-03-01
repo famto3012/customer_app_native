@@ -1,5 +1,5 @@
 import { Image, Pressable, StyleSheet, View } from "react-native";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius, spacingX } from "@/constants/theme";
 import Typo from "../Typo";
@@ -46,7 +46,7 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
     <Pressable
       style={styles.container}
       onPress={() => {
-        if (!item.status) return null;
+        // if (!item.status) return null;
 
         router.push({
           pathname: "/screens/universal/products",
@@ -127,7 +127,7 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
   );
 };
 
-export default MerchantCard;
+export default memo(MerchantCard);
 
 const styles = StyleSheet.create({
   container: {

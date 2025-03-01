@@ -25,10 +25,10 @@ const TopService = () => {
           style={styles.serviceCard}
         >
           <LottieView
-            source={require("@/assets/images/truck-animation.json")} // Path to your Lottie JSON file
+            source={require("@/assets/images/truck-animation.json")}
             autoPlay
             loop
-            style={{ width: verticalScale(90), height: verticalScale(90) }} // Adjust size as needed
+            style={{ width: verticalScale(90), height: verticalScale(90) }}
           />
 
           <View>
