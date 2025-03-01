@@ -206,3 +206,11 @@ export type UserProfileProps = {
   imageURL: string;
   phoneNumber: string;
 };
+
+export type ItemsProps = {
+  itemName: string;
+  unit: string;
+  numOfUnits: number;
+  quantity: number;
+  imageURL: string;
+};

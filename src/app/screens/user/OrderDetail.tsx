@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: scale(15),
     marginHorizontal: scale(20),
-    width: SCREEN_WIDTH * 0.28,
+    width: SCREEN_WIDTH * 0.35,
     justifyContent: "center",
     alignItems: "center",
   },

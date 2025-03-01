@@ -6,6 +6,7 @@ import { ButtonProps } from "@/types";
 import { colors, radius } from "@/constants/theme";
 
 const Button = ({ title, onPress, style, isLoading }: ButtonProps) => {
+  const textColor = style?.color || colors.WHITE;
   return (
     <Pressable
       onPress={onPress}
@@ -15,7 +16,7 @@ const Button = ({ title, onPress, style, isLoading }: ButtonProps) => {
       {isLoading ? (
         <ActivityIndicator size={"small"} color={colors.WHITE} />
       ) : (
-        <Typo size={14} color={colors.WHITE} style={{ textAlign: "center" }}>
+        <Typo size={14} color={textColor} style={{ textAlign: "center" }}>
           {title}
         </Typo>
       )}
