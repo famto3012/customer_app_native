@@ -23,6 +23,7 @@ import BottomSheet, {
   BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
 import LogoutSheet from "@/components/BottomSheets/user/LogoutSheet";
+import { commonStyles } from "@/constants/commonStyles";
 
 const Profile = () => {
   const { token } = useAuthStore.getState();
@@ -50,7 +51,7 @@ const Profile = () => {
         disappearsOnIndex={-1}
         appearsOnIndex={0}
         opacity={0.5}
-        style={[props.style, styles.backdrop]}
+        style={[props.style, commonStyles.backdrop]}
       />
     ),
     []
@@ -271,14 +272,6 @@ const styles = StyleSheet.create({
     borderWidth: 0.2,
     marginVertical: verticalScale(10),
     borderColor: colors.NEUTRAL400,
-  },
-  backdrop: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 1)",
   },
   authBtn: {
     backgroundColor: colors.PRIMARY,

@@ -31,6 +31,7 @@ import { CaretUp, XCircle } from "phosphor-react-native";
 import PaymentOptionSheet from "@/components/BottomSheets/common/PaymentOptionSheet";
 import { useAuthStore } from "@/store/store";
 import { removeAppliedPromoCode } from "@/service/userService";
+import { commonStyles } from "@/constants/commonStyles";
 
 const Bill = () => {
   const [selectedPaymentMode, setSelectedPaymentMode] =
@@ -96,7 +97,7 @@ const Bill = () => {
         disappearsOnIndex={-1}
         appearsOnIndex={0}
         opacity={0.5}
-        style={[props.style, styles.backdrop]}
+        style={[props.style, commonStyles.backdrop]}
       />
     ),
     []
@@ -284,13 +285,5 @@ const styles = StyleSheet.create({
   billContainer: {
     marginHorizontal: scale(20),
     marginTop: verticalScale(20),
-  },
-  backdrop: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 1)",
   },
 });

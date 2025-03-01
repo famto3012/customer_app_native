@@ -85,6 +85,8 @@ export type MerchantDataProps = {
   displayAddress: string;
   preOrderStatus: boolean;
   rating: number;
+  phoneNumber: string;
+  fssaiNumber: string;
   isFavourite: boolean;
   distanceWarning: boolean;
 } | null;

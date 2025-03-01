@@ -16,6 +16,8 @@ import Typo from "@/components/Typo";
 import { Info } from "phosphor-react-native";
 import CustomOrderBottomSheet from "../../../components/BottomSheets/customOrder/CustomOrderBottomSheet";
 import CustomOrderLocationBottomSheet from "@/components/BottomSheets/customOrder/CustomOrderLocationBottomSheet";
+import { commonStyles } from "@/constants/commonStyles";
+
 const CustomOrderHome = () => {
   const bottomSheetInfoRef = useRef<BottomSheet>(null);
   const variantSheetInfoSnapPoints = useMemo(() => {
@@ -35,7 +37,7 @@ const CustomOrderHome = () => {
         disappearsOnIndex={-1}
         appearsOnIndex={0}
         opacity={0.5}
-        style={[props.style, styles.backdrop]}
+        style={[props.style, commonStyles.backdrop]}
         // onPress={handleClosePress}
       />
     ),
@@ -190,13 +192,5 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     alignSelf: "center",
     borderRadius: 10,
-  },
-  backdrop: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 1)",
   },
 });

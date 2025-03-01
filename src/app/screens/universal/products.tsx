@@ -7,60 +7,46 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
-import { colors, radius, spacingX, spacingY } from "@/constants/theme";
+import { scale, verticalScale } from "@/utils/styling";
+import { colors, radius, spacingX } from "@/constants/theme";
 import Header from "@/components/Header";
 import { StatusBar } from "expo-status-bar";
 import Typo from "@/components/Typo";
-import { CaretUp, Clock, Star, XCircle } from "phosphor-react-native";
+import { XCircle } from "phosphor-react-native";
 import SearchView from "@/components/SearchView";
 import { productFilters } from "@/utils/defaultData";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAuthStore } from "@/store/store";
-import {
-  AddVariantProps,
-  CategoryProps,
-  MerchantDataProps,
-  ProductProps,
-} from "@/types";
+import { AddVariantProps, MerchantDataProps, ProductProps } from "@/types";
 import {
   addProductToCart,
   getAllCategory,
-  getAllProducts,
-  getCustomerCart,
-  getMerchantBanners,
   getMerchantData,
   haveValidCart,
 } from "@/service/universal";
 import { useSafeLocation } from "@/utils/helpers";
-import ProductCard from "@/components/universal/ProductCard";
-import { Image } from "react-native";
 import FloatingCart from "@/components/universal/FloatingCart";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
-  SCREEN_HEIGHT,
 } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import VariantSheet from "@/components/BottomSheets/VariantSheet";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useFocusEffect } from "@react-navigation/native";
-import Carousel, { TAnimationStyle } from "react-native-reanimated-carousel";
-import { interpolate } from "react-native-reanimated";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import MerchantData from "@/components/universal/MerchantData";
+import MerchantBanner from "@/components/universal/MerchantBanner";
+import { commonStyles } from "@/constants/commonStyles";
+import ProductFooter from "@/components/universal/ProductFooter";
+import CategoryItem from "@/components/universal/CategoryItem";
 
 const { height } = Dimensions.get("window");
 
 const Product = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>("");
-  const [category, setCategory] = useState<CategoryProps[]>([]);
-  const [merchant, setMerchant] = useState<MerchantDataProps>(null);
-  const [categoryPage, setCategoryPage] = useState<number>(1);
   const [categoryProducts, setCategoryProducts] = useState<{
     [key: string]: ProductProps[];
   }>({});
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [banners, setBanners] = useState<{ imageURL: string }[]>([]);
   const [product, setProduct] = useState<ProductProps | null>(null);
 
   const variantSheetRef = useRef<BottomSheet>(null);
@@ -72,70 +58,30 @@ const Product = () => {
   const { latitude, longitude } = useSafeLocation();
 
   const CATEGORY_LIMIT: number = 5;
-  const PRODUCT_LIMIT: number = 10;
 
-  useEffect(() => {
-    fetchMerchantBanners();
-    fetchCategory();
-  }, [merchantId, selectedBusiness]);
+  const {
+    data: categoryData,
+    fetchNextPage: fetchNextCategoryPage,
+    hasNextPage: hasNextCategoryPage,
+    isFetchingNextPage: isFetchingNextCategoryPage,
+  } = useInfiniteQuery({
+    queryKey: ["category", merchantId, selectedBusiness],
+    queryFn: ({ pageParam = 1 }) =>
+      getAllCategory(
+        merchantId.toString(),
+        selectedBusiness || "",
+        pageParam,
+        CATEGORY_LIMIT
+      ),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.hasNextPage ? allPages.length + 1 : undefined,
+  });
 
-  useFocusEffect(
-    useCallback(() => {
-      category.forEach((item) => {
-        fetchProduct(item.categoryId);
-      });
-    }, [category])
-  );
-
-  const fetchCategory = async () => {
-    if (!merchantId || !selectedBusiness || loadingMore) return;
-
-    setLoadingMore(true);
-
-    const res = await getAllCategory(
-      merchantId.toString(),
-      selectedBusiness,
-      categoryPage,
-      CATEGORY_LIMIT
-    );
-
-    if (res.length > 0) {
-      setCategory((prev) => [...prev, ...res]); // Append new categories
-      setCategoryPage((prev) => prev + 1); // Increment page for next fetch
-    }
-
-    setLoadingMore(false);
-  };
-
-  const fetchProduct = async (categoryId: string) => {
-    if (categoryProducts[categoryId]) return; // Avoid duplicate calls
-
-    const res = await getAllProducts(
-      categoryId,
-      userId ? userId : "",
-      1, // Always start with page 1 for products
-      PRODUCT_LIMIT
-    );
-
-    setCategoryProducts((prev) => ({
-      ...prev,
-      [categoryId]: res,
-    }));
-  };
-
-  const { data: merchantData } = useQuery({
+  const { data: merchantData } = useQuery<MerchantDataProps>({
     queryKey: ["merchant-data", merchantId],
     queryFn: () => getMerchantData(merchantId.toString(), latitude, longitude),
   });
-
-  useEffect(() => {
-    setMerchant(merchantData);
-  }, [merchantData]);
-
-  const fetchMerchantBanners = async () => {
-    const res = await getMerchantBanners(merchantId.toString());
-    setBanners(res);
-  };
 
   const handleSelectFilter = (value: string) => {
     if (value === selectedFilter) {
@@ -144,18 +90,6 @@ const Product = () => {
       setSelectedFilter(value);
     }
   };
-
-  const onViewableItemsChanged = ({
-    viewableItems,
-  }: {
-    viewableItems: { item: CategoryProps }[];
-  }) => {
-    viewableItems.forEach(({ item }) => {
-      fetchProduct(item.categoryId);
-    });
-  };
-
-  const viewabilityConfig = { viewAreaCoveragePercentThreshold: 50 };
 
   const openVariantSheet = (product: ProductProps) => {
     if (product) {
@@ -208,7 +142,7 @@ const Product = () => {
 
   const handleClearCart = () => {
     setCategoryProducts((prev) => {
-      const updatedProducts = JSON.parse(JSON.stringify(prev)); // Deep copy to trigger re-render
+      const updatedProducts = JSON.parse(JSON.stringify(prev));
 
       for (const categoryId in updatedProducts) {
         updatedProducts[categoryId] = updatedProducts[categoryId].map(
@@ -222,7 +156,6 @@ const Product = () => {
       return updatedProducts;
     });
 
-    // Also update FloatingCart state to hide it
     useAuthStore.setState({
       cart: {
         showCart: false,
@@ -239,26 +172,11 @@ const Product = () => {
         disappearsOnIndex={-1}
         appearsOnIndex={0}
         opacity={0.5}
-        style={[props.style, styles.backdrop]}
-        // onPress={handleClosePress}
+        style={[props.style, commonStyles.backdrop]}
       />
     ),
     []
   );
-
-  const animationStyle: TAnimationStyle = useCallback((value: number) => {
-    "worklet";
-
-    const zIndex = Math.round(interpolate(value, [-1, 0, 1], [10, 20, 30])); // Ensure whole number
-    const scale = interpolate(value, [-1, 0, 1], [1.25, 1, 0.25]); // No rounding needed
-    const opacity = interpolate(value, [-0.75, 0, 1], [0, 1, 0]); // No rounding needed
-
-    return {
-      transform: [{ scale: Number(scale) }], // Ensuring it's a number
-      zIndex: zIndex, // Already rounded
-      opacity: Number(opacity), // Ensuring it's a number
-    };
-  }, []);
 
   const renderItem = ({ item }: any) => {
     return (
@@ -293,96 +211,23 @@ const Product = () => {
         />
 
         <FlatList
-          data={category}
+          data={categoryData?.pages.flatMap((page) => page.data) || []}
+          renderItem={({ item }) => <CategoryItem category={item} />}
+          keyExtractor={(item, index) => `category-${item.categoryId}-${index}`}
+          onEndReached={() => hasNextCategoryPage && fetchNextCategoryPage()}
+          onEndReachedThreshold={0.5}
+          showsVerticalScrollIndicator={false}
           ListHeaderComponent={
             <>
               <View style={styles.merchantOuter}>
                 <Header title="Products" />
 
-                <View style={styles.merchantData}>
-                  <View style={{ gap: scale(10) }}>
-                    <Typo size={20} color={colors.NEUTRAL900} fontWeight="bold">
-                      {merchant?.merchantName}
-                    </Typo>
-                    <Typo
-                      size={12}
-                      color={colors.NEUTRAL600}
-                      fontFamily="Medium"
-                    >
-                      {merchant?.displayAddress}
-                    </Typo>
-
-                    <View style={styles.labels}>
-                      <Clock size={scale(15)} />
-                      <Typo
-                        size={12}
-                        color={colors.NEUTRAL600}
-                        fontFamily="Medium"
-                      >
-                        {merchant?.deliveryTime} min •
-                      </Typo>
-                      <Typo
-                        size={12}
-                        color={colors.NEUTRAL600}
-                        fontFamily="Medium"
-                      >
-                        {merchant?.distanceInKM} km
-                      </Typo>
-                    </View>
-
-                    <Typo size={12} color={colors.NEUTRAL600}>
-                      {merchant?.description}
-                    </Typo>
-                  </View>
-
-                  <View>
-                    <Pressable style={styles.rating}>
-                      <Star
-                        size={scale(15)}
-                        color={colors.WHITE}
-                        weight="fill"
-                      />
-                      <Typo size={14} color={colors.WHITE}>
-                        {merchant?.rating}
-                      </Typo>
-                    </Pressable>
-                  </View>
-                </View>
+                <MerchantData
+                  merchantData={merchantData ? merchantData : null}
+                />
               </View>
 
-              {banners.length && (
-                <Carousel
-                  loop
-                  style={{
-                    width: SCREEN_WIDTH - 40,
-                    height: verticalScale(100),
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginVertical: spacingY._15,
-                    marginHorizontal: spacingX._15,
-                  }}
-                  autoPlay
-                  autoPlayInterval={4000}
-                  scrollAnimationDuration={2000}
-                  width={Math.round(SCREEN_WIDTH - 40)} // Ensuring whole number
-                  height={Math.round(verticalScale(100))} // Ensuring whole number
-                  data={banners || []}
-                  renderItem={({ item }: any) => (
-                    <Image
-                      source={{
-                        uri: item.imageURL,
-                      }}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        backgroundColor: "transparent",
-                      }}
-                      resizeMode="cover"
-                    />
-                  )}
-                  customAnimation={animationStyle}
-                />
-              )}
+              <MerchantBanner merchantId={merchantId.toString()} />
 
               <View style={{ paddingHorizontal: scale(20) }}>
                 <SearchView
@@ -404,75 +249,13 @@ const Product = () => {
               </View>
             </>
           }
-          renderItem={({ item }) => (
-            <View style={styles.categoryContainer}>
-              <Pressable
-                style={{
-                  paddingTop: verticalScale(24),
-                  paddingBottom: verticalScale(32),
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Typo size={16} color={colors.NEUTRAL900} fontFamily="SemiBold">
-                  {item.categoryName}
-                </Typo>
-
-                <View
-                  style={{
-                    marginEnd: scale(10),
-                    borderWidth: 1,
-                    borderRadius: radius._6,
-                    padding: scale(2),
-                  }}
-                >
-                  <CaretUp size={16} />
-                </View>
-              </Pressable>
-
-              <FlatList
-                data={categoryProducts[item.categoryId] || []}
-                keyExtractor={(item, index) =>
-                  `product-${item.productId}-${index}`
-                }
-                renderItem={({ item }) => (
-                  <ProductCard
-                    item={item}
-                    openVariant={openVariantSheet}
-                    cartCount={item?.cartCount || null}
-                    showAddCart={true}
-                  />
-                )}
-                scrollEnabled={false}
-              />
-            </View>
-          )}
-          keyExtractor={(item, index) => `category-${item.categoryId}-${index}`}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          onEndReached={fetchCategory}
-          onEndReachedThreshold={0.5}
-          showsVerticalScrollIndicator={false}
           ListFooterComponent={
-            loadingMore ? (
+            isFetchingNextCategoryPage ? (
               <ActivityIndicator size="large" color={colors.PRIMARY} />
             ) : (
-              <View
-                style={{
-                  paddingBottom: verticalScale(100),
-                  paddingHorizontal: scale(20),
-                }}
-              >
-                <View>
-                  <Typo>FSSAI</Typo>
-                  <Typo>FSSAI123456</Typo>
-                </View>
-                <View>
-                  <Typo>Phone</Typo>
-                  <Typo>+91 987465122</Typo>
-                </View>
-              </View>
+              <ProductFooter
+                merchantData={merchantData ? merchantData : null}
+              />
             )
           }
         />
@@ -508,30 +291,6 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: radius._30,
     paddingBottom: verticalScale(20),
   },
-  merchantData: {
-    marginHorizontal: scale(20),
-    marginTop: verticalScale(30),
-    backgroundColor: colors.WHITE,
-    padding: scale(15),
-    borderRadius: radius._10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  labels: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacingX._3,
-  },
-  rating: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacingX._7,
-    backgroundColor: colors.PRIMARY,
-    paddingHorizontal: scale(8),
-    paddingVertical: scale(2),
-    borderRadius: radius._3,
-  },
   filterItem: {
     padding: 10,
     paddingHorizontal: 15,
@@ -547,14 +306,6 @@ const styles = StyleSheet.create({
   selectedFilter: {
     backgroundColor: colors.PRIMARY,
   },
-  categoryContainer: {
-    marginVertical: verticalScale(10),
-    backgroundColor: colors.WHITE,
-    paddingBottom: verticalScale(10),
-    paddingHorizontal: scale(7),
-    marginHorizontal: scale(10),
-    borderRadius: radius._10,
-  },
   categoryHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -566,12 +317,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: colors.NEUTRAL300,
   },
-  backdrop: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 1)",
+  icon: {
+    width: scale(24),
+    height: verticalScale(24),
+    resizeMode: "cover",
+    marginEnd: scale(10),
   },
 });
