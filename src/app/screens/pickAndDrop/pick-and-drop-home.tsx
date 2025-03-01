@@ -57,7 +57,10 @@ const PickAndDropHome = () => {
   const textOffset = useSharedValue(300);
   const indexRef = useRef(0);
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const variantSheetSnapPoints = useMemo(() => ["50%"], []);
+  const variantSheetSnapPoints = useMemo(() => {
+    const percentageHeight = SCREEN_HEIGHT * 0.5; // 50% of screen height
+    return [percentageHeight];
+  }, []);
 
   useEffect(() => {
     const cycleImages = () => {
@@ -129,7 +132,7 @@ const PickAndDropHome = () => {
           <Header title={"Pick & Drop"} />
           <Pressable onPress={() => bottomSheetRef.current?.expand()}>
             <Info
-              size={32}
+              size={28}
               style={{ marginLeft: scale(-60), paddingRight: scale(60) }}
             />
           </Pressable>
@@ -215,7 +218,7 @@ export default PickAndDropHome;
 
 const styles = StyleSheet.create({
   image: {
-    marginTop: scale(30),
+    marginVertical: scale(15),
     width: SCREEN_WIDTH * 0.8,
     height: SCREEN_HEIGHT * 0.45,
     borderRadius: 10,
@@ -223,25 +226,25 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     alignItems: "center",
-    marginTop: scale(5),
+    marginVertical: scale(5),
   },
   reminderContainer: {
-    marginTop: scale(40),
-    padding: 20,
+    marginVertical: scale(20),
+    padding: scale(20),
     backgroundColor: colors.NEUTRAL100,
     borderRadius: 20,
     width: SCREEN_WIDTH * 0.9,
     alignSelf: "center",
   },
   bulletContainer: {
-    marginTop: scale(15),
+    marginVertical: scale(10),
   },
   bulletPoint: {
     alignItems: "flex-start",
     marginBottom: 5,
   },
   button: {
-    marginTop: scale(30),
+    marginVertical: scale(10),
     alignSelf: "center",
     width: SCREEN_WIDTH * 0.9,
   },

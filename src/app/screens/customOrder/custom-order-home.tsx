@@ -15,10 +15,20 @@ import { router } from "expo-router";
 import Typo from "@/components/Typo";
 import { Info } from "phosphor-react-native";
 import CustomOrderBottomSheet from "../../../components/BottomSheets/customOrder/CustomOrderBottomSheet";
+import CustomOrderLocationBottomSheet from "@/components/BottomSheets/customOrder/CustomOrderLocationBottomSheet";
 import { commonStyles } from "@/constants/commonStyles";
+
 const CustomOrderHome = () => {
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  const variantSheetSnapPoints = useMemo(() => ["55%"], []);
+  const bottomSheetInfoRef = useRef<BottomSheet>(null);
+  const variantSheetInfoSnapPoints = useMemo(() => {
+    const percentageHeight = SCREEN_HEIGHT * 0.55; // 50% of screen height
+    return [percentageHeight];
+  }, []);
+  const bottomSheetLocationRef = useRef<BottomSheet>(null);
+  const variantSheetLocationSnapPoints = useMemo(() => {
+    const percentageHeight = SCREEN_HEIGHT * 0.2; // 50% of screen height
+    return [percentageHeight];
+  }, []);
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
@@ -45,9 +55,9 @@ const CustomOrderHome = () => {
           }}
         >
           <Header title={"Custom Order"} />
-          <Pressable onPress={() => bottomSheetRef.current?.expand()}>
+          <Pressable onPress={() => bottomSheetInfoRef.current?.expand()}>
             <Info
-              size={32}
+              size={26}
               style={{ marginLeft: scale(-60), paddingRight: scale(60) }}
             />
           </Pressable>
@@ -107,21 +117,29 @@ const CustomOrderHome = () => {
 
         <Button
           title="Place your order"
-          onPress={() => {
-            console.log("Button pressed");
-          }}
+          onPress={() => bottomSheetLocationRef.current?.expand()}
           style={styles.button}
         />
       </ScreenWrapper>
       <BottomSheet
-        ref={bottomSheetRef}
+        ref={bottomSheetInfoRef}
         index={-1}
-        snapPoints={variantSheetSnapPoints}
+        snapPoints={variantSheetInfoSnapPoints}
         enableDynamicSizing={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
       >
-        <CustomOrderBottomSheet bottomSheetRef={bottomSheetRef} />
+        <CustomOrderBottomSheet bottomSheetRef={bottomSheetInfoRef} />
+      </BottomSheet>
+      <BottomSheet
+        ref={bottomSheetLocationRef}
+        index={-1}
+        snapPoints={variantSheetLocationSnapPoints}
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+      >
+        <CustomOrderLocationBottomSheet />
       </BottomSheet>
     </>
   );

@@ -41,7 +41,11 @@ interface AuthStore {
   setSelectedBusiness: (business: string) => void;
   setNewUser: (newUser: boolean) => void;
   setPromoCode: (code: string) => void;
-  setCart: (cart: { showCart: boolean; merchant: string; cartId: string }) => void;
+  setCart: (cart: {
+    showCart: boolean;
+    merchant: string;
+    cartId: string;
+  }) => void;
   addOrder: (order: Order) => void;
   clearOrders: () => void;
   setBiometricAuth: (status: boolean) => void;
@@ -119,7 +123,6 @@ export const useAuthStore = create<AuthStore>()(
           cart: { showCart: false, merchant: "", cartId: "" },
           promoCode: null,
           orders: [],
-          biometricAuth: false,
         });
         secureStorage.removeItem("userId");
         secureStorage.removeItem("token");
@@ -129,7 +132,6 @@ export const useAuthStore = create<AuthStore>()(
         secureStorage.removeItem("cart");
         secureStorage.removeItem("promoCode");
         secureStorage.removeItem("orders");
-        secureStorage.removeItem("biometricAuth");
       },
     }),
     {

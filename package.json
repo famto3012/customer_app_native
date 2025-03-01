@@ -44,6 +44,7 @@
     "react-dom": "18.3.1",
     "react-native": "0.76.7",
     "react-native-color-matrix-image-filters": "^7.0.2",
+    "react-native-element-dropdown": "^2.12.4",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-mmkv": "^3.2.0",
     "react-native-otp-entry": "^1.8.2",
