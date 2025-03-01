@@ -8,17 +8,20 @@ import { XCircle } from "phosphor-react-native";
 import { clearCart } from "@/service/universal";
 import { FC } from "react";
 import { router } from "expo-router";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const FloatingCart: FC<{ onClearCart: () => void }> = ({ onClearCart }) => {
   const showCart = useAuthStore((state) => state.cart.showCart);
   const merchant = useAuthStore((state) => state.cart.merchant);
   const cartId = useAuthStore((state) => state.cart.cartId);
 
+  const queryClient = useQueryClient();
+
   const handleClearCartMutation = useMutation({
     mutationKey: ["clear-cart"],
     mutationFn: () => clearCart(cartId),
     onSuccess: () => {
+      queryClient.clear();
       useAuthStore.setState({
         cart: {
           showCart: false,

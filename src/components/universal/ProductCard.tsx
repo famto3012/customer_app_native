@@ -1,5 +1,5 @@
 import { Image, Pressable, StyleSheet, View } from "react-native";
-import { FC, useEffect, useState } from "react";
+import { FC, memo, useEffect, useState } from "react";
 import { ProductProps } from "@/types";
 import { scale, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
@@ -18,7 +18,10 @@ import { Grayscale } from "react-native-color-matrix-image-filters";
 
 const ProductCard: FC<{
   item: ProductProps;
-  openVariant?: (product: ProductProps) => void;
+  openVariant?: (
+    product: ProductProps,
+    updateCartCount: (count: number) => void
+  ) => void;
   cartCount?: number | null;
   showAddCart: boolean;
 }> = ({ item, openVariant, cartCount, showAddCart }) => {
@@ -66,7 +69,7 @@ const ProductCard: FC<{
     if (!item.inventory) return;
 
     if (item.variantAvailable) {
-      openVariant?.(item);
+      openVariant?.(item, (newCount) => setCount(newCount));
     } else {
       setCount((prev) => (prev ? prev + 1 : 1));
     }
@@ -190,7 +193,7 @@ const ProductCard: FC<{
   );
 };
 
-export default ProductCard;
+export default memo(ProductCard);
 
 const styles = StyleSheet.create({
   container: {

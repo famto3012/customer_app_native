@@ -30,6 +30,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { CartProps } from "@/types";
 import { useAuthStore } from "@/store/store";
 import Button from "@/components/Button";
+import { commonStyles } from "@/constants/commonStyles";
 
 const TAB_WIDTH = scale((SCREEN_WIDTH - 40) / 2);
 
@@ -155,7 +156,7 @@ const Checkout = () => {
         disappearsOnIndex={-1}
         appearsOnIndex={0}
         opacity={0.5}
-        style={[props.style, styles.backdrop]}
+        style={[props.style, commonStyles.backdrop]}
         // onPress={handleClosePress}
       />
     ),
@@ -419,13 +420,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: radius._10,
-  },
-  backdrop: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 1)",
   },
 });

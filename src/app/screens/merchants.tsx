@@ -4,8 +4,9 @@ import {
   Pressable,
   StyleSheet,
   View,
+  RefreshControl,
 } from "react-native";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import Search from "@/components/Search";
@@ -19,7 +20,7 @@ import MerchantCard from "@/components/universal/MerchantCard";
 import { MerchantCardProps } from "@/types";
 import { getMerchants } from "@/service/universal";
 import { useSafeLocation } from "@/utils/helpers";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 const Merchants = () => {
   const { businessCategory, businessCategoryId } = useLocalSearchParams();
@@ -27,43 +28,60 @@ const Merchants = () => {
   const [merchants, setMerchants] = useState<MerchantCardProps[]>([]);
   const [query, setQuery] = useState<string>("");
   const [debounceQuery, setDebounceQuery] = useState<string>("");
+  const [refreshing, setRefreshing] = useState(false);
 
   const { latitude, longitude } = useSafeLocation();
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["merchants", businessCategory, selectedFilter, query],
-    queryFn: () =>
-      getMerchants(
-        latitude,
-        longitude,
-        businessCategoryId.toString(),
-        selectedFilter,
-        query
-      ),
-  });
+  const MERCHANT_LIMIT = 10;
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
+    useInfiniteQuery({
+      queryKey: ["merchants", businessCategory, selectedFilter, query],
+      queryFn: ({ pageParam = 1 }) =>
+        getMerchants(
+          latitude,
+          longitude,
+          businessCategoryId?.toString() || "",
+          selectedFilter,
+          query,
+          pageParam,
+          MERCHANT_LIMIT
+        ),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage, allPages) =>
+        lastPage?.hasNextPage ? allPages.length + 1 : undefined,
+    });
 
   useEffect(() => {
-    setMerchants(data);
+    if (data?.pages) {
+      setMerchants((prev) => {
+        const newMerchants = data.pages.flatMap((page) => page.data);
+        return JSON.stringify(prev) !== JSON.stringify(newMerchants)
+          ? newMerchants
+          : prev;
+      });
+    }
   }, [data]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refetch(); // Fetch fresh data
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     const timeOut = setTimeout(() => {
       setQuery(debounceQuery);
     }, 500);
-
     return () => clearTimeout(timeOut);
   }, [debounceQuery]);
 
   const handleSelectFilter = (value: string) => {
-    if (value === selectedFilter) {
-      setSelectedFilter("");
-    } else {
-      setSelectedFilter(value);
-    }
+    setSelectedFilter((prev) => (prev === value ? "" : value));
   };
 
-  const renderItem = ({ item }: any) => {
-    return (
+  const renderFilterItem = useCallback(
+    ({ item }: any) => (
       <Pressable
         style={[
           styles.filterItem,
@@ -82,12 +100,13 @@ const Merchants = () => {
 
         {selectedFilter === item.value && <XCircle size={20} color="white" />}
       </Pressable>
-    );
-  };
+    ),
+    [selectedFilter]
+  );
 
   return (
     <ScreenWrapper>
-      <Header title={businessCategory.toString()} />
+      <Header title={businessCategory?.toString() || "Merchants"} />
 
       <Search
         placeHolder="Search Restaurants/Dishes/Products"
@@ -102,7 +121,7 @@ const Merchants = () => {
       >
         <FlatList
           data={merchantFilters}
-          renderItem={renderItem}
+          renderItem={renderFilterItem}
           keyExtractor={(item) => item.value}
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -113,23 +132,23 @@ const Merchants = () => {
         data={merchants}
         renderItem={({ item }) => <MerchantCard item={item} />}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{
-          paddingHorizontal: scale(20),
-          marginTop: verticalScale(15),
-          paddingBottom: verticalScale(30),
-          backgroundColor: colors.WHITE,
-        }}
+        initialNumToRender={5}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[colors.PRIMARY]}
+          />
+        }
+        contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          isLoading ? (
-            <ActivityIndicator size="large" color={colors.PRIMARY} />
-          ) : !isLoading && !merchants?.length ? (
+          !isFetchingNextPage && merchants.length === 0 ? (
             <View
               style={{
                 flex: 1,
                 alignItems: "center",
                 justifyContent: "center",
-
                 height: SCREEN_HEIGHT - verticalScale(250),
               }}
             >
@@ -137,6 +156,19 @@ const Merchants = () => {
             </View>
           ) : null
         }
+        ListFooterComponent={
+          isFetchingNextPage ? (
+            <View style={{ paddingVertical: 20, alignItems: "center" }}>
+              <ActivityIndicator size="large" color={colors.PRIMARY} />
+            </View>
+          ) : null
+        }
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        onEndReachedThreshold={0.4}
       />
     </ScreenWrapper>
   );
@@ -159,5 +191,11 @@ const styles = StyleSheet.create({
   },
   selectedFilter: {
     backgroundColor: colors.PRIMARY,
+  },
+  container: {
+    paddingHorizontal: scale(20),
+    marginTop: verticalScale(15),
+    paddingBottom: verticalScale(30),
+    backgroundColor: colors.WHITE,
   },
 });

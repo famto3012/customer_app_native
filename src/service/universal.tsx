@@ -32,30 +32,44 @@ export const getMerchants = async (
   latitude: number,
   longitude: number,
   categoryId: string,
-  filter: string,
-  query: string
+  filterType: string,
+  query: string,
+  page: number,
+  limit: number
 ) => {
   try {
-    const res = await appAxios.post(
-      "/customers/list-restaurants",
-      {
+    const res = await appAxios.get("/customers/filter-and-search-merchants", {
+      params: {
+        query,
         latitude,
         longitude,
         businessCategoryId: categoryId,
-        filter,
+        filterType,
+        page,
+        limit,
       },
-      { params: { query } }
-    );
+    });
 
     if (res.status === 200) {
-      return res.data.data;
+      return {
+        data: res.data,
+        hasNextPage: res.data.length === limit,
+      };
     } else {
-      throw new Error("Failed to fetch categories");
+      return {
+        data: [],
+        hasNextPage: false,
+      };
     }
   } catch (err) {
     console.error(`Error in getting merchants:`, err);
     Alert.alert("Error", "Something went wrong!");
-    return [];
+
+    // Ensure function always returns an object
+    return {
+      data: [],
+      hasNextPage: false,
+    };
   }
 };
 
@@ -98,14 +112,20 @@ export const getAllCategory = async (
     });
 
     if (res.status === 200) {
-      return res.data;
+      return {
+        data: res.data.data,
+        hasNextPage: res.data.hasNextPage,
+      };
     } else {
-      throw new Error("Failed to fetch categories");
+      return {
+        data: [],
+        hasNextPage: false,
+      };
     }
   } catch (err) {
     console.error(`Error in getting merchant category:`, err);
     Alert.alert("Error", "Something went wrong!");
-    return [];
+    return { data: [], hasNextPage: false };
   }
 };
 
@@ -126,14 +146,20 @@ export const getAllProducts = async (
     });
 
     if (res.status === 200) {
-      return res.data;
+      return {
+        data: res.data.data,
+        hasNextPage: res.data.hasNextPage,
+      };
     } else {
-      throw new Error("Failed to fetch products");
+      return {
+        data: [],
+        hasNextPage: false,
+      };
     }
   } catch (err) {
     console.error(`Error in getting merchant products:`, err);
     Alert.alert("Error", "Something went wrong!");
-    return [];
+    return { data: [], hasNextPage: false };
   }
 };
 
