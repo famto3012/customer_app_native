@@ -4,14 +4,14 @@ import Typo from "../Typo";
 import { colors, radius } from "@/constants/theme";
 import { router } from "expo-router";
 import { FC, useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addProductToCart } from "@/service/universal";
 import { CartProps } from "@/types";
 import { useAuthStore } from "@/store/store";
 
 const ItemList: FC<{ items: CartProps["items"] }> = ({ items }) => {
   const [cartItems, setCartItems] = useState<CartProps["items"]>([]);
-
+  const queryClient = useQueryClient();
   useEffect(() => {
     setCartItems(items);
   }, [items]);
@@ -107,7 +107,13 @@ const ItemList: FC<{ items: CartProps["items"] }> = ({ items }) => {
         </View>
       ))}
 
-      <TouchableOpacity onPress={() => router.back()} style={styles.addBtn}>
+      <TouchableOpacity
+        onPress={() => {
+          queryClient.refetchQueries({ queryKey: ["products"] });
+          router.back();
+        }}
+        style={styles.addBtn}
+      >
         <Typo size={14} color={colors.PRIMARY}>
           Add More
         </Typo>
