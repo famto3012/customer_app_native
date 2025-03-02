@@ -83,6 +83,12 @@ export const referralDetails = [
   "You receives 50 Famto Cash. When your friend completes an order of ₹300 or more within 7 days, your friend receives ₹25. Up to ₹500 in Famto Cash can be earned.",
 ];
 
+export const customOrderDetails = [
+  "Sending high-value or fragile products should be avoided.",
+  "Items should fit inside the backpack.",
+  "Transporting illegal goods is prohibited.",
+];
+
 export const unitData = [
   { label: "kg", value: "kg" },
   { label: "gm", value: "g" },
