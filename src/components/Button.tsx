@@ -5,8 +5,15 @@ import Typo from "./Typo";
 import { ButtonProps } from "@/types";
 import { colors, radius } from "@/constants/theme";
 
-const Button = ({ title, onPress, style, isLoading }: ButtonProps) => {
-  const textColor = style?.color || colors.WHITE;
+const Button = ({
+  title,
+  onPress,
+  style,
+  isLoading,
+  labelColor,
+}: ButtonProps) => {
+  const textColor = labelColor || colors.WHITE;
+
   return (
     <Pressable
       onPress={onPress}
@@ -14,7 +21,7 @@ const Button = ({ title, onPress, style, isLoading }: ButtonProps) => {
       disabled={isLoading}
     >
       {isLoading ? (
-        <ActivityIndicator size={"small"} color={colors.WHITE} />
+        <ActivityIndicator size={"small"} color={textColor} />
       ) : (
         <Typo size={14} color={textColor} style={{ textAlign: "center" }}>
           {title}

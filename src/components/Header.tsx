@@ -1,5 +1,5 @@
 import { View, StyleSheet, Pressable, Image } from "react-native";
-import { CaretLeft, Info } from "phosphor-react-native";
+import { CaretLeft } from "phosphor-react-native";
 import { colors } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
 import Typo from "./Typo";

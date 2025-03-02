@@ -1,34 +1,25 @@
 import { Image, Pressable, StyleSheet, View } from "react-native";
 import { scale, verticalScale } from "@/utils/styling";
-import Typo from "../Typo";
 import { colors, radius } from "@/constants/theme";
+import Typo from "../Typo";
 import { FC } from "react";
-import { router } from "expo-router";
 
-const PromoCode: FC<{
-  deliveryMode: string;
-  merchantId?: string;
-  orderAmount: number;
-}> = ({ deliveryMode, merchantId, orderAmount }) => {
+const BillUpdate: FC<{ onPress: () => void }> = ({ onPress }) => {
   return (
-    <Pressable
-      onPress={() =>
-        router.push({
-          pathname: "/screens/common/promo-code",
-          params: { deliveryMode, merchantId, orderAmount },
-        })
-      }
-      style={styles.container}
-    >
+    <Pressable onPress={onPress} style={styles.container}>
       <Image
-        source={require("@/assets/icons/ticket-discount.webp")}
+        source={require("@/assets/icons/bill.webp")}
         style={styles.image}
       />
+
       <View style={{ flex: 1, marginLeft: scale(15) }}>
-        <Typo fontFamily="Medium" size={12} color={colors.NEUTRAL900}>
-          Apply a promo code
+        <Typo size={13} color={colors.NEUTRAL900}>
+          Your total bill{" "}
+          <Typo size={13} fontFamily="SemiBold" color={colors.NEUTRAL900}>
+            will be updated soon
+          </Typo>
         </Typo>
-        <Typo size={12}>Get discounts using promo codes</Typo>
+        <Typo size={12}>Including all charges and tax</Typo>
       </View>
 
       <Image
@@ -39,7 +30,7 @@ const PromoCode: FC<{
   );
 };
 
-export default PromoCode;
+export default BillUpdate;
 
 const styles = StyleSheet.create({
   container: {
@@ -48,8 +39,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: scale(10),
     paddingVertical: verticalScale(15),
-    borderBottomLeftRadius: radius._10,
-    borderBottomRightRadius: radius._10,
+    borderTopLeftRadius: radius._10,
+    borderTopRightRadius: radius._10,
   },
   image: {
     width: scale(24),

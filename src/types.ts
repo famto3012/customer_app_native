@@ -36,6 +36,7 @@ export type ButtonProps = {
   onPress: () => void;
   style?: ViewStyle;
   isLoading?: boolean;
+  labelColor?: string;
 };
 
 export interface InputProps extends TextInputProps {
@@ -209,10 +210,39 @@ export type UserProfileProps = {
   phoneNumber: string;
 };
 
-export type ItemsProps = {
+export type CustomOrderItemsProps = {
+  itemId?: string;
   itemName: string;
+  quantity: number | string;
   unit: string;
   numOfUnits: number;
-  quantity: number;
-  imageURL: string;
+  itemImage?: string;
 };
+
+export type AddCustomStoreProps = {
+  latitude: number | null;
+  longitude: number | null;
+  shopName: string;
+  place: string;
+  buyFromAnyWhere: boolean;
+};
+
+export type AddStoreResponse = {
+  cartId: string;
+  shopName: string;
+  place: string;
+  distance: number | null;
+  duration: number | null;
+};
+
+export type CustomCartBill = {
+  deliveryCharge: number | null;
+  discountedAmount: number | null;
+  grandTotal: number | null;
+  taxAmount: number | null;
+  itemTotal: number | null;
+  addedTip: number | null;
+  subTotal: number | null;
+  surgePrice: number | null;
+  promoCodeUsed: string | null;
+} | null;
