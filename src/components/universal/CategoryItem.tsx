@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -12,7 +12,7 @@ import { colors, radius } from "@/constants/theme";
 import Typo from "../Typo";
 import { CategoryProps, ProductProps } from "@/types";
 import { scale, verticalScale } from "@/utils/styling";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { getAllProducts } from "@/service/universal";
 import ProductCard from "./ProductCard";
 import { useAuthStore } from "@/store/store";
@@ -21,6 +21,7 @@ import Animated, {
   FadeOut,
   LinearTransition,
 } from "react-native-reanimated";
+import { useFocusEffect } from "@react-navigation/native";
 
 const useProducts = (categoryId: string, userId: string) => {
   return useInfiniteQuery({
@@ -31,11 +32,13 @@ const useProducts = (categoryId: string, userId: string) => {
     getNextPageParam: (lastPage, allPages) =>
       lastPage.hasNextPage ? allPages.length + 1 : undefined,
     enabled: !!categoryId,
+    refetchOnWindowFocus: true,
   });
 };
 
-const ProductList = ({ categoryId }: { categoryId: string }) => {
+const ProductList: FC<{ categoryId: string }> = ({ categoryId }) => {
   const { userId } = useAuthStore.getState();
+  const queryClient = useQueryClient();
 
   const {
     data,
@@ -45,6 +48,12 @@ const ProductList = ({ categoryId }: { categoryId: string }) => {
     isLoading,
     isError,
   } = useProducts(categoryId, userId || "");
+
+  useFocusEffect(
+    useCallback(() => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    }, [])
+  );
 
   if (isLoading) return <ActivityIndicator size="small" />;
   if (isError) return <Text>Error loading products.</Text>;

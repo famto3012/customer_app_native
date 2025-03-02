@@ -21,7 +21,7 @@ const FloatingCart: FC<{ onClearCart: () => void }> = ({ onClearCart }) => {
     mutationKey: ["clear-cart"],
     mutationFn: () => clearCart(cartId),
     onSuccess: () => {
-      queryClient.clear();
+      queryClient.invalidateQueries({ queryKey: ["products"] });
       useAuthStore.setState({
         cart: {
           showCart: false,
