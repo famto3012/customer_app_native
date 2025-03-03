@@ -47,7 +47,7 @@ const CustomBillDetail: FC<{ data: CustomCartBill }> = ({ data }) => {
               Added Tip
             </Typo>
             <Typo fontFamily="Medium" size={16} color={colors.NEUTRAL800}>
-              {data?.addedTip}
+              ₹ {data?.addedTip.toFixed(2)}
             </Typo>
           </View>
         )}
@@ -58,7 +58,7 @@ const CustomBillDetail: FC<{ data: CustomCartBill }> = ({ data }) => {
               Discount {data?.promoCodeUsed && data?.promoCodeUsed}
             </Typo>
             <Typo fontFamily="Medium" size={16} color={colors.NEUTRAL800}>
-              {data?.discountedAmount}
+              ₹ {data?.discountedAmount.toFixed(2)}
             </Typo>
           </View>
         )}

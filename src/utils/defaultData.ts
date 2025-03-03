@@ -93,6 +93,7 @@ export const unitData = [
   { label: "kg", value: "kg" },
   { label: "gm", value: "g" },
   { label: "ltr", value: "ltr" },
+  { label: "ml", value: "ml" },
   { label: "m", value: "m" },
   { label: "cm", value: "cm" },
 ];

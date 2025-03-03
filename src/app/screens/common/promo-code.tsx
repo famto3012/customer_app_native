@@ -19,6 +19,7 @@ import { useAuthStore } from "@/store/store";
 import { applyUniversalPromoCode } from "@/service/universal";
 import { useEffect, useState } from "react";
 import { Grayscale } from "react-native-color-matrix-image-filters";
+import { applyCustomOrderTipAndPromoCode } from "@/service/customOrderService";
 
 interface PromoCodeProps {
   id: string;
@@ -52,6 +53,32 @@ const PromoCodeList = () => {
     }, 500);
   }, [debounceQuery]);
 
+  const handleApplyPromoCode = (item: PromoCodeProps) => {
+    if (deliveryMode === "Home Delivery") {
+      if (Number(orderAmount) < item.minOrderAmount) return;
+
+      // Apply promo code mutation before navigating back
+      applyUniversalPromoCode(item.promoCode).then(() => {
+        queryClient.invalidateQueries({ queryKey: ["universal-bill"] });
+        useAuthStore.setState({ promoCode: item.promoCode });
+        router.back();
+      });
+
+      return;
+    }
+
+    if (deliveryMode === "Custom Order") {
+      // Apply promo code mutation before navigating back
+      applyCustomOrderTipAndPromoCode(null, item.promoCode).then(() => {
+        queryClient.invalidateQueries({ queryKey: ["custom-order-bill"] });
+        useAuthStore.setState({ promoCode: item.promoCode });
+        router.back();
+      });
+
+      return;
+    }
+  };
+
   const renderItem = ({ item }: { item: PromoCodeProps }) => {
     return (
       <View style={styles.container}>
@@ -75,16 +102,7 @@ const PromoCodeList = () => {
         </View>
 
         <Pressable
-          onPress={() => {
-            if (Number(orderAmount) < item.minOrderAmount) return;
-
-            // Apply promo code mutation before navigating back
-            applyUniversalPromoCode(item.promoCode).then(() => {
-              queryClient.invalidateQueries({ queryKey: ["universal-bill"] });
-              useAuthStore.setState({ promoCode: item.promoCode });
-              router.back();
-            });
-          }}
+          onPress={() => handleApplyPromoCode(item)}
           style={styles.actionContainer}
         >
           <Image

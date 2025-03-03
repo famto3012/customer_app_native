@@ -17,6 +17,8 @@ import Button from "../Button";
 import * as ImagePicker from "expo-image-picker";
 import { useMutation } from "@tanstack/react-query";
 import { addItemDetail } from "@/service/customOrderService";
+import { Dropdown } from "react-native-element-dropdown";
+import { unitData } from "@/utils/defaultData";
 
 const AddItem: FC<{
   openAddSheet?: () => void;
@@ -27,7 +29,7 @@ const AddItem: FC<{
     itemName: "",
     quantity: "",
     numOfUnits: 1,
-    unit: "kg",
+    unit: "",
   });
   const [image, setImage] = useState<string | null>(null);
   const [addMore, setAddMore] = useState<boolean>(false);
@@ -81,7 +83,7 @@ const AddItem: FC<{
   });
 
   const handleSave = (data: CustomOrderItemsProps) => {
-    if (!item.itemName || !item.quantity) {
+    if (!item.itemName || !item.quantity || !item.unit) {
       Alert.alert("Error", "Please add item details");
       return;
     }
@@ -136,6 +138,29 @@ const AddItem: FC<{
           value={item.quantity?.toString()}
           onChangeText={(data) => setItem({ ...item, quantity: Number(data) })}
           keyboardType="numeric"
+        />
+        <Dropdown
+          data={unitData}
+          labelField="label"
+          valueField="value"
+          placeholder="Unit"
+          placeholderStyle={{
+            fontSize: 16,
+          }}
+          onChange={(data: { label: string; value: string }) =>
+            setItem({ ...item, unit: data.value })
+          }
+          value={item.unit}
+          style={{
+            height: verticalScale(45),
+            borderColor: colors.NEUTRAL300,
+            backgroundColor: colors.WHITE,
+            borderWidth: 1,
+            borderRadius: radius._10,
+            paddingHorizontal: scale(10),
+            width: SCREEN_WIDTH * 0.2,
+          }}
+          mode="auto"
         />
       </View>
 
