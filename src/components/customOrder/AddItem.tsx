@@ -24,7 +24,8 @@ const AddItem: FC<{
   openAddSheet?: () => void;
   onAddingItem: (data: CustomOrderItemsProps[]) => void;
   closeAddSheet?: () => void;
-}> = ({ openAddSheet, onAddingItem, closeAddSheet }) => {
+  onViewImage?: (data: CustomOrderItemsProps) => void;
+}> = ({ openAddSheet, onAddingItem, closeAddSheet, onViewImage }) => {
   const [item, setItem] = useState<CustomOrderItemsProps>({
     itemName: "",
     quantity: "",
@@ -201,23 +202,26 @@ const AddItem: FC<{
       <View>
         {image ? (
           <View style={styles.imageContainer}>
-            <View style={styles.imageBox}>
+            <Pressable
+              onPress={() => onViewImage?.({ ...item, itemImage: image })}
+              style={styles.imageBox}
+            >
               <Image
                 source={require("@/assets/icons/paperclip.webp")}
                 style={styles.galleryImage}
                 resizeMode="cover"
               />
-              <Pressable onPress={() => {}}>
-                <Typo
-                  size={13}
-                  color={colors.NEUTRAL900}
-                  style={{ width: "70%" }}
-                  textProps={{ numberOfLines: 1 }}
-                >
-                  {image.split("/").pop()}
-                </Typo>
-              </Pressable>
-            </View>
+              {/* <Pressable onPress={() => {}}> */}
+              <Typo
+                size={13}
+                color={colors.NEUTRAL900}
+                style={{ width: "70%" }}
+                textProps={{ numberOfLines: 1 }}
+              >
+                {image.split("/").pop()}
+              </Typo>
+              {/* </Pressable> */}
+            </Pressable>
             <Pressable onPress={() => setImage(null)} style={styles.clearBtn}>
               <XCircle size={30} color={colors.RED} />
             </Pressable>

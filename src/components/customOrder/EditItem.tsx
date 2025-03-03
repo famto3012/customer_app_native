@@ -23,7 +23,8 @@ import { unitData } from "@/utils/defaultData";
 const EditItem: FC<{
   item: CustomOrderItemsProps | null;
   onEditItem: (data: CustomOrderItemsProps[]) => void;
-}> = ({ item, onEditItem }) => {
+  onViewImage: (data: CustomOrderItemsProps) => void;
+}> = ({ item, onEditItem, onViewImage }) => {
   const [itemData, setItemData] = useState<CustomOrderItemsProps>({
     itemId: "",
     itemName: "",
@@ -199,23 +200,25 @@ const EditItem: FC<{
       <View>
         {itemData?.itemImage ? (
           <View style={styles.imageContainer}>
-            <View style={styles.imageBox}>
+            <Pressable
+              onPress={() => onViewImage(itemData)}
+              style={styles.imageBox}
+            >
               <Image
                 source={require("@/assets/icons/paperclip.webp")}
                 style={styles.galleryImage}
                 resizeMode="cover"
               />
-              <Pressable onPress={() => {}}>
-                <Typo
-                  size={13}
-                  color={colors.NEUTRAL900}
-                  style={{ width: "70%" }}
-                  textProps={{ numberOfLines: 1 }}
-                >
-                  {itemData.itemName} Image
-                </Typo>
-              </Pressable>
-            </View>
+
+              <Typo
+                size={13}
+                color={colors.NEUTRAL900}
+                style={{ width: "70%" }}
+                textProps={{ numberOfLines: 1 }}
+              >
+                {itemData.itemName} Image
+              </Typo>
+            </Pressable>
             <Pressable onPress={() => setImage(null)} style={styles.clearBtn}>
               <XCircle size={30} color={colors.RED} />
             </Pressable>

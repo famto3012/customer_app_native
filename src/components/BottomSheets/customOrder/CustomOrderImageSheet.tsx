@@ -22,35 +22,17 @@ const CustomOrderImageSheet: FC<{ item: CustomOrderItemsProps | null }> = ({
           {item?.itemName}
         </Typo>
 
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: spacingX._15,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: spacingX._5,
-            }}
-          >
+        <View style={styles.dataContainer}>
+          <View style={styles.data}>
             <Typo size={13} color={colors.NEUTRAL400}>
               Quantity
             </Typo>
             <Typo size={14} fontFamily="SemiBold" color={colors.NEUTRAL900}>
-              500gm
+              {item?.quantity} {item?.unit}
             </Typo>
           </View>
 
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: spacingX._5,
-            }}
-          >
+          <View style={styles.data}>
             <Typo
               size={13}
               color={colors.NEUTRAL400}
@@ -59,7 +41,7 @@ const CustomOrderImageSheet: FC<{ item: CustomOrderItemsProps | null }> = ({
               No of units
             </Typo>
             <Typo size={14} fontFamily="SemiBold" color={colors.NEUTRAL900}>
-              2
+              {item?.numOfUnits}
             </Typo>
           </View>
         </View>
@@ -91,5 +73,15 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     borderRadius: radius._10,
+  },
+  dataContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacingX._15,
+  },
+  data: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacingX._5,
   },
 });
