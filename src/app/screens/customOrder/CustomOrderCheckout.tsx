@@ -1,5 +1,12 @@
-import { Alert, FlatList, ScrollView, StyleSheet, View } from "react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import Typo from "@/components/Typo";
@@ -18,8 +25,12 @@ import { CustomOrderItemsProps } from "@/types";
 import ItemCard from "@/components/customOrder/ItemCard";
 import Button from "@/components/Button";
 import CustomOrderImageSheet from "@/components/BottomSheets/customOrder/CustomOrderImageSheet";
-import { useMutation } from "@tanstack/react-query";
-import { addDeliveryAddress, deleteItem } from "@/service/customOrderService";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  addDeliveryAddress,
+  deleteItem,
+  fetchCustomOrderItems,
+} from "@/service/customOrderService";
 import Address from "@/components/common/Address";
 import Instructions from "@/components/common/Instructions";
 import { commonStyles } from "@/constants/commonStyles";
@@ -37,7 +48,7 @@ const CustomOrderCheckout = () => {
 
   const [voiceInstruction, setVoiceInstruction] = useState<string | null>(null);
 
-  const { storeName, location } = useLocalSearchParams();
+  const { storeName, location, cartId } = useLocalSearchParams();
 
   const addItemSheetRef = useRef<BottomSheet>(null);
   const editItemSheetRef = useRef<BottomSheet>(null);
@@ -66,6 +77,16 @@ const CustomOrderCheckout = () => {
     setSelectedItem(data);
     itemImageSheetRef.current?.snapToIndex(0);
   };
+
+  const { data, isLoading, isError } = useQuery<CustomOrderItemsProps[]>({
+    queryKey: ["custom-order-items"],
+    queryFn: () => fetchCustomOrderItems(cartId.toString()),
+    enabled: !!cartId,
+  });
+
+  useEffect(() => {
+    setCartItem(data || []);
+  }, [data]);
 
   const handleDeleteMutation = useMutation({
     mutationKey: ["delete-item"],
@@ -176,10 +197,19 @@ const CustomOrderCheckout = () => {
                     setItemId(itemId);
                     handleDeleteMutation.mutate();
                   }}
+                  isDeleting={handleDeleteMutation.isPending}
+                  deletingId={itemId}
                 />
               )}
               keyExtractor={(item, index) =>
                 item.itemId?.toString() || index.toString()
+              }
+              ListEmptyComponent={
+                <View>
+                  {isLoading && cartItem.length === 0 ? (
+                    <ActivityIndicator size="large" color={colors.PRIMARY} />
+                  ) : null}
+                </View>
               }
               scrollEnabled={false}
               contentContainerStyle={{
@@ -209,6 +239,7 @@ const CustomOrderCheckout = () => {
               <AddItem
                 openAddSheet={() => addItemSheetRef.current?.snapToIndex(0)}
                 onAddingItem={handleAddingItem}
+                onViewImage={handleViewImage}
               />
             </View>
           )}
@@ -278,6 +309,7 @@ const CustomOrderCheckout = () => {
         <EditItemBottomSheet
           item={selectedItem ? selectedItem : null}
           onEditItem={handleEditItem}
+          onViewImage={handleViewImage}
         />
       </BottomSheet>
 

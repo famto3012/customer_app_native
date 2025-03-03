@@ -10,7 +10,8 @@ import EditItem from "@/components/customOrder/EditItem";
 const EditItemBottomSheet: FC<{
   item: CustomOrderItemsProps | null;
   onEditItem: (data: CustomOrderItemsProps[]) => void;
-}> = ({ item, onEditItem }) => {
+  onViewImage: (data: CustomOrderItemsProps) => void;
+}> = ({ item, onEditItem, onViewImage }) => {
   return (
     <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
       <Typo
@@ -22,7 +23,7 @@ const EditItemBottomSheet: FC<{
         Edit Item
       </Typo>
 
-      <EditItem item={item} onEditItem={onEditItem} />
+      <EditItem item={item} onEditItem={onEditItem} onViewImage={onViewImage} />
     </BottomSheetScrollView>
   );
 };

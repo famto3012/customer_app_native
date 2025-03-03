@@ -1,4 +1,10 @@
-import { Image, Pressable, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
 import { FC } from "react";
 import { CustomOrderItemsProps } from "@/types";
 import Typo from "../Typo";
@@ -10,7 +16,16 @@ const ItemCard: FC<{
   onEditItem: (item: CustomOrderItemsProps) => void;
   onViewImage: (item: CustomOrderItemsProps) => void;
   onDeleteItem: (itemId: string) => void;
-}> = ({ item, onEditItem, onViewImage, onDeleteItem }) => {
+  isDeleting: boolean;
+  deletingId: string | null;
+}> = ({
+  item,
+  onEditItem,
+  onViewImage,
+  onDeleteItem,
+  isDeleting,
+  deletingId,
+}) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -29,19 +44,26 @@ const ItemCard: FC<{
               }}
             />
           </Pressable>
-          <Pressable
-            onPress={() => onDeleteItem(item?.itemId || "")}
-            style={styles.actionBtn}
-          >
-            <Image
-              source={require("@/assets/icons/trash.webp")}
-              style={{
-                width: scale(24),
-                height: verticalScale(24),
-                resizeMode: "cover",
-              }}
-            />
-          </Pressable>
+
+          {isDeleting && deletingId === item.itemId ? (
+            <View style={styles.actionBtn}>
+              <ActivityIndicator size="small" color={colors.RED} />
+            </View>
+          ) : (
+            <Pressable
+              onPress={() => onDeleteItem(item?.itemId || "")}
+              style={styles.actionBtn}
+            >
+              <Image
+                source={require("@/assets/icons/trash.webp")}
+                style={{
+                  width: scale(24),
+                  height: verticalScale(24),
+                  resizeMode: "cover",
+                }}
+              />
+            </Pressable>
+          )}
         </View>
       </View>
 
