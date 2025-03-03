@@ -17,6 +17,8 @@ import * as ImagePicker from "expo-image-picker";
 import { useMutation } from "@tanstack/react-query";
 import { editItemDetail } from "@/service/customOrderService";
 import { XCircle } from "phosphor-react-native";
+import { Dropdown } from "react-native-element-dropdown";
+import { unitData } from "@/utils/defaultData";
 
 const EditItem: FC<{
   item: CustomOrderItemsProps | null;
@@ -71,7 +73,7 @@ const EditItem: FC<{
   });
 
   const handleSave = (data: CustomOrderItemsProps) => {
-    if (!itemData.itemName || !itemData.quantity) {
+    if (!itemData.itemName || !itemData.quantity || !itemData.unit) {
       Alert.alert("Error", "Please add item details");
       return;
     }
@@ -128,6 +130,29 @@ const EditItem: FC<{
             setItemData({ ...itemData, quantity: Number(data) })
           }
           keyboardType="numeric"
+        />
+        <Dropdown
+          data={unitData}
+          labelField="label"
+          valueField="value"
+          placeholder="Unit"
+          placeholderStyle={{
+            fontSize: 16,
+          }}
+          onChange={(data: { label: string; value: string }) =>
+            setItemData({ ...itemData, unit: data.value })
+          }
+          value={itemData.unit}
+          style={{
+            height: verticalScale(45),
+            borderColor: colors.NEUTRAL300,
+            backgroundColor: colors.WHITE,
+            borderWidth: 1,
+            borderRadius: radius._10,
+            paddingHorizontal: scale(10),
+            width: SCREEN_WIDTH * 0.2,
+          }}
+          mode="auto"
         />
       </View>
 

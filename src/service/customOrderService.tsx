@@ -102,6 +102,24 @@ export const fetchCustomCartBill = async (cartId: string) => {
   }
 };
 
+export const applyCustomOrderTipAndPromoCode = async (
+  addedTip?: number | null,
+  promoCode?: string
+) => {
+  try {
+    const res = await appAxios.post(`/customers/add-custom-tip-and-promocode`, {
+      addedTip,
+      promoCode,
+    });
+
+    return res.status === 200 ? res.data : null;
+  } catch (err) {
+    console.error(`Error in getting custom order bill:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return null;
+  }
+};
+
 export const confirmCustomOrder = async (cartId: string) => {
   try {
     const res = await appAxios.post(`/customers/confirm-custom-order`, {

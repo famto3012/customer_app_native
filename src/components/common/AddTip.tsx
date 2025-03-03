@@ -3,19 +3,16 @@ import { FC, useEffect, useState } from "react";
 import Typo from "../Typo";
 import { colors, spacingX } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addUniversalTip } from "@/service/universal";
 
 interface AddTipProps {
   previousTip: number;
+  onTipSelect: (data: number) => void;
 }
 
-const AddTip: FC<AddTipProps> = ({ previousTip }) => {
+const AddTip: FC<AddTipProps> = ({ previousTip, onTipSelect }) => {
   const [toggleInput, setToggleInput] = useState<boolean>(false);
   const [customTip, setCustomTip] = useState<string>("");
   const [selectedTip, setSelectedTip] = useState<number | null>(null);
-
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (previousTip === 10 || previousTip === 20 || previousTip === 50) {
@@ -28,26 +25,18 @@ const AddTip: FC<AddTipProps> = ({ previousTip }) => {
     }
   }, [previousTip]);
 
-  const handleAddTipMutation = useMutation({
-    mutationKey: ["universal-tip"],
-    mutationFn: (tip: number) => addUniversalTip(tip),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["universal-bill"] });
-    },
-  });
-
   const chooseTip = (value: number) => {
     if (value === selectedTip) {
       setSelectedTip(null);
       setCustomTip("");
-      handleAddTipMutation.mutate(0);
+      onTipSelect(0);
       return;
     }
 
     setToggleInput(false);
     setCustomTip("");
     setSelectedTip(value);
-    handleAddTipMutation.mutate(value);
+    onTipSelect(value);
   };
 
   return (
@@ -108,9 +97,9 @@ const AddTip: FC<AddTipProps> = ({ previousTip }) => {
               const value = parseFloat(customTip);
               if (!isNaN(value) && value > 0) {
                 setSelectedTip(value);
-                handleAddTipMutation.mutate(value);
+                onTipSelect(value);
               } else if (customTip === "") {
-                handleAddTipMutation.mutate(0);
+                onTipSelect(0);
                 setSelectedTip(null);
                 setCustomTip("");
                 setToggleInput(false);

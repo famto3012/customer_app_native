@@ -5,8 +5,9 @@ import ItemSpecification from "@/components/customOrder/ItemSpecification";
 import AddTip from "@/components/common/AddTip";
 import Typo from "@/components/Typo";
 import { router, useLocalSearchParams } from "expo-router";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  applyCustomOrderTipAndPromoCode,
   confirmCustomOrder,
   fetchCustomCartBill,
 } from "@/service/customOrderService";
@@ -15,7 +16,7 @@ import { scale, verticalScale } from "@/utils/styling";
 import Button from "@/components/Button";
 import PromoCode from "@/components/common/Promocode";
 import BillUpdate from "@/components/common/BillUpdate";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
@@ -23,22 +24,42 @@ import BottomSheet, {
 import { commonStyles } from "@/constants/commonStyles";
 import CustomBillDetail from "@/components/customOrder/CustomBillDetail";
 import { CustomCartBill } from "@/types";
+import { useAuthStore } from "@/store/store";
+import AppliedPromoCode from "@/components/common/AppliedPromoCode";
 
 const CustomOrderBill = () => {
+  const [promoCodeUsed, setPromoCodeUsed] = useState<string>("");
+
   const { cartId } = useLocalSearchParams();
+
+  const { promoCode } = useAuthStore.getState();
 
   const customBillSheetRef = useRef<BottomSheet>(null);
 
   const customBillSnapPoints = useMemo(() => ["60%"], []);
 
-  const {
-    data: cartBill,
-    isLoading,
-    isError,
-  } = useQuery<CustomCartBill>({
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (promoCode?.toString()) {
+      setPromoCodeUsed(promoCode?.toString() || "");
+    }
+  }, [promoCode]);
+
+  const { data: cartBill } = useQuery<CustomCartBill>({
     queryKey: ["custom-order-bill", cartId],
     queryFn: () => fetchCustomCartBill(cartId.toString()),
     enabled: !!cartId,
+  });
+
+  const handleAddTipMutation = useMutation({
+    mutationKey: ["custom-order-tip"],
+    mutationFn: (addedTip: number) => applyCustomOrderTipAndPromoCode(addedTip),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["custom-order-bill", cartId],
+      });
+    },
   });
 
   const handleConfirmOrder = useMutation({
@@ -46,6 +67,7 @@ const CustomOrderBill = () => {
     mutationFn: () => confirmCustomOrder(cartId.toString()),
     onSuccess: (data) => {
       if (data.orderId) {
+        useAuthStore.setState({ promoCode: null });
         router.push({
           pathname: "/(tabs)",
           params: { orderId: data.orderId },
@@ -75,12 +97,15 @@ const CustomOrderBill = () => {
 
           <ItemSpecification cartId={cartId.toString()} />
 
-          <AddTip previousTip={cartBill?.addedTip || 0} />
+          <AddTip
+            previousTip={cartBill?.addedTip ?? 0}
+            onTipSelect={(data: number) => handleAddTipMutation.mutate(data)}
+          />
 
           <View
             style={{
               paddingHorizontal: scale(20),
-              marginVertical: verticalScale(20),
+              marginTop: verticalScale(20),
             }}
           >
             <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
@@ -97,6 +122,15 @@ const CustomOrderBill = () => {
               <PromoCode deliveryMode="Custom Order" orderAmount={200} />
             </View>
           </View>
+
+          {promoCodeUsed && (
+            <AppliedPromoCode
+              cartId={cartId.toString()}
+              deliveryMode="Custom Order"
+              onRemove={() => setPromoCodeUsed("")}
+              promoCode={promoCodeUsed}
+            />
+          )}
         </ScrollView>
 
         <View style={styles.btnContainer}>

@@ -21,7 +21,7 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  applyUniversalPromoCode,
+  addUniversalTip,
   getCartBill,
   placeUniversalOrder,
 } from "@/service/universal";
@@ -32,6 +32,7 @@ import PaymentOptionSheet from "@/components/BottomSheets/common/PaymentOptionSh
 import { useAuthStore } from "@/store/store";
 import { removeAppliedPromoCode } from "@/service/userService";
 import { commonStyles } from "@/constants/commonStyles";
+import AppliedPromoCode from "@/components/common/AppliedPromoCode";
 
 const Bill = () => {
   const [selectedPaymentMode, setSelectedPaymentMode] =
@@ -53,18 +54,11 @@ const Bill = () => {
     }
   }, [promoCode]);
 
-  const removePromoCodeMutation = useMutation<
-    void,
-    unknown,
-    { cartId: string; deliveryMode: string }
-  >({
-    mutationKey: ["remove-promo-code"],
-    mutationFn: ({ cartId, deliveryMode }) =>
-      removeAppliedPromoCode(cartId, deliveryMode),
+  const handleAddTipMutation = useMutation({
+    mutationKey: ["universal-tip"],
+    mutationFn: (tip: number) => addUniversalTip(tip),
     onSuccess: () => {
-      setPromoCodeUsed("");
-      useAuthStore.setState({ promoCode: null });
-      queryClient.clear();
+      queryClient.invalidateQueries({ queryKey: ["universal-bill"] });
     },
   });
 
@@ -108,7 +102,10 @@ const Bill = () => {
       <ScrollView>
         <Header title="Checkout" />
 
-        <AddTip previousTip={data?.addedTip ?? 0} />
+        <AddTip
+          previousTip={data?.addedTip ?? 0}
+          onTipSelect={(data: number) => handleAddTipMutation.mutate(data)}
+        />
 
         <View style={styles.promoContainer}>
           <PromoCode
@@ -123,40 +120,12 @@ const Bill = () => {
         </View>
 
         {promoCodeUsed && (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginHorizontal: scale(20),
-              marginTop: verticalScale(20),
-              backgroundColor: colors.NEUTRAL200,
-              paddingHorizontal: scale(10),
-              paddingVertical: verticalScale(8),
-              borderRadius: radius._6,
-            }}
-          >
-            <View style={{ flex: 1 }}>
-              <Typo size={13} color={colors.NEUTRAL900}>
-                Code Used:{" "}
-                <Typo size={14} fontFamily="SemiBold" color={colors.NEUTRAL900}>
-                  {promoCodeUsed}
-                </Typo>
-              </Typo>
-            </View>
-
-            <Pressable
-              onPress={() => {
-                if (cartId && deliveryMode) {
-                  removePromoCodeMutation.mutate({
-                    cartId: cartId.toString(),
-                    deliveryMode: deliveryMode.toString(),
-                  });
-                }
-              }}
-            >
-              <XCircle color={colors.RED} />
-            </Pressable>
-          </View>
+          <AppliedPromoCode
+            cartId={cartId.toString()}
+            deliveryMode={deliveryMode.toString()}
+            onRemove={() => setPromoCodeUsed("")}
+            promoCode={promoCodeUsed}
+          />
         )}
 
         <View style={styles.billContainer}>
