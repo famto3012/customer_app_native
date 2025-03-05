@@ -6,9 +6,10 @@ import { MerchantDataProps } from "@/types";
 import Typo from "../Typo";
 import { Clock, Star } from "phosphor-react-native";
 
-const MerchantData: FC<{ merchantData: MerchantDataProps }> = ({
-  merchantData,
-}) => {
+const MerchantData: FC<{
+  merchantData: MerchantDataProps;
+  openRating: () => void;
+}> = ({ merchantData, openRating }) => {
   return (
     <View style={styles.merchantData}>
       <View style={{ gap: scale(10) }}>
@@ -35,7 +36,7 @@ const MerchantData: FC<{ merchantData: MerchantDataProps }> = ({
       </View>
 
       <View>
-        <Pressable style={styles.rating}>
+        <Pressable style={styles.rating} onPress={openRating}>
           <Star size={scale(15)} color={colors.WHITE} weight="fill" />
           <Typo size={14} color={colors.WHITE}>
             {merchantData?.rating}
