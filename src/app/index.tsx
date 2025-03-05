@@ -76,14 +76,14 @@ const Main = () => {
 
   const proceedNavigation = () => {
     setTimeout(() => {
-      if (token) {
-        resetAndNavigate("/(tabs)");
-      } else if (newUser) {
-        setNewUser(false);
-        resetAndNavigate("/notification-permission");
-      } else {
-        resetAndNavigate("/auth");
-      }
+      // if (token) {
+      // resetAndNavigate("/(tabs)");
+      // } else if (newUser) {
+      setNewUser(false);
+      resetAndNavigate("/notification-permission");
+      // } else {
+      // resetAndNavigate("/auth");
+      // }
     }, 2000);
   };
 
