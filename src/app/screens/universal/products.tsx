@@ -15,7 +15,7 @@ import Typo from "@/components/Typo";
 import { XCircle } from "phosphor-react-native";
 import SearchView from "@/components/SearchView";
 import { productFilters } from "@/utils/defaultData";
-import { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAuthStore } from "@/store/store";
 import { AddVariantProps, MerchantDataProps, ProductProps } from "@/types";
@@ -33,31 +33,41 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import VariantSheet from "@/components/BottomSheets/VariantSheet";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import MerchantData from "@/components/universal/MerchantData";
 import MerchantBanner from "@/components/universal/MerchantBanner";
 import { commonStyles } from "@/constants/commonStyles";
 import ProductFooter from "@/components/universal/ProductFooter";
 import CategoryItem from "@/components/universal/CategoryItem";
+import ClearCartSheet from "@/components/BottomSheets/universal/ClearCartSheet";
+import DuplicateVariantSheet from "@/components/BottomSheets/universal/DuplicateVariantSheet";
 
 const { height } = Dimensions.get("window");
 
 const Product = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>("");
-  const [categoryProducts, setCategoryProducts] = useState<{
-    [key: string]: ProductProps[];
-  }>({});
   const [product, setProduct] = useState<ProductProps | null>(null);
+  const [productId, setProductId] = useState<string | null>(null);
 
   const variantSheetRef = useRef<BottomSheet>(null);
+  const clearCartSheetRef = useRef<BottomSheet>(null);
+  const duplicateVariantSheetRef = useRef<BottomSheet>(null);
 
   const variantSheetSnapPoints = useMemo(() => ["60%"], []);
+  const clearCartSheetSnapPoints = useMemo(() => ["28%"], []);
+  const duplicateSheetSnapPoints = useMemo(() => ["40%"], []);
 
   const { merchantId } = useLocalSearchParams();
   const { selectedBusiness, userId } = useAuthStore.getState();
   const { latitude, longitude } = useSafeLocation();
 
   const CATEGORY_LIMIT: number = 5;
+
+  const queryClient = useQueryClient();
 
   const {
     data: categoryData,
@@ -92,8 +102,13 @@ const Product = () => {
   };
 
   const openVariantSheet = (product: ProductProps) => {
-    if (product) {
-      setProduct(product);
+    if (!product) return;
+
+    if (product.cartCount) {
+      setProductId(product.productId);
+      duplicateVariantSheetRef.current?.snapToIndex(0);
+    } else {
+      setProduct((prevProduct) => prevProduct || product); // Preserve product state
       variantSheetRef.current?.snapToIndex(0);
     }
   };
@@ -117,52 +132,10 @@ const Product = () => {
         },
       });
 
-      setCategoryProducts((prev) => {
-        const updatedProducts = { ...prev };
-        for (const categoryId in updatedProducts) {
-          updatedProducts[categoryId] = updatedProducts[categoryId].map(
-            (product) => {
-              if (product.productId === data.productId) {
-                return {
-                  ...product,
-                  cartCount: (product.cartCount || 0) + data.quantity,
-                };
-              }
-              return product;
-            }
-          );
-        }
-
-        return updatedProducts;
-      });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
 
       variantSheetRef.current?.close();
     }
-  };
-
-  const handleClearCart = () => {
-    setCategoryProducts((prev) => {
-      const updatedProducts = JSON.parse(JSON.stringify(prev));
-
-      for (const categoryId in updatedProducts) {
-        updatedProducts[categoryId] = updatedProducts[categoryId].map(
-          (product: ProductProps) => ({
-            ...product,
-            cartCount: 0,
-          })
-        );
-      }
-
-      return updatedProducts;
-    });
-
-    useAuthStore.setState({
-      cart: {
-        showCart: false,
-        merchant: "",
-        cartId: "",
-      },
-    });
   };
 
   const renderBackdrop = useCallback(
@@ -212,7 +185,9 @@ const Product = () => {
 
         <FlatList
           data={categoryData?.pages.flatMap((page) => page.data) || []}
-          renderItem={({ item }) => <CategoryItem category={item} />}
+          renderItem={({ item }) => (
+            <CategoryItem category={item} openVariant={openVariantSheet} />
+          )}
           keyExtractor={(item, index) => `category-${item.categoryId}-${index}`}
           onEndReached={() => hasNextCategoryPage && fetchNextCategoryPage()}
           onEndReachedThreshold={0.5}
@@ -260,7 +235,7 @@ const Product = () => {
           }
         />
 
-        <FloatingCart onClearCart={handleClearCart} />
+        <FloatingCart onClearCart={() => clearCartSheetRef.current?.expand()} />
 
         <BottomSheet
           ref={variantSheetRef}
@@ -275,6 +250,30 @@ const Product = () => {
             product={product ? product : null}
             onAddItem={onAddItem}
           />
+        </BottomSheet>
+
+        <BottomSheet
+          ref={clearCartSheetRef}
+          index={-1}
+          snapPoints={clearCartSheetSnapPoints}
+          enableDynamicSizing={false}
+          enablePanDownToClose
+          backdropComponent={renderBackdrop}
+        >
+          <ClearCartSheet
+            closeClearCartSheet={() => clearCartSheetRef.current?.close()}
+          />
+        </BottomSheet>
+
+        <BottomSheet
+          ref={duplicateVariantSheetRef}
+          index={-1}
+          snapPoints={duplicateSheetSnapPoints}
+          enableDynamicSizing={false}
+          enablePanDownToClose
+          backdropComponent={renderBackdrop}
+        >
+          <DuplicateVariantSheet productId={productId} />
         </BottomSheet>
       </View>
     </GestureHandlerRootView>

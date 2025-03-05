@@ -5,35 +5,13 @@ import { useAuthStore } from "@/store/store";
 import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
 import Typo from "../Typo";
 import { XCircle } from "phosphor-react-native";
-import { clearCart } from "@/service/universal";
 import { FC } from "react";
 import { router } from "expo-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const FloatingCart: FC<{ onClearCart: () => void }> = ({ onClearCart }) => {
   const showCart = useAuthStore((state) => state.cart.showCart);
   const merchant = useAuthStore((state) => state.cart.merchant);
   const cartId = useAuthStore((state) => state.cart.cartId);
-
-  const queryClient = useQueryClient();
-
-  const handleClearCartMutation = useMutation({
-    mutationKey: ["clear-cart"],
-    mutationFn: () => clearCart(cartId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products"] });
-      useAuthStore.setState({
-        cart: {
-          showCart: false,
-          merchant: "",
-          cartId: "",
-        },
-        promoCode: null,
-      });
-
-      onClearCart();
-    },
-  });
 
   return showCart ? (
     <Animated.View
@@ -77,10 +55,7 @@ const FloatingCart: FC<{ onClearCart: () => void }> = ({ onClearCart }) => {
         </Typo>
       </Pressable>
 
-      <Pressable
-        onPress={() => handleClearCartMutation.mutate()}
-        style={styles.clearBtn}
-      >
+      <Pressable onPress={onClearCart} style={styles.clearBtn}>
         <XCircle size={20} color={colors.RED} />
       </Pressable>
     </Animated.View>

@@ -19,8 +19,8 @@ import { Grayscale } from "react-native-color-matrix-image-filters";
 const ProductCard: FC<{
   item: ProductProps;
   openVariant?: (
-    product: ProductProps,
-    updateCartCount: (count: number) => void
+    product: ProductProps
+    // updateCartCount: (count: number) => void
   ) => void;
   cartCount?: number | null;
   showAddCart: boolean;
@@ -56,6 +56,7 @@ const ProductCard: FC<{
 
   const handleDecrement = () => {
     if (!isUserAuthenticated()) return;
+    if (!item.inventory) return;
 
     if (item.variantAvailable) {
       console.log(`Variant available`);
@@ -69,7 +70,8 @@ const ProductCard: FC<{
     if (!item.inventory) return;
 
     if (item.variantAvailable) {
-      openVariant?.(item, (newCount) => setCount(newCount));
+      // openVariant?.(item, (newCount) => setCount(newCount));
+      openVariant?.(item);
     } else {
       setCount((prev) => (prev ? prev + 1 : 1));
     }
