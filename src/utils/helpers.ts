@@ -1,7 +1,8 @@
 import { useAuthStore } from "@/store/store";
 import * as Location from "expo-location";
 import { Audio } from "expo-av";
-import { Alert, Linking } from "react-native";
+import { Alert, Linking, PermissionsAndroid } from "react-native";
+import messaging from "@react-native-firebase/messaging";
 
 export const requestLocationPermission = async () => {
   try {
@@ -87,4 +88,18 @@ export const formatTime = (hours: number, minutes: number): string => {
   const formattedMinutes = String(minutes).padStart(2, "0");
 
   return `${formattedHours}:${formattedMinutes} ${period}`;
+};
+
+export const requestNotificationPermission = async () => {
+  PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+  const authStatus = await messaging().requestPermission();
+  const enabled =
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+  if (enabled) {
+    console.log("Authorization status:", authStatus);
+    const token = await messaging().getToken();
+    console.log("FCM token:", token);
+  }
 };
