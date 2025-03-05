@@ -24,13 +24,13 @@ import {
   addUniversalTip,
   getCartBill,
   placeUniversalOrder,
+  verifyPayment,
 } from "@/service/universal";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CaretUp, XCircle } from "phosphor-react-native";
+import { CaretUp } from "phosphor-react-native";
 import PaymentOptionSheet from "@/components/BottomSheets/common/PaymentOptionSheet";
 import { useAuthStore } from "@/store/store";
-import { removeAppliedPromoCode } from "@/service/userService";
 import { commonStyles } from "@/constants/commonStyles";
 import AppliedPromoCode from "@/components/common/AppliedPromoCode";
 
@@ -71,7 +71,36 @@ const Bill = () => {
     mutationKey: ["place-universal-order"],
     mutationFn: () => placeUniversalOrder(selectedPaymentMode),
     onSuccess: (data) => {
-      if (data?.orderId) {
+      if (selectedPaymentMode === "Online-payment") {
+        const { orderId, amount } = data;
+
+        if (orderId) {
+          verifyPaymentMutation.mutate({
+            orderId,
+            amount,
+          });
+        }
+      } else {
+        if (data?.success && data?.orderId) {
+          useAuthStore.setState({
+            cart: {
+              showCart: false,
+              merchant: "",
+              cartId: "",
+            },
+          });
+          router.replace({ pathname: "/(tabs)" });
+        }
+      }
+    },
+  });
+
+  const verifyPaymentMutation = useMutation({
+    mutationKey: ["verify-universal-payment"],
+    mutationFn: ({ orderId, amount }: { orderId: string; amount: number }) =>
+      verifyPayment(orderId, amount),
+    onSuccess: (data) => {
+      if (data) {
         useAuthStore.setState({
           cart: {
             showCart: false,

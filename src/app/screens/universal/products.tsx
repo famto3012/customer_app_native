@@ -45,6 +45,7 @@ import ProductFooter from "@/components/universal/ProductFooter";
 import CategoryItem from "@/components/universal/CategoryItem";
 import ClearCartSheet from "@/components/BottomSheets/universal/ClearCartSheet";
 import DuplicateVariantSheet from "@/components/BottomSheets/universal/DuplicateVariantSheet";
+import MerchantRatingSheet from "@/components/BottomSheets/universal/MerchantRatingSheet";
 
 const { height } = Dimensions.get("window");
 
@@ -56,10 +57,12 @@ const Product = () => {
   const variantSheetRef = useRef<BottomSheet>(null);
   const clearCartSheetRef = useRef<BottomSheet>(null);
   const duplicateVariantSheetRef = useRef<BottomSheet>(null);
+  const ratingSheetRef = useRef<BottomSheet>(null);
 
   const variantSheetSnapPoints = useMemo(() => ["60%"], []);
   const clearCartSheetSnapPoints = useMemo(() => ["28%"], []);
   const duplicateSheetSnapPoints = useMemo(() => ["40%"], []);
+  const ratingSheetSnapPoints = useMemo(() => ["45%"], []);
 
   const { merchantId } = useLocalSearchParams();
   const { selectedBusiness, userId } = useAuthStore.getState();
@@ -199,6 +202,7 @@ const Product = () => {
 
                 <MerchantData
                   merchantData={merchantData ? merchantData : null}
+                  openRating={() => ratingSheetRef.current?.snapToIndex(0)}
                 />
               </View>
 
@@ -274,6 +278,21 @@ const Product = () => {
           backdropComponent={renderBackdrop}
         >
           <DuplicateVariantSheet productId={productId} />
+        </BottomSheet>
+
+        <BottomSheet
+          ref={ratingSheetRef}
+          index={-1}
+          snapPoints={ratingSheetSnapPoints}
+          enableDynamicSizing={false}
+          enablePanDownToClose
+          backdropComponent={renderBackdrop}
+        >
+          <MerchantRatingSheet
+            merchantId={merchantId.toString()}
+            rating={merchantData?.rating || 0}
+            onPress={() => ratingSheetRef.current?.close()}
+          />
         </BottomSheet>
       </View>
     </GestureHandlerRootView>

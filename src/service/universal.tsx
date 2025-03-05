@@ -1,5 +1,6 @@
 import { appAxios } from "@/config/apiInterceptor";
 import { Alert } from "react-native";
+import RazorpayCheckout from "react-native-razorpay";
 
 export const getBusinessCategories = async (
   latitude: number,
@@ -385,7 +386,9 @@ export const placeUniversalOrder = async (paymentMode: string) => {
       paymentMode,
     });
 
-    return res.status === 200 ? res.data : null;
+    console.log("Response of place order", res.data);
+
+    return res.data.success ? res.data : null;
   } catch (err) {
     console.error(`Error in placing order:`, err);
     Alert.alert("Error", "Something went wrong!");
@@ -420,5 +423,82 @@ export const getProductsWithVariantsInCart = async (productId: string) => {
     console.error(`Error in fetching products with variants in cart:`, err);
     Alert.alert("Error", "Something went wrong!");
     return [];
+  }
+};
+
+export const verifyPayment = async (
+  orderId: string,
+  amount: string | number
+) => {
+  try {
+    const razorpayKey = process.env.EXPO_PUBLIC_RAZORPAY_KEY;
+
+    if (!razorpayKey) {
+      throw new Error("Razorpay key is missing. Check environment variables.");
+    }
+
+    const amountInPaise = Math.round(Number(amount) * 100);
+
+    const options = {
+      key: razorpayKey,
+      amount: amountInPaise,
+      currency: "INR",
+      name: "Famto",
+      description: "Order payment",
+      order_id: orderId,
+      prefill: {
+        name: "",
+        email: "",
+        contact: "",
+      },
+      theme: {
+        color: "#00CED1",
+      },
+    };
+
+    return new Promise((resolve, reject) => {
+      RazorpayCheckout.open(options)
+        .then(async (response) => {
+          const paymentDetails = {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          };
+
+          try {
+            const res = await appAxios.post(`/customers/verify-payment`, {
+              paymentDetails,
+            });
+
+            resolve(res.status === 200 ? res.data : null);
+          } catch (error) {
+            console.error("❌ Error in Payment Verification API:", error);
+            reject(error);
+          }
+        })
+        .catch((error) => {
+          console.error("❌ Payment failed or canceled:", error);
+          reject(error);
+        });
+    });
+  } catch (err) {
+    console.error("❌ Error in verifying payment:", err);
+    return null;
+  }
+};
+
+export const rateMerchant = async (data: {
+  merchantId: string;
+  rating: number;
+  review?: string;
+}) => {
+  try {
+    const res = await appAxios.post(`/customers/rate-merchant`, data);
+
+    return res.status === 200 ? res.data : null;
+  } catch (err) {
+    console.error(`Error in rating merchant:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return null;
   }
 };
