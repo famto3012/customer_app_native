@@ -406,3 +406,19 @@ export const applyUniversalPromoCode = async (promoCode: string) => {
     return null;
   }
 };
+
+export const getProductsWithVariantsInCart = async (productId: string) => {
+  try {
+    const res = await appAxios.get(`/customers/products-with-variants`, {
+      params: {
+        productId,
+      },
+    });
+
+    return res.status === 200 ? res.data : [];
+  } catch (err) {
+    console.error(`Error in fetching products with variants in cart:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return [];
+  }
+};

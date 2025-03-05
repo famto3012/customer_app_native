@@ -36,7 +36,10 @@ const useProducts = (categoryId: string, userId: string) => {
   });
 };
 
-const ProductList: FC<{ categoryId: string }> = ({ categoryId }) => {
+const ProductList: FC<{
+  categoryId: string;
+  openVariant: (product: ProductProps) => void;
+}> = ({ categoryId, openVariant }) => {
   const { userId } = useAuthStore.getState();
   const queryClient = useQueryClient();
 
@@ -73,7 +76,7 @@ const ProductList: FC<{ categoryId: string }> = ({ categoryId }) => {
       renderItem={({ item }) => (
         <ProductCard
           item={item}
-          openVariant={() => {}}
+          openVariant={(product: ProductProps) => openVariant(product)}
           cartCount={item?.cartCount || null}
           showAddCart={true}
         />
@@ -96,7 +99,8 @@ const ProductList: FC<{ categoryId: string }> = ({ categoryId }) => {
 
 const CategoryItem: FC<{
   category: CategoryProps;
-}> = ({ category }) => {
+  openVariant: (product: ProductProps) => void;
+}> = ({ category, openVariant }) => {
   const [isExpanded, setIsExpanded] = useState(category.status);
 
   return (
@@ -132,7 +136,10 @@ const CategoryItem: FC<{
           entering={FadeInUp.springify().damping(12).stiffness(100)}
           exiting={FadeOut.springify().damping(10).stiffness(80)}
         >
-          <ProductList categoryId={category.categoryId} />
+          <ProductList
+            categoryId={category.categoryId}
+            openVariant={(product: ProductProps) => openVariant(product)}
+          />
         </Animated.View>
       )}
     </Animated.View>
