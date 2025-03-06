@@ -264,6 +264,10 @@ export const addProductToCart = async (
   variantTypeId?: string
 ) => {
   try {
+    console.log("productId", productId);
+    console.log("quantity", quantity);
+    console.log("variantTypeId", variantTypeId);
+
     const res = await appAxios.put("/customers/update-cart", {
       productId,
       quantity,
@@ -498,6 +502,29 @@ export const rateMerchant = async (data: {
     return res.status === 200 ? res.data : null;
   } catch (err) {
     console.error(`Error in rating merchant:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return null;
+  }
+};
+
+export const addItemsToCart = async (
+  merchantId: string,
+  items: {
+    productId: string;
+    price: number;
+    quantity: number;
+    variantTypeId?: string;
+  }[]
+) => {
+  try {
+    const res = await appAxios.post(`/customers/add-items`, {
+      merchantId,
+      items,
+    });
+
+    return res.status === 200 ? res.data.cartId : null;
+  } catch (err) {
+    console.error(`Error in adding items:`, err);
     Alert.alert("Error", "Something went wrong!");
     return null;
   }

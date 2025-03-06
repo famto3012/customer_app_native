@@ -8,10 +8,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addProductToCart } from "@/service/universal";
 import { CartProps } from "@/types";
 import { useAuthStore } from "@/store/store";
+import { updateCart } from "@/localDB/controller/cartController";
 
 const ItemList: FC<{ items: CartProps["items"] }> = ({ items }) => {
   const [cartItems, setCartItems] = useState<CartProps["items"]>([]);
   const queryClient = useQueryClient();
+
+  const { selectedMerchant } = useAuthStore.getState();
+
   useEffect(() => {
     setCartItems(items);
   }, [items]);
@@ -20,24 +24,58 @@ const ItemList: FC<{ items: CartProps["items"] }> = ({ items }) => {
     mutationKey: ["update-cart"],
     mutationFn: async ({
       productId,
+      productName,
+      price,
       quantity,
       variantTypeId,
+      variantTypeName,
     }: {
       productId: string;
+      productName: string;
+      price: number;
       quantity: number;
-      variantTypeId: string;
+      variantTypeId?: string;
+      variantTypeName?: string;
     }): Promise<boolean> =>
       addProductToCart(productId, quantity, variantTypeId),
 
-    onSuccess: async (_, { productId, quantity }) => {
+    onSuccess: async (
+      _,
+      {
+        productId,
+        productName,
+        price,
+        quantity,
+        variantTypeId,
+        variantTypeName,
+      }
+    ) => {
+      updateCart(
+        selectedMerchant?.merchantId || "",
+        productId,
+        productName,
+        price, // ✅ Ensure price is passed
+        quantity,
+        variantTypeId,
+        variantTypeName
+      );
       setCartItems((prev) => {
         const updatedItems = prev
-          .map((item) =>
-            item.productId.id === productId ? { ...item, quantity } : item
-          )
+          .map((item) => {
+            const itemProductId =
+              typeof item.productId === "object"
+                ? item.productId.id
+                : item.productId;
+            const itemVariantTypeId = item.variantTypeId ?? null;
+
+            const isMatchingProduct =
+              itemProductId === productId &&
+              (variantTypeId ? itemVariantTypeId?.id === variantTypeId : true);
+
+            return isMatchingProduct ? { ...item, quantity, price } : item; // ✅ Update price
+          })
           .filter((item) => item.quantity > 0);
 
-        // If cart is empty, navigate back and reset cart
         if (updatedItems.length === 0) {
           useAuthStore.setState({
             cart: {
@@ -69,6 +107,11 @@ const ItemList: FC<{ items: CartProps["items"] }> = ({ items }) => {
             <Typo size={14} color={colors.NEUTRAL900} fontFamily="SemiBold">
               ₹ {product?.price}
             </Typo>
+            {product?.variantTypeId?.variantTypeName && (
+              <Typo size={14} color={colors.NEUTRAL400}>
+                {product?.variantTypeId?.variantTypeName}
+              </Typo>
+            )}
           </View>
 
           <View style={[styles.actionBtn]}>
@@ -76,8 +119,11 @@ const ItemList: FC<{ items: CartProps["items"] }> = ({ items }) => {
               onPress={() =>
                 handleUpdateCartMutation.mutate({
                   productId: product.productId.id,
+                  productName: product.productId.productName,
+                  price: product.price,
                   quantity: product.quantity - 1,
-                  variantTypeId: product?.variantTypeId || "",
+                  variantTypeId: product?.variantTypeId?.id || "",
+                  variantTypeName: product.variantTypeId?.variantTypeName,
                 })
               }
               style={styles.btn}
@@ -93,8 +139,11 @@ const ItemList: FC<{ items: CartProps["items"] }> = ({ items }) => {
               onPress={() =>
                 handleUpdateCartMutation.mutate({
                   productId: product.productId.id,
+                  productName: product.productId.productName,
+                  price: product.price,
                   quantity: product.quantity + 1,
-                  variantTypeId: product?.variantTypeId || "",
+                  variantTypeId: product?.variantTypeId?.id || "",
+                  variantTypeName: product.variantTypeId?.variantTypeName,
                 })
               }
               style={styles.btn}

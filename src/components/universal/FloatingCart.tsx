@@ -1,4 +1,10 @@
-import { Image, Pressable, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
 import { colors, radius, spacingY } from "@/constants/theme";
 import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import { useAuthStore } from "@/store/store";
@@ -7,11 +13,39 @@ import Typo from "../Typo";
 import { XCircle } from "phosphor-react-native";
 import { FC } from "react";
 import { router } from "expo-router";
+import { getCartItems } from "@/localDB/controller/cartController";
+import { useMutation } from "@tanstack/react-query";
+import { addItemsToCart } from "@/service/universal";
 
 const FloatingCart: FC<{ onClearCart: () => void }> = ({ onClearCart }) => {
   const showCart = useAuthStore((state) => state.cart.showCart);
   const merchant = useAuthStore((state) => state.cart.merchant);
   const cartId = useAuthStore((state) => state.cart.cartId);
+
+  const { selectedMerchant } = useAuthStore.getState();
+
+  const handleAddItemsToCartMutation = useMutation({
+    mutationKey: ["add-items"],
+    mutationFn: ({ merchantId, items }: { merchantId: any; items: any }) =>
+      addItemsToCart(merchantId, items),
+    onSuccess: (data) => {
+      router.push({
+        pathname: "/screens/universal/checkout",
+        params: {
+          cartId: data,
+        },
+      });
+    },
+  });
+
+  const handlePrepare = async () => {
+    const items = await getCartItems();
+
+    handleAddItemsToCartMutation.mutate({
+      merchantId: selectedMerchant?.merchantId || "",
+      items,
+    });
+  };
 
   return showCart ? (
     <Animated.View
@@ -39,24 +73,22 @@ const FloatingCart: FC<{ onClearCart: () => void }> = ({ onClearCart }) => {
         </Typo>
       </View>
 
-      <Pressable
-        onPress={() =>
-          router.push({
-            pathname: "/screens/universal/checkout",
-            params: {
-              cartId,
-            },
-          })
-        }
-        style={styles.checkoutBtn}
-      >
-        <Typo size={12} color={colors.WHITE}>
-          Checkout
-        </Typo>
+      <Pressable onPress={handlePrepare} style={styles.checkoutBtn}>
+        {handleAddItemsToCartMutation.isPending ? (
+          <ActivityIndicator
+            size="small"
+            color={colors.WHITE}
+            style={{ paddingHorizontal: scale(20) }}
+          />
+        ) : (
+          <Typo size={12} color={colors.WHITE}>
+            Checkout
+          </Typo>
+        )}
       </Pressable>
 
       <Pressable onPress={onClearCart} style={styles.clearBtn}>
-        <XCircle size={20} color={colors.RED} />
+        <XCircle size={scale(24)} color={colors.RED} />
       </Pressable>
     </Animated.View>
   ) : null;

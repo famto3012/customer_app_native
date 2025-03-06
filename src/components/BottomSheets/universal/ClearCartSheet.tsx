@@ -5,33 +5,15 @@ import Typo from "@/components/Typo";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, spacingX } from "@/constants/theme";
 import Button from "@/components/Button";
-import { useAuthStore } from "@/store/store";
-import { clearCart } from "@/service/universal";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { clearCart } from "@/localDB/controller/cartController";
 
 const ClearCartSheet: FC<{ closeClearCartSheet: () => void }> = ({
   closeClearCartSheet,
 }) => {
-  const cartId = useAuthStore((state) => state.cart.cartId);
-
-  const queryClient = useQueryClient();
-
-  const handleClearCartMutation = useMutation({
-    mutationKey: ["clear-cart"],
-    mutationFn: () => clearCart(cartId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products"] });
-      useAuthStore.setState({
-        cart: {
-          showCart: false,
-          merchant: "",
-          cartId: "",
-        },
-        promoCode: null,
-      });
-      closeClearCartSheet();
-    },
-  });
+  const handleClearCart = () => {
+    clearCart();
+    closeClearCartSheet();
+  };
 
   return (
     <BottomSheetScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -60,8 +42,7 @@ const ClearCartSheet: FC<{ closeClearCartSheet: () => void }> = ({
             />
             <Button
               title="Clear"
-              onPress={() => handleClearCartMutation.mutate()}
-              isLoading={handleClearCartMutation.isPending}
+              onPress={handleClearCart}
               style={{ flex: 1, backgroundColor: colors.LIGHT_RED }}
               labelColor={colors.RED}
             />

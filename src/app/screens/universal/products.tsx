@@ -52,7 +52,8 @@ const { height } = Dimensions.get("window");
 const Product = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>("");
   const [product, setProduct] = useState<ProductProps | null>(null);
-  const [productId, setProductId] = useState<string | null>(null);
+  const [duplicateProduct, setDuplicateProductId] =
+    useState<ProductProps | null>(null);
 
   const variantSheetRef = useRef<BottomSheet>(null);
   const clearCartSheetRef = useRef<BottomSheet>(null);
@@ -107,37 +108,22 @@ const Product = () => {
   const openVariantSheet = (product: ProductProps) => {
     if (!product) return;
 
+    console.log("product", product);
+
     if (product.cartCount) {
-      setProductId(product.productId);
+      setDuplicateProductId(product);
       duplicateVariantSheetRef.current?.snapToIndex(0);
     } else {
-      setProduct((prevProduct) => prevProduct || product); // Preserve product state
+      setProduct((prevProduct) => prevProduct || product);
       variantSheetRef.current?.snapToIndex(0);
     }
   };
 
-  const onAddItem = async (data: AddVariantProps) => {
-    const quantity = data.quantity ?? 0;
-    const res = await addProductToCart(
-      data.productId,
-      quantity,
-      data.variantTypeId
-    );
-
-    if (res) {
-      const floatingCartRes = await haveValidCart();
-
-      useAuthStore.setState({
-        cart: {
-          showCart: floatingCartRes.haveCart,
-          merchant: floatingCartRes.merchant,
-          cartId: floatingCartRes.cartId,
-        },
-      });
-
-      queryClient.invalidateQueries({ queryKey: ["products"] });
-
-      variantSheetRef.current?.close();
+  const handleNewCustomization = (product: ProductProps | null) => {
+    if (product?.productId) {
+      setProduct(product);
+      duplicateVariantSheetRef.current?.close();
+      variantSheetRef.current?.snapToIndex(0);
     }
   };
 
@@ -252,7 +238,8 @@ const Product = () => {
         >
           <VariantSheet
             product={product ? product : null}
-            onAddItem={onAddItem}
+            // onAddItem={onAddItem}
+            onAddItem={() => variantSheetRef.current?.close()}
           />
         </BottomSheet>
 
@@ -277,7 +264,10 @@ const Product = () => {
           enablePanDownToClose
           backdropComponent={renderBackdrop}
         >
-          <DuplicateVariantSheet productId={productId} />
+          <DuplicateVariantSheet
+            product={duplicateProduct}
+            onNewCustomization={handleNewCustomization}
+          />
         </BottomSheet>
 
         <BottomSheet

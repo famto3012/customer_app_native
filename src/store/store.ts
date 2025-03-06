@@ -34,6 +34,7 @@ interface AuthStore {
   promoCode: string | null;
   orders: Order[];
   biometricAuth: boolean;
+  selectedMerchant: { merchantId: string | null; merchantName: string | null };
   setUserId: (userId: string) => void;
   setToken: (token: string) => void;
   setRefreshToken: (refreshToken: string) => void;
@@ -49,6 +50,7 @@ interface AuthStore {
   addOrder: (order: Order) => void;
   clearOrders: () => void;
   setBiometricAuth: (status: boolean) => void;
+  setSelectedMerchant: (merchantId: string, merchantName: string) => void;
   clearStorage: () => void;
 }
 
@@ -65,6 +67,7 @@ export const useAuthStore = create<AuthStore>()(
       promoCode: null,
       orders: [],
       biometricAuth: false,
+      selectedMerchant: { merchantId: null, merchantName: null },
 
       setUserId: (userId) => {
         set({ userId });
@@ -113,6 +116,15 @@ export const useAuthStore = create<AuthStore>()(
         set({ biometricAuth: status });
         secureStorage.setItem("biometricAuth", JSON.stringify(status));
       },
+      setSelectedMerchant: (merchantId, merchantName) => {
+        const selectedMerchant = { merchantId, merchantName };
+        set({ selectedMerchant });
+        secureStorage.setItem(
+          "selectedMerchant",
+          JSON.stringify(selectedMerchant)
+        );
+      },
+
       clearStorage: () => {
         set({
           userId: null,

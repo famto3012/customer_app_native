@@ -4,6 +4,7 @@ import Typo from "./Typo";
 
 import { ButtonProps } from "@/types";
 import { colors, radius } from "@/constants/theme";
+import { scale } from "@/utils/styling";
 
 const Button = ({
   title,
@@ -38,7 +39,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
     backgroundColor: colors.PRIMARY,
-    padding: 15,
+    paddingVertical: scale(15),
     borderRadius: radius._30,
   },
 });
