@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/store/store";
 import * as Location from "expo-location";
 import { Audio } from "expo-av";
-import { Alert, Linking, PermissionsAndroid } from "react-native";
+import { Alert, Linking, PermissionsAndroid, Platform } from "react-native";
 import messaging from "@react-native-firebase/messaging";
 
 export const requestLocationPermission = async () => {
@@ -91,15 +91,31 @@ export const formatTime = (hours: number, minutes: number): string => {
 };
 
 export const requestNotificationPermission = async () => {
-  PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
-  const authStatus = await messaging().requestPermission();
-  const enabled =
-    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  try {
+    if (Platform.OS === "android") {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+      );
 
-  if (enabled) {
-    console.log("Authorization status:", authStatus);
-    const token = await messaging().getToken();
-    console.log("FCM token:", token);
+      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+        console.log("Notification permission denied");
+        return;
+      }
+    }
+
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (enabled) {
+      console.log("Authorization status:", authStatus);
+      const token = await messaging().getToken();
+      console.log("FCM token:", token);
+    } else {
+      console.log("User denied push notifications");
+    }
+  } catch (error) {
+    console.log("Error requesting notification permission:", error);
   }
 };

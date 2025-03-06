@@ -1,10 +1,6 @@
 // firebaseConfig.ts
-import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-} from "firebase/auth";
+import { initializeApp } from "@react-native-firebase/app";
+import { getAuth, signInWithPhoneNumber } from "@react-native-firebase/auth";
 import {
   API_KEY,
   APP_ID,
@@ -27,4 +23,4 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-export { auth, RecaptchaVerifier, signInWithPhoneNumber };
+export { auth, signInWithPhoneNumber };

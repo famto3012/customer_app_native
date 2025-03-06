@@ -64,7 +64,10 @@ const NotificationPermission = () => {
           paddingBottom: verticalScale(30),
         }}
       >
-        <Button title="Turn on notifications" onPress={() => {}} />
+        <Button
+          title="Turn on notifications"
+          onPress={requestNotificationPermission}
+        />
         <Pressable
           style={{ padding: scale(10) }}
           onPress={() => router.push("/delivery-ad")}
