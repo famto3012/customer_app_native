@@ -1,15 +1,16 @@
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import { FC, useEffect, useState } from "react";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  addProductToCart,
-  getProductsWithVariantsInCart,
-} from "@/service/universal";
 import Typo from "@/components/Typo";
 import { colors, radius, spacingY } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
 import Button from "@/components/Button";
+import { ProductProps } from "@/types";
+import {
+  getItemsWithVariants,
+  updateCart,
+} from "@/localDB/controller/cartController";
+import { useAuthStore } from "@/store/store";
 
 interface DuplicateVariantProps {
   productId: string;
@@ -20,43 +21,21 @@ interface DuplicateVariantProps {
   price: number;
 }
 
-const DuplicateVariantSheet: FC<{ productId: string | null }> = ({
-  productId,
-}) => {
+const DuplicateVariantSheet: FC<{
+  product: ProductProps | null;
+  onNewCustomization: (product: ProductProps | null) => void;
+}> = ({ product, onNewCustomization }) => {
   const [localData, setLocalData] = useState<DuplicateVariantProps[]>([]);
 
-  const queryClient = useQueryClient();
-
-  const { data } = useQuery<DuplicateVariantProps[]>({
-    queryKey: ["duplicate-variant"],
-    queryFn: () => getProductsWithVariantsInCart(productId || ""),
-    enabled: !!productId,
-  });
-
   useEffect(() => {
-    data && data?.length > 0 && setLocalData(data);
-  }, [data]);
+    fetchData();
+  }, [product?.productId]);
 
-  const addItemMutation = useMutation({
-    mutationKey: ["add-item"],
-    mutationFn: ({
-      productId,
-      quantity,
-      variantTypeId,
-    }: {
-      productId: string;
-      quantity: number;
-      variantTypeId: string;
-    }) => addProductToCart(productId, quantity, variantTypeId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["duplicate-variant"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["products"],
-      });
-    },
-  });
+  const fetchData = async () => {
+    const items = await getItemsWithVariants(product?.productId || "");
+
+    setLocalData(items);
+  };
 
   const RenderItem = ({ item }: { item: DuplicateVariantProps }) => {
     return (
@@ -87,13 +66,28 @@ const DuplicateVariantSheet: FC<{ productId: string | null }> = ({
 
         <View style={styles.actionBtn}>
           <TouchableOpacity
-            onPress={() =>
-              addItemMutation.mutate({
-                productId: item.productId,
-                quantity: item.quantity - 1,
-                variantTypeId: item.variantTypeId,
-              })
-            }
+            onPress={() => {
+              const newCount = item.quantity - 1;
+
+              updateCart(
+                useAuthStore.getState().selectedMerchant.merchantId || "",
+                item.productId,
+                item.productName,
+                item.price,
+                newCount,
+                item.variantTypeId,
+                item.variantTypeName
+              );
+
+              const updatedData = localData.map((dataItem) =>
+                dataItem.productId === item.productId &&
+                dataItem.variantTypeId === item.variantTypeId
+                  ? { ...dataItem, quantity: newCount }
+                  : dataItem
+              );
+
+              setLocalData(updatedData);
+            }}
             style={styles.btn}
           >
             <Typo size={14} color={colors.PRIMARY}>
@@ -104,13 +98,28 @@ const DuplicateVariantSheet: FC<{ productId: string | null }> = ({
             {item.quantity}
           </Typo>
           <TouchableOpacity
-            onPress={() =>
-              addItemMutation.mutate({
-                productId: item.productId,
-                quantity: item.quantity + 1,
-                variantTypeId: item.variantTypeId,
-              })
-            }
+            onPress={() => {
+              const newCount = item.quantity + 1;
+
+              updateCart(
+                useAuthStore.getState().selectedMerchant.merchantId || "",
+                item.productId,
+                item.productName,
+                item.price,
+                newCount,
+                item.variantTypeId,
+                item.variantTypeName
+              );
+
+              const updatedData = localData.map((dataItem) =>
+                dataItem.productId === item.productId &&
+                dataItem.variantTypeId === item.variantTypeId
+                  ? { ...dataItem, quantity: newCount }
+                  : dataItem
+              );
+
+              setLocalData(updatedData);
+            }}
             style={styles.btn}
           >
             <Typo size={14} color={colors.PRIMARY}>
@@ -145,7 +154,7 @@ const DuplicateVariantSheet: FC<{ productId: string | null }> = ({
 
       <Button
         title="+ Add new Customization"
-        onPress={() => {}}
+        onPress={() => onNewCustomization(product)}
         style={{ marginTop: "auto", marginBottom: verticalScale(20) }}
       />
     </BottomSheetScrollView>

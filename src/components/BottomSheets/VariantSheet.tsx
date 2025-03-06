@@ -13,64 +13,74 @@ import Typo from "../Typo";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius, spacingX } from "@/constants/theme";
 import { addProductToCart, getVariants } from "@/service/universal";
+import { updateCart } from "@/localDB/controller/cartController";
+import { useAuthStore } from "@/store/store";
+import { useQuery } from "@tanstack/react-query";
+
+interface SelectedVariantProps {
+  variantTypeId: string;
+  price: number | null;
+  variantTypeName: string;
+}
 
 const VariantSheet: FC<{
   product: ProductProps | null;
-  onAddItem: (data: AddVariantProps) => void; // ✅ Fixed function signature
+  onAddItem: () => void;
 }> = ({ product, onAddItem }) => {
-  const [variants, setVariants] = useState<Variant[]>([]);
-  const [selected, setSelected] = useState<string>("");
+  const [selected, setSelected] = useState<SelectedVariantProps>({
+    variantTypeId: "",
+    price: null,
+    variantTypeName: "",
+  });
   const [count, setCount] = useState<number>(1);
 
-  useEffect(() => {
-    fetchVariants();
-  }, [product?.productId]);
+  const { data: variants } = useQuery<Variant[]>({
+    queryKey: ["product-variants", product?.productId],
+    queryFn: () => getVariants(product?.productId || ""),
+    enabled: !!product?.productId,
+  });
 
   useEffect(() => {
-    if (variants.length > 0 && !selected) {
-      setSelected(variants[0]?.variantTypes[0]?._id || ""); // ✅ Ensure fallback
+    if (variants && variants?.length > 0 && !selected.variantTypeId) {
+      setSelected({
+        variantTypeId: variants[0]?.variantTypes[0]?._id || "",
+        price:
+          variants[0]?.variantTypes[0]?.discountPrice ||
+          variants[0]?.variantTypes[0]?.price ||
+          null,
+        variantTypeName: variants[0].variantTypes[0].typeName,
+      });
+
+      setCount(1);
     }
   }, [variants]);
 
-  const fetchVariants = async () => {
-    if (!product?.productId) return;
-    try {
-      const res = await getVariants(product.productId);
-      setVariants(res);
-    } catch (error) {
-      console.error("Error fetching variants:", error);
-    }
-  };
-
-  const handleSelectVariant = (typeId: string) => {
-    setSelected(typeId);
+  const handleSelectVariant = (
+    typeId: string,
+    price: number,
+    variantTypeName: string
+  ) => {
+    setSelected({ variantTypeId: typeId, price, variantTypeName });
   };
 
   const handleDecrement = () => {
     if (count > 1) setCount(count - 1);
   };
 
-  const handleIncrement = () => {
-    setCount(count + 1);
-  };
+  const handleIncrement = () => setCount(count + 1);
 
   const handleAddItem = async () => {
     if (selected && count > 0 && product?.productId) {
-      const itemData: AddVariantProps = {
-        productId: product.productId,
-        quantity: count,
-        variantTypeId: selected,
-      };
-
-      const res = await addProductToCart(
-        itemData.productId,
-        itemData.quantity,
-        itemData.variantTypeId
+      updateCart(
+        useAuthStore.getState().selectedMerchant.merchantId || "",
+        product?.productId,
+        product.productName,
+        selected?.price || 0,
+        count,
+        selected.variantTypeId,
+        selected.variantTypeName
       );
-
-      if (res) {
-        onAddItem(itemData);
-      }
+      onAddItem();
     }
   };
 
@@ -96,7 +106,7 @@ const VariantSheet: FC<{
         </View>
 
         <FlatList
-          data={variants}
+          data={variants || []}
           renderItem={({ item }) => (
             <View style={{ marginTop: verticalScale(20) }}>
               <Typo
@@ -112,7 +122,13 @@ const VariantSheet: FC<{
                 data={item.variantTypes}
                 renderItem={({ item }) => (
                   <Pressable
-                    onPress={() => handleSelectVariant(item._id)}
+                    onPress={() =>
+                      handleSelectVariant(
+                        item._id,
+                        item?.discountPrice || item.price,
+                        item.typeName
+                      )
+                    }
                     style={styles.variantRow}
                   >
                     <Typo
@@ -143,10 +159,11 @@ const VariantSheet: FC<{
                       <View
                         style={[
                           styles.radio,
-                          selected === item._id && styles.radioSelected,
+                          selected.variantTypeId === item._id &&
+                            styles.radioSelected,
                         ]}
                       >
-                        {selected === item._id && (
+                        {selected.variantTypeId === item._id && (
                           <View style={styles.radioInner} />
                         )}
                       </View>

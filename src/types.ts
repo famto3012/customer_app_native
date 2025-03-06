@@ -192,7 +192,7 @@ interface Item {
   productId: ProductId;
   quantity: number;
   price: number;
-  variantTypeId: null;
+  variantTypeId: { id: string; variantTypeName: string } | null;
 }
 
 interface ProductId {

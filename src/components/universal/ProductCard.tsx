@@ -1,40 +1,59 @@
 import { Image, Pressable, StyleSheet, View } from "react-native";
-import { FC, memo, useEffect, useState } from "react";
+import { FC, memo, useCallback, useEffect, useState } from "react";
 import { ProductProps } from "@/types";
 import { scale, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
 import { colors, radius, spacingX } from "@/constants/theme";
 import AddCartButton from "./AddCartButton";
 import { Heart } from "phosphor-react-native";
-import {
-  addProductToCart,
-  haveValidCart,
-  toggleProductFavorite,
-} from "@/service/universal";
+import { toggleProductFavorite } from "@/service/universal";
 import { useAuthStore } from "@/store/store";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { Grayscale } from "react-native-color-matrix-image-filters";
+import { updateCart } from "@/localDB/controller/cartController";
+import { database } from "@/localDB/database";
+import Cart from "@/localDB/models/Cart";
+import { Q } from "@nozbe/watermelondb";
 
 const ProductCard: FC<{
   item: ProductProps;
-  openVariant?: (
-    product: ProductProps
-    // updateCartCount: (count: number) => void
-  ) => void;
+  openVariant?: (product: ProductProps) => void;
   cartCount?: number | null;
   showAddCart: boolean;
 }> = ({ item, openVariant, cartCount, showAddCart }) => {
   const [isFavorite, setIsFavorite] = useState<boolean>(item.isFavorite);
   const [count, setCount] = useState<number | null>(cartCount || null);
 
-  const { token } = useAuthStore.getState();
+  const { token, selectedMerchant } = useAuthStore.getState();
 
-  useEffect(() => {
-    if (count !== null && count >= 0 && !item.variantAvailable) {
-      handleUpdateCartMutation.mutate();
-    }
-  }, [count]);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchCartQuantity = async () => {
+        if (!selectedMerchant?.merchantId) return;
+        const cartCollection = database.get<Cart>("cart");
+        const cartItems = await cartCollection
+          .query()
+          .fetch()
+          .then((items) =>
+            items.filter(
+              (cartItem) =>
+                cartItem.merchantId === selectedMerchant.merchantId &&
+                cartItem.productId === item.productId &&
+                cartItem.quantity > 0
+            )
+          );
+
+        const totalQuantity = cartItems.reduce(
+          (sum, cartItem) => sum + cartItem.quantity,
+          0
+        );
+        setCount(totalQuantity);
+      };
+
+      fetchCartQuantity();
+    }, [item, selectedMerchant])
+  );
 
   useEffect(() => {
     cartCount ? setCount(cartCount) : setCount(null);
@@ -59,9 +78,17 @@ const ProductCard: FC<{
     if (!item.inventory) return;
 
     if (item.variantAvailable) {
-      console.log(`Variant available`);
+      openVariant?.({ ...item, cartCount: count ? count : 0 });
     } else {
-      setCount((prev) => (prev && prev > 0 ? prev - 1 : 0));
+      const newQuantity = count ? count - 1 : 1;
+      newQuantity === 0 ? setCount(null) : setCount(newQuantity);
+      updateCart(
+        selectedMerchant?.merchantId || "",
+        item.productId,
+        item.productName,
+        item.price,
+        newQuantity
+      );
     }
   };
 
@@ -70,31 +97,19 @@ const ProductCard: FC<{
     if (!item.inventory) return;
 
     if (item.variantAvailable) {
-      // openVariant?.(item, (newCount) => setCount(newCount));
-      openVariant?.(item);
+      openVariant?.({ ...item, cartCount: count ? count : 0 });
     } else {
-      setCount((prev) => (prev ? prev + 1 : 1));
+      const newQuantity = count ? count + 1 : 1;
+      setCount(newQuantity);
+      updateCart(
+        selectedMerchant?.merchantId || "",
+        item.productId,
+        item.productName,
+        item.price,
+        newQuantity
+      );
     }
   };
-
-  const handleUpdateCartMutation = useMutation({
-    mutationKey: ["update-cart"],
-    mutationFn: () => {
-      const quantity = count ?? 0;
-      return addProductToCart(item.productId, quantity);
-    },
-    onSuccess: async () => {
-      const floatingCartRes = await haveValidCart();
-
-      useAuthStore.setState({
-        cart: {
-          showCart: floatingCartRes.haveCart,
-          merchant: floatingCartRes.merchant,
-          cartId: floatingCartRes.cartId,
-        },
-      });
-    },
-  });
 
   return (
     <View style={styles.container}>
