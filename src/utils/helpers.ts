@@ -112,10 +112,60 @@ export const requestNotificationPermission = async () => {
       console.log("Authorization status:", authStatus);
       const token = await messaging().getToken();
       console.log("FCM token:", token);
+      useAuthStore.getState().setFcmToken(token);
     } else {
       console.log("User denied push notifications");
     }
   } catch (error) {
     console.log("Error requesting notification permission:", error);
+  }
+};
+
+export const toggleNotificationPermission = async (enable: boolean) => {
+  try {
+    if (enable) {
+      // ENABLE NOTIFICATIONS
+      if (Platform.OS === "android" && Platform.Version >= 33) {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+        );
+
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          console.log("Notification permission denied");
+          return;
+        }
+      }
+
+      const authStatus = await messaging().requestPermission();
+      const hasPermission =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+      if (hasPermission) {
+        console.log("Push notifications enabled!");
+        const token = await messaging().getToken();
+        console.log("FCM Token:", token);
+        useAuthStore.getState().setFcmToken(token);
+      } else {
+        console.log("User denied push notifications");
+      }
+    } else {
+      // DISABLE NOTIFICATIONS
+      await messaging().deleteToken(); // Remove FCM token
+      console.log("FCM token deleted. Notifications disabled.");
+      const { clearFcmToken } = useAuthStore.getState();
+
+      clearFcmToken();
+
+      if (Platform.OS === "ios") {
+        await messaging().requestPermission({
+          alert: false,
+          badge: false,
+          sound: false,
+        });
+      }
+    }
+  } catch (error) {
+    console.log("Error toggling notification permission:", error);
   }
 };

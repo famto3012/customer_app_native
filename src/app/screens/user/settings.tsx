@@ -6,11 +6,18 @@ import Header from "@/components/Header";
 import { useAuthStore } from "@/store/store";
 import { colors } from "@/constants/theme";
 import Typo from "@/components/Typo";
+import {
+  requestNotificationPermission,
+  toggleNotificationPermission,
+} from "@/utils/helpers";
+import * as Notifications from "expo-notifications";
 
 const Settings = () => {
   const [hasBiometric, setHasBiometry] = useState<boolean>(false);
   const [haveBiometric, setHaveBiometry] = useState<boolean>(false);
   const [fingerprintEnabled, setFingerprintEnabled] = useState<boolean>(false);
+  const [notificationsEnabled, setNotificationsEnabled] =
+    useState<boolean>(false);
 
   useEffect(() => {
     (async () => {
@@ -22,6 +29,9 @@ const Settings = () => {
 
       // Get stored biometric preference
       setFingerprintEnabled(useAuthStore.getState().biometricAuth);
+
+      const { status } = await Notifications.getPermissionsAsync();
+      setNotificationsEnabled(status === "granted");
     })();
   }, []);
 
@@ -87,11 +97,12 @@ const Settings = () => {
             Activate all notifications
           </Typo>
           <Switch
-            value={false}
+            value={notificationsEnabled}
             trackColor={{ false: "#D3D3D3", true: "#00D4FF" }}
             thumbColor={colors.NEUTRAL100}
             ios_backgroundColor="#D3D3D3"
             style={{ transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }] }}
+            onValueChange={requestNotificationPermission}
           />
         </View>
       </View>

@@ -9,11 +9,29 @@ import { verticalScale, scale } from "@/utils/styling";
 import { router } from "expo-router";
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import { requestNotificationPermission } from "@/utils/helpers";
+import { resetAndNavigate } from "@/utils/navigation";
+import * as Notifications from "expo-notifications";
 
 const NotificationPermission = () => {
+  const checkNotificationPermission = async () => {
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status === "granted") {
+      resetAndNavigate("/delivery-ad");
+    } else {
+      await requestNotificationPermission();
+      resetAndNavigate("/delivery-ad");
+    }
+  };
+
+  const handlePermissionRequest = async () => {
+    await requestNotificationPermission();
+    checkNotificationPermission();
+  };
+
   useEffect(() => {
-    requestNotificationPermission();
+    checkNotificationPermission();
   }, []);
+
   return (
     <ScreenWrapper>
       <Header
@@ -66,7 +84,7 @@ const NotificationPermission = () => {
       >
         <Button
           title="Turn on notifications"
-          onPress={requestNotificationPermission}
+          onPress={handlePermissionRequest}
         />
         <Pressable
           style={{ padding: scale(10) }}
