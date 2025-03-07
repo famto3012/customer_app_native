@@ -32,6 +32,7 @@ interface AuthStore {
   newUser: boolean;
   cart: { showCart: boolean; merchant: string; cartId: string };
   promoCode: string | null;
+  fcmToken: string | null;
   orders: Order[];
   biometricAuth: boolean;
   selectedMerchant: { merchantId: string | null; merchantName: string | null };
@@ -42,6 +43,7 @@ interface AuthStore {
   setSelectedBusiness: (business: string) => void;
   setNewUser: (newUser: boolean) => void;
   setPromoCode: (code: string) => void;
+  setFcmToken: (code: string) => void;
   setCart: (cart: {
     showCart: boolean;
     merchant: string;
@@ -49,6 +51,7 @@ interface AuthStore {
   }) => void;
   addOrder: (order: Order) => void;
   clearOrders: () => void;
+  clearFcmToken: () => void;
   setBiometricAuth: (status: boolean) => void;
   setSelectedMerchant: (merchantId: string, merchantName: string) => void;
   clearStorage: () => void;
@@ -65,6 +68,7 @@ export const useAuthStore = create<AuthStore>()(
       newUser: true,
       cart: { showCart: false, merchant: "", cartId: "" },
       promoCode: null,
+      fcmToken: null,
       orders: [],
       biometricAuth: false,
       selectedMerchant: { merchantId: null, merchantName: null },
@@ -101,6 +105,10 @@ export const useAuthStore = create<AuthStore>()(
         set({ promoCode });
         secureStorage.setItem("promoCode", promoCode);
       },
+      setFcmToken: (fcmToken) => {
+        set({ fcmToken });
+        secureStorage.setItem("fcmToken", fcmToken);
+      },
       addOrder: (order) => {
         set((state) => {
           const updatedOrders = [...state.orders, order];
@@ -111,6 +119,10 @@ export const useAuthStore = create<AuthStore>()(
       clearOrders: () => {
         set({ orders: [] });
         secureStorage.removeItem("orders");
+      },
+      clearFcmToken: () => {
+        set({ fcmToken: null });
+        secureStorage.removeItem("fcmToken");
       },
       setBiometricAuth: (status) => {
         set({ biometricAuth: status });

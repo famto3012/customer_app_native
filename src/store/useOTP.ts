@@ -1,5 +1,7 @@
 import { create } from "zustand";
-import auth from "@react-native-firebase/auth"; // Use react-native-firebase
+import auth from "@react-native-firebase/auth";
+
+// auth().settings.appVerificationDisabledForTesting = true;
 
 interface OTPState {
   verificationId: string | null;
@@ -7,7 +9,7 @@ interface OTPState {
   setVerificationId: (id: string) => void;
   setIsVerified: (status: boolean) => void;
   setupRecaptcha: (phoneNumber: string) => Promise<void>;
-  verifyOTP: (otp: string) => Promise<void>;
+  verifyOTP: (otp: string, verificationId: string) => Promise<void>;
 }
 
 export const useOTPStore = create<OTPState>((set) => ({
@@ -21,23 +23,25 @@ export const useOTPStore = create<OTPState>((set) => ({
     try {
       const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
       set({ verificationId: confirmation.verificationId });
+      console.log("Verification ID set:", confirmation.verificationId);
     } catch (error) {
       console.error("Phone number verification failed:", error);
-      throw error;
+      throw new Error("Phone number verification failed. Please try again.");
     }
   },
 
-  verifyOTP: async (otp: string) => {
+  verifyOTP: async (otp: string, verificationId: string) => {
     try {
-      const { verificationId } = useOTPStore.getState();
-      if (!verificationId) throw new Error("No verification ID found");
+      if (!verificationId)
+        throw new Error("No verification ID found. Please retry login.");
 
       const credential = auth.PhoneAuthProvider.credential(verificationId, otp);
       await auth().signInWithCredential(credential);
       set({ isVerified: true });
-    } catch (error) {
+      console.log("OTP verified successfully!");
+    } catch (error: any) {
       console.error("OTP Verification failed:", error.message);
-      throw error;
+      throw new Error("Invalid OTP. Please try again.");
     }
   },
 }));

@@ -40,4 +40,6 @@ android/app/build
 
 .vscode
 android/app/google-services.json
+android/app/my-upload-key.keystore
+android/gradle.properties
 ios/GoogleService-Info.plist
