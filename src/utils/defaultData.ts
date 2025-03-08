@@ -97,3 +97,24 @@ export const unitData = [
   { label: "m", value: "m" },
   { label: "cm", value: "cm" },
 ];
+
+export const pickAndDropHomeImages = [
+  {
+    source: require("@/assets/images/Pick-and-drop-home.webp"),
+    text: "Forgot something at home?",
+  },
+  {
+    source: require("@/assets/images/Pick-and-drop-home1.webp"),
+    text: "Delivery boys available anytime",
+  },
+  {
+    source: require("@/assets/images/location-permission.webp"),
+    text: "Fast and safe delivery",
+  },
+];
+
+export const pickAndDropSubtexts = [
+  "Give us a pickup address",
+  "Our delivery agents are at your service",
+  "We ensure safe and fast delivery every time",
+];
