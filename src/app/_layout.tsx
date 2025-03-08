@@ -8,6 +8,7 @@ import {
   PaperProvider,
   MD3LightTheme as DefaultTheme,
 } from "react-native-paper";
+import { SocketProvider } from "@/service/socketProvider";
 
 const queryClient = new QueryClient();
 
@@ -30,11 +31,13 @@ const RootLayout = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView>
-        <PaperProvider theme={theme}>
-          <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
-            <Stack.Screen name="index" />
-          </Stack>
-        </PaperProvider>
+        <SocketProvider>
+          <PaperProvider theme={theme}>
+            <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
+              <Stack.Screen name="index" />
+            </Stack>
+          </PaperProvider>
+        </SocketProvider>
       </GestureHandlerRootView>
     </QueryClientProvider>
   );
