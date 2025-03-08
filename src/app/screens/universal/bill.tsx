@@ -33,6 +33,7 @@ import PaymentOptionSheet from "@/components/BottomSheets/common/PaymentOptionSh
 import { useAuthStore } from "@/store/store";
 import { commonStyles } from "@/constants/commonStyles";
 import AppliedPromoCode from "@/components/common/AppliedPromoCode";
+import { addOrder } from "@/localDB/controller/orderController";
 
 const Bill = () => {
   const [selectedPaymentMode, setSelectedPaymentMode] =
@@ -82,6 +83,8 @@ const Bill = () => {
         }
       } else {
         if (data?.success && data?.orderId) {
+          addOrder(data?.orderId, data?.createdAt);
+
           useAuthStore.setState({
             cart: {
               showCart: false,
@@ -89,6 +92,7 @@ const Bill = () => {
               cartId: "",
             },
           });
+
           router.replace({ pathname: "/(tabs)" });
         }
       }
@@ -101,6 +105,8 @@ const Bill = () => {
       verifyPayment(orderId, amount),
     onSuccess: (data) => {
       if (data) {
+        addOrder(data?.orderId, data?.createdAt);
+
         useAuthStore.setState({
           cart: {
             showCart: false,
