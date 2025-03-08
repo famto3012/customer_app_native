@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from "@nozbe/watermelondb";
 
 export const schema = appSchema({
-  version: 2,
+  version: 4,
   tables: [
     tableSchema({
       name: "cart",
@@ -13,6 +13,13 @@ export const schema = appSchema({
         { name: "variantTypeName", type: "string", isOptional: true },
         { name: "price", type: "number" },
         { name: "quantity", type: "number" },
+      ],
+    }),
+    tableSchema({
+      name: "order",
+      columns: [
+        { name: "orderId", type: "string", isIndexed: true },
+        { name: "createdAt", type: "string" },
       ],
     }),
   ],

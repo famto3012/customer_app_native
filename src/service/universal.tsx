@@ -390,8 +390,6 @@ export const placeUniversalOrder = async (paymentMode: string) => {
       paymentMode,
     });
 
-    console.log("Response of place order", res.data);
-
     return res.data.success ? res.data : null;
   } catch (err) {
     console.error(`Error in placing order:`, err);
@@ -433,7 +431,7 @@ export const getProductsWithVariantsInCart = async (productId: string) => {
 export const verifyPayment = async (
   orderId: string,
   amount: string | number
-) => {
+): Promise<{ orderId: string; createdAt: string } | null> => {
   try {
     const razorpayKey = process.env.EXPO_PUBLIC_RAZORPAY_KEY;
 
@@ -527,5 +525,29 @@ export const addItemsToCart = async (
     console.error(`Error in adding items:`, err);
     Alert.alert("Error", "Something went wrong!");
     return null;
+  }
+};
+
+export const filterAndSearchProducts = async (
+  merchantId: string,
+  filter?: string,
+  query?: string
+) => {
+  try {
+    const res = await appAxios.get(
+      `/customers/products/filter-and-sort/${merchantId}`,
+      {
+        params: {
+          filter,
+          productName: query,
+        },
+      }
+    );
+
+    return res.status === 200 ? res.data : [];
+  } catch (err) {
+    console.error(`Error in searching products:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return [];
   }
 };

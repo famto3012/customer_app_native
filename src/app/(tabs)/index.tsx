@@ -92,17 +92,6 @@ const Home = () => {
             style={styles.imageBackground}
             resizeMode="cover"
           >
-            {/* <LinearGradient
-              locations={[0, 0.1, 1]}
-              colors={[
-                "rgba(255, 255, 255, 0.5)",
-                "rgba(110, 253, 255, 0.75)",
-                "rgba(0, 206, 209, 0.8)",
-              ]}
-              style={styles.gradient}
-            > */}
-
-            {/* <View> */}
             <View style={styles.overlayContainer}>
               <HomeHeader />
               <SearchView
@@ -111,34 +100,7 @@ const Home = () => {
                 style={{ marginHorizontal: scale(20) }}
               />
             </View>
-            {/* <View style={{ marginTop: verticalScale(24) }}>
-                  <Typo
-                    size={20}
-                    fontFamily="SemiBold"
-                    color={colors.WHITE}
-                    style={{ textAlign: "center" }}
-                  >
-                    Grab Our Exclusive Food
-                  </Typo>
-                  <Typo
-                    size={20}
-                    fontFamily="SemiBold"
-                    color={colors.WHITE}
-                    style={{ textAlign: "center" }}
-                  >
-                    Discounts Now!
-                  </Typo>
-                </View>
-                <Pressable onPress={() => {}} style={styles.pressable}>
-                  <Typo size={14} fontFamily="Medium" color={colors.WHITE}>
-                    Order Now
-                  </Typo>
-                </Pressable>
-                <Image
-                  source={require("@/assets/images/home-burger.webp")}
-                  style={styles.image}
-                  resizeMode="contain"
-                /> */}
+
             <Carousel
               loop
               style={{
@@ -167,8 +129,6 @@ const Home = () => {
               )}
               customAnimation={animationStyle}
             />
-            {/* </View> */}
-            {/* </LinearGradient> */}
           </ImageBackground>
           <TopService />
           <BusinessCategories query="" />

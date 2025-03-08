@@ -1,11 +1,110 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import ScreenWrapper from "@/components/ScreenWrapper";
+import Header from "@/components/Header";
+import Search from "@/components/Search";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { filterAndSearchProducts } from "@/service/universal";
+import { useAuthStore } from "@/store/store";
+import ProductCard from "@/components/universal/ProductCard";
+import { scale, verticalScale } from "@/utils/styling";
+import Typo from "@/components/Typo";
+import FloatingCart from "@/components/universal/FloatingCart";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
+import ClearCartSheet from "@/components/BottomSheets/universal/ClearCartSheet";
+import { commonStyles } from "@/constants/commonStyles";
+import { ProductProps } from "@/types";
 
 const ProductSearch = () => {
+  const [query, setQuery] = useState<string>("");
+  const [debounceQuery, setDebounceQuery] = useState<string>("");
+  const [product, setProduct] = useState<ProductProps | null>(null);
+    const [duplicateProduct, setDuplicateProductId] =
+      useState<ProductProps | null>(null);
+
+  const clearCartSheetRef = useRef<BottomSheet>(null);
+  const variantSheetRef = useRef<BottomSheet>(null);
+  const duplicateVariantSheetRef = useRef<BottomSheet>(null);
+
+  const clearCartSheetSnapPoints = useMemo(() => ["28%"], []);
+  const variantSheetSnapPoints = useMemo(() => ["60%"], []);
+    const duplicateSheetSnapPoints = useMemo(() => ["40%"], []);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setQuery(debounceQuery);
+    }, 500);
+  }, [debounceQuery]);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["search-products", query],
+    queryFn: () =>
+      filterAndSearchProducts(
+        useAuthStore.getState().selectedMerchant.merchantId || "",
+        "",
+        query
+      ),
+    enabled: !!query,
+  });
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+        style={[props.style, commonStyles.backdrop]}
+      />
+    ),
+    []
+  );
+
   return (
-    <View>
-      <Text>ProductSearch</Text>
-    </View>
+    <ScreenWrapper>
+      <Header title="Search Products" />
+
+      <Search
+        placeHolder="Search Products"
+        onChangeText={(data: string) => setDebounceQuery(data)}
+      />
+
+      <FlatList
+        data={data || []}
+        renderItem={({ item }) => <ProductCard item={item} showAddCart />}
+        contentContainerStyle={{
+          paddingHorizontal: scale(20),
+          marginTop: verticalScale(20),
+        }}
+        ListEmptyComponent={
+          isLoading ? (
+            <ActivityIndicator />
+          ) : (
+            <View>
+              <Typo>No Items found !</Typo>
+            </View>
+          )
+        }
+      />
+
+      <FloatingCart onClearCart={() => clearCartSheetRef.current?.expand()} />
+
+      <BottomSheet
+        ref={clearCartSheetRef}
+        index={-1}
+        snapPoints={clearCartSheetSnapPoints}
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+      >
+        <ClearCartSheet
+          closeClearCartSheet={() => clearCartSheetRef.current?.close()}
+        />
+      </BottomSheet>
+    </ScreenWrapper>
   );
 };
 

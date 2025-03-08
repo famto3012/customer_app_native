@@ -1,12 +1,5 @@
-import {
-  FlatList,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import React, { useEffect } from "react";
+import { FlatList, Image, ScrollView, StyleSheet, View } from "react-native";
+import { useEffect } from "react";
 import { useLocalSearchParams } from "expo-router";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
@@ -24,9 +17,9 @@ const OrderDetail = () => {
 
   const { token } = useAuthStore.getState();
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["order-details", orderId],
-    queryFn: () => getOrderDetail(orderId),
+    queryFn: () => getOrderDetail(orderId.toString()),
     enabled: !!token && !!orderId,
   });
 

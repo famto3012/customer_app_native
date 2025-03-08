@@ -20,7 +20,7 @@ const ProductCard: FC<{
   openVariant?: (product: ProductProps) => void;
   cartCount?: number | null;
   showAddCart: boolean;
-  trigger: string;
+  trigger?: string;
 }> = ({ item, openVariant, cartCount, showAddCart, trigger }) => {
   const [isFavorite, setIsFavorite] = useState<boolean>(item.isFavorite);
   const [count, setCount] = useState<number | null>(cartCount || null);

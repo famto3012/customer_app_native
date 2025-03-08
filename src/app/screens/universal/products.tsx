@@ -58,7 +58,7 @@ const Product = () => {
   const ratingSheetSnapPoints = useMemo(() => ["45%"], []);
 
   const { merchantId } = useLocalSearchParams();
-  const { selectedBusiness, userId } = useAuthStore.getState();
+  const { selectedBusiness } = useAuthStore.getState();
   const { latitude, longitude } = useSafeLocation();
 
   const CATEGORY_LIMIT: number = 5;
