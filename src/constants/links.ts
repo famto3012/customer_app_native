@@ -1,4 +1,5 @@
 export const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+export const SOCKET_URL = process.env.EXPO_PUBLIC_SOCKET_URL;
 
 export const API_KEY = process.env.EXPO_PUBLIC_API_KEY || "";
 export const AUTH_DOMAIN = process.env.EXPO_PUBLIC_AUTH_DOMAIN || "";

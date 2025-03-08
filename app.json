@@ -40,8 +40,10 @@
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.POST_NOTIFICATIONS",
         "com.google.android.c2dm.permission.RECEIVE",
-        "android.permission.WAKE_LOCK"
-      ]
+        "android.permission.WAKE_LOCK",
+        "android.permission.INTERNET"
+      ],
+      "useNextNotificationsApi": true
     },
     "web": {
       "bundler": "metro",
@@ -68,6 +70,12 @@
         {
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photo library to select images.",
           "cameraPermission": "Allow $(PRODUCT_NAME) to use your camera to take pictures."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./src/assets/images/app_logo.png"
         }
       ]
     ],
