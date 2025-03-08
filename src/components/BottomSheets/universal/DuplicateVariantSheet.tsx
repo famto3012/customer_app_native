@@ -24,7 +24,8 @@ interface DuplicateVariantProps {
 const DuplicateVariantSheet: FC<{
   product: ProductProps | null;
   onNewCustomization: (product: ProductProps | null) => void;
-}> = ({ product, onNewCustomization }) => {
+  closeSheet: () => void;
+}> = ({ product, onNewCustomization, closeSheet }) => {
   const [localData, setLocalData] = useState<DuplicateVariantProps[]>([]);
 
   useEffect(() => {
@@ -79,14 +80,27 @@ const DuplicateVariantSheet: FC<{
                 item.variantTypeName
               );
 
-              const updatedData = localData.map((dataItem) =>
-                dataItem.productId === item.productId &&
-                dataItem.variantTypeId === item.variantTypeId
-                  ? { ...dataItem, quantity: newCount }
-                  : dataItem
-              );
+              const updatedData = localData
+                .filter(
+                  (dataItem) =>
+                    !(
+                      dataItem.productId === item.productId &&
+                      dataItem.variantTypeId === item.variantTypeId &&
+                      newCount === 0
+                    )
+                )
+                .map((dataItem) =>
+                  dataItem.productId === item.productId &&
+                  dataItem.variantTypeId === item.variantTypeId
+                    ? { ...dataItem, quantity: newCount }
+                    : dataItem
+                );
 
               setLocalData(updatedData);
+
+              if (updatedData.length === 0) {
+                closeSheet();
+              }
             }}
             style={styles.btn}
           >

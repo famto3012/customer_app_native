@@ -50,6 +50,9 @@ const Merchants = () => {
       initialPageParam: 1,
       getNextPageParam: (lastPage, allPages) =>
         lastPage?.hasNextPage ? allPages.length + 1 : undefined,
+      refetchOnMount: true,
+      refetchOnReconnect: true,
+      refetchOnWindowFocus: true,
     });
 
   useEffect(() => {

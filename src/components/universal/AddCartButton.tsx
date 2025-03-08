@@ -67,8 +67,9 @@ export default AddCartButton;
 
 const styles = StyleSheet.create({
   container: {
+    height: verticalScale(35),
     alignSelf: "center",
-    paddingVertical: verticalScale(5),
+    justifyContent: "center",
     width: "80%",
     borderRadius: radius._6,
     position: "absolute",
@@ -84,6 +85,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    height: verticalScale(30),
   },
   text: {
     textAlign: "center",

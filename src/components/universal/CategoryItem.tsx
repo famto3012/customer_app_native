@@ -32,6 +32,8 @@ const useProducts = (categoryId: string, userId: string) => {
     getNextPageParam: (lastPage, allPages) =>
       lastPage.hasNextPage ? allPages.length + 1 : undefined,
     enabled: !!categoryId,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
     refetchOnWindowFocus: true,
   });
 };
@@ -39,7 +41,8 @@ const useProducts = (categoryId: string, userId: string) => {
 const ProductList: FC<{
   categoryId: string;
   openVariant: (product: ProductProps) => void;
-}> = ({ categoryId, openVariant }) => {
+  trigger: string;
+}> = ({ categoryId, openVariant, trigger }) => {
   const { userId } = useAuthStore.getState();
   const queryClient = useQueryClient();
 
@@ -79,6 +82,7 @@ const ProductList: FC<{
           openVariant={(product: ProductProps) => openVariant(product)}
           cartCount={item?.cartCount || null}
           showAddCart={true}
+          trigger={trigger}
         />
       )}
       onEndReached={() => hasNextPage && fetchNextPage()}
@@ -100,7 +104,8 @@ const ProductList: FC<{
 const CategoryItem: FC<{
   category: CategoryProps;
   openVariant: (product: ProductProps) => void;
-}> = ({ category, openVariant }) => {
+  trigger: string;
+}> = ({ category, openVariant, trigger }) => {
   const [isExpanded, setIsExpanded] = useState(category.status);
 
   return (
@@ -139,6 +144,7 @@ const CategoryItem: FC<{
           <ProductList
             categoryId={category.categoryId}
             openVariant={(product: ProductProps) => openVariant(product)}
+            trigger={trigger}
           />
         </Animated.View>
       )}
