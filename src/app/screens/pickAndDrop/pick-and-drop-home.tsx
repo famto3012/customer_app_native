@@ -1,73 +1,45 @@
-import { StyleSheet, Text, View, Image, Pressable } from "react-native";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { StyleSheet, View } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  runOnJS,
 } from "react-native-reanimated";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import Typo from "@/components/Typo";
-import { colors } from "@/constants/theme";
+import { colors, radius, spacingX } from "@/constants/theme";
 import Button from "@/components/Button";
-import { scale } from "@/utils/styling";
+import { scale, verticalScale } from "@/utils/styling";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
-  SCREEN_HEIGHT,
   SCREEN_WIDTH,
 } from "@gorhom/bottom-sheet";
-
-import { Info } from "phosphor-react-native";
 import { router } from "expo-router";
 import PickAndDropBottomSheet from "@/components/BottomSheets/pickAndDrop/pick-and-drop-bottomsheet";
 import { commonStyles } from "@/constants/commonStyles";
-
-const images = [
-  {
-    source: require("@/assets/images/Pick-and-drop-home.webp"),
-    text: "Forgot something at home?",
-  },
-  {
-    source: require("@/assets/images/Pick-and-drop-home1.webp"),
-    text: "Delivery boys available anytime",
-  },
-  {
-    source: require("@/assets/images/location-permission.webp"),
-    text: "Fast and safe delivery",
-  },
-];
-
-const subtexts = [
-  "Give us a pickup address",
-  "Our delivery agents are at your service",
-  "We ensure safe and fast delivery everytime",
-];
+import {
+  customOrderDetails,
+  pickAndDropHomeImages,
+  pickAndDropSubtexts,
+} from "@/utils/defaultData";
 
 const PickAndDropHome = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const imageOffset = useSharedValue(-300);
   const textOffset = useSharedValue(300);
+
   const indexRef = useRef(0);
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  const variantSheetSnapPoints = useMemo(() => {
-    const percentageHeight = SCREEN_HEIGHT * 0.5; // 50% of screen height
-    return [percentageHeight];
-  }, []);
+  const infoSheetRef = useRef<BottomSheet>(null);
+
+  const InfoSnapPoints = useMemo(() => ["60%"], []);
 
   useEffect(() => {
     const cycleImages = () => {
-      // Compute the next index
-      const nextIndex = (indexRef.current + 1) % images.length;
-      indexRef.current = nextIndex; // Update the ref
-      setCurrentIndex(nextIndex); // Update state BEFORE animation starts
+      const nextIndex = (indexRef.current + 1) % pickAndDropHomeImages.length;
+      indexRef.current = nextIndex;
+      setCurrentIndex(nextIndex);
 
       const isLeftToRight = nextIndex % 2 === 0;
 
@@ -90,7 +62,7 @@ const PickAndDropHome = () => {
       );
     };
 
-    cycleImages(); // Start animation immediately
+    cycleImages();
 
     const interval = setInterval(cycleImages, 3000);
     return () => clearInterval(interval);
@@ -112,7 +84,6 @@ const PickAndDropHome = () => {
         appearsOnIndex={0}
         opacity={0.5}
         style={[props.style, commonStyles.backdrop]}
-        // onPress={handleClosePress}
       />
     ),
     []
@@ -121,73 +92,53 @@ const PickAndDropHome = () => {
   return (
     <>
       <ScreenWrapper>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            width: "100%",
-          }}
-        >
-          <Header title={"Pick & Drop"} />
-          <Pressable onPress={() => bottomSheetRef.current?.expand()}>
-            <Info
-              size={28}
-              style={{ marginLeft: scale(-60), paddingRight: scale(60) }}
-            />
-          </Pressable>
-        </View>
+        <Header
+          title="Pick & Drop"
+          icon={require("@/assets/icons/info-circle.webp")}
+          onPress={() => infoSheetRef.current?.expand()}
+          showRightIcon
+        />
 
-        <View style={styles.animationWrapper}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
           <Animated.Image
-            source={images[currentIndex].source}
+            source={pickAndDropHomeImages[currentIndex].source}
             style={[styles.image, animatedImageStyle]}
             resizeMode="contain"
           />
-        </View>
-        <View style={styles.animationWrapperText}>
+
           <Animated.View style={[styles.textContainer, animatedTextStyle]}>
             <Typo size={15} fontFamily="SemiBold" color={colors.NEUTRAL900}>
-              {images[currentIndex].text}
+              {pickAndDropHomeImages[currentIndex].text}
             </Typo>
+
             <Typo
               size={13}
               color={colors.NEUTRAL400}
               style={{ textAlign: "center" }}
             >
-              {subtexts[currentIndex]}
+              {pickAndDropSubtexts[currentIndex]}
             </Typo>
           </Animated.View>
         </View>
-        <View style={styles.reminderContainer}>
-          <Typo size={14} fontFamily="Medium" color={colors.NEUTRAL900}>
+
+        <View style={styles.detailContainer}>
+          <Typo
+            size={14}
+            fontFamily="Medium"
+            color={colors.NEUTRAL900}
+            style={{ paddingBottom: verticalScale(15) }}
+          >
             Things to remember
           </Typo>
 
-          <View style={styles.bulletContainer}>
-            <View style={styles.bulletPoint}>
-              <Typo size={12} color={colors.NEUTRAL400}>
-                • Sending high-value or fragile products should
-              </Typo>
-              <Typo
-                size={12}
-                color={colors.NEUTRAL400}
-                style={{ marginLeft: scale(9) }}
-              >
-                be avoided.
-              </Typo>
+          {customOrderDetails?.map((detail, index) => (
+            <View key={index} style={styles.detail}>
+              <Typo>•</Typo>
+              <Typo size={13}>{detail}</Typo>
             </View>
-            <View style={styles.bulletPoint}>
-              <Typo size={12} color={colors.NEUTRAL400}>
-                • Items should fit inside the backpack.
-              </Typo>
-            </View>
-            <View style={styles.bulletPoint}>
-              <Typo size={12} color={colors.NEUTRAL400}>
-                • Transporting illegal goods is prohibited.
-              </Typo>
-            </View>
-          </View>
+          ))}
         </View>
 
         <Button
@@ -200,15 +151,18 @@ const PickAndDropHome = () => {
           style={styles.button}
         />
       </ScreenWrapper>
+
       <BottomSheet
-        ref={bottomSheetRef}
+        ref={infoSheetRef}
         index={-1}
-        snapPoints={variantSheetSnapPoints}
+        snapPoints={InfoSnapPoints}
         enableDynamicSizing={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
       >
-        <PickAndDropBottomSheet bottomSheetRef={bottomSheetRef} />
+        <PickAndDropBottomSheet
+          closeSheet={() => infoSheetRef.current?.close()}
+        />
       </BottomSheet>
     </>
   );
@@ -218,48 +172,31 @@ export default PickAndDropHome;
 
 const styles = StyleSheet.create({
   image: {
-    marginVertical: scale(15),
-    width: SCREEN_WIDTH * 0.8,
-    height: SCREEN_HEIGHT * 0.45,
-    borderRadius: 10,
+    width: scale(300),
+    height: verticalScale(300),
     alignSelf: "center",
   },
   textContainer: {
     alignItems: "center",
     marginVertical: scale(5),
   },
-  reminderContainer: {
-    marginVertical: scale(20),
-    padding: scale(20),
+  detailContainer: {
     backgroundColor: colors.NEUTRAL100,
-    borderRadius: 20,
-    width: SCREEN_WIDTH * 0.9,
-    alignSelf: "center",
+    marginHorizontal: scale(20),
+    marginTop: verticalScale(20),
+    paddingHorizontal: scale(20),
+    paddingVertical: verticalScale(20),
+    borderRadius: radius._10,
   },
-  bulletContainer: {
-    marginVertical: scale(10),
-  },
-  bulletPoint: {
-    alignItems: "flex-start",
-    marginBottom: 5,
+  detail: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: verticalScale(10),
+    gap: spacingX._10,
   },
   button: {
-    marginVertical: scale(10),
+    marginVertical: verticalScale(30),
     alignSelf: "center",
     width: SCREEN_WIDTH * 0.9,
-  },
-  animationWrapper: {
-    width: SCREEN_WIDTH * 0.6,
-    height: SCREEN_HEIGHT * 0.45,
-    overflow: "hidden",
-    alignSelf: "center",
-    borderRadius: 10,
-  },
-  animationWrapperText: {
-    width: SCREEN_WIDTH * 0.7,
-    height: SCREEN_HEIGHT * 0.1,
-    overflow: "hidden",
-    alignSelf: "center",
-    borderRadius: 10,
   },
 });

@@ -1,199 +1,186 @@
-
-import {
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import SchedulePicker from "@/components/common/SchedulePicker";
 import { scale, verticalScale } from "@/utils/styling";
-import HomeDelivery from "@/components/universal/HomeDelivery";
-import TakeAway from "@/components/universal/TakeAway";
-import Animated, {
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-  SCREEN_WIDTH,
-} from "@gorhom/bottom-sheet";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import ScheduleSheet from "@/components/BottomSheets/ScheduleSheet";
-import { getCustomerCart, getMerchantDeliveryOption } from "@/service/universal";
-import { useQuery } from "@tanstack/react-query";
-import { CartProps } from "@/types";
-import { useAuthStore } from "@/store/store";
 import Typo from "@/components/Typo";
 import { colors } from "@/constants/theme";
 import Address from "@/components/common/Address";
 import Instructions from "@/components/common/Instructions";
 import Button from "@/components/Button";
-
-const TAB_WIDTH = SCREEN_WIDTH / 2 - 20;
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
+import { commonStyles } from "@/constants/commonStyles";
+import ScheduleSheet from "@/components/BottomSheets/ScheduleSheet";
 
 interface FormDataProps {
-  deliveryMode: string;
-  businessCategoryId: string;
+  pickUpAddressType: string;
+  pickUpAddressOtherAddressId?: string;
   deliveryAddressType: string;
-  ifScheduled?: {
-    startDate: string;
-    endDate: string;
-    time: string;
-  } | null;
-  isSuperMarketOrder: boolean;
+  deliveryAddressOtherAddressId?: string;
+  instructionInPickup: string;
+  instructionInDelivery: string;
+  startDate?: string;
+  endDate?: string;
+  time?: string;
 }
 
 const PickDropScreen = () => {
-  const [deliveryMode, setDeliveryMode] = useState<string>("Home Delivery");
-  const [cart, setCart] = useState<CartProps | null>(null);
-  const selectedBusiness = useAuthStore((state) => state.selectedBusiness);
+  const [formData, setFormData] = useState<FormDataProps>({
+    pickUpAddressType: "",
+    pickUpAddressOtherAddressId: "",
+    deliveryAddressType: "",
+    deliveryAddressOtherAddressId: "",
+    instructionInPickup: "",
+    instructionInDelivery: "",
+    startDate: "",
+    endDate: "",
+    time: "",
+  });
+  const [voiceInstruction, setVoiceInstruction] = useState({
+    pick: "",
+    delivery: "",
+  });
+
   const scheduleSheetRef = useRef<BottomSheet>(null);
 
-  // Define handler functions
-  const onAgentVoice = (data: string) => {
-    console.log("Voice recorded:", data);
+  const scheduleSheetSnapPoints = useMemo(() => ["80%"], []);
+
+  const onPickVoice = (data: string) => {
+    setVoiceInstruction({ ...voiceInstruction, pick: data });
   };
 
-  const onAgentInstruction = (data: string) => {
-    console.log("Instruction:", data);
+  const onDeliveryVoice = (data: string) => {
+    setVoiceInstruction({ ...voiceInstruction, delivery: data });
   };
 
-  const onAddressSelect = (type: string, otherId?: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      deliveryAddressType: type,
-    }));
-  };
-
-  const [formData, setFormData] = useState<FormDataProps>({
-    deliveryMode,
-    businessCategoryId: selectedBusiness?.toString() ?? "",
-    deliveryAddressType: "home",
-    ifScheduled: null,
-    isSuperMarketOrder: false,
-  });
-
-  const indicatorPosition = useSharedValue(0);
-  const variantSheetSnapPoints = useMemo(() => ["80%"], []);
-
-  // Fetch cart data
-  const { data: cartData } = useQuery({
-    queryKey: ["customer-cart"],
-    queryFn: getCustomerCart,
-  });
-
-  // Fetch merchant delivery options
-  const { data: deliveryOption } = useQuery({
-    queryKey: ["merchant-delivery-option", cart?.merchantId],
-    queryFn: () => getMerchantDeliveryOption(cart?.merchantId?.toString() ?? ""),
-    enabled: !!cart?.merchantId,
-  });
-
-  // Update cart state only when cartData changes
-  useEffect(() => {
-    if (cartData && cartData !== cart) {
-      setCart(cartData);
+  const handleSelectDeliveryAddress = (type: string, otherId?: string) => {
+    if (type !== "other" && type === formData.pickUpAddressType) {
+      Alert.alert("Error", "Pick and Delivery address cannot be same");
+      return;
     }
-  }, [cartData, cart]);
 
-  // Update business category ID if selectedBusiness changes
-  useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      businessCategoryId: selectedBusiness?.toString() ?? "",
-    }));
-  }, [selectedBusiness]);
+    if (type === "other" && formData.pickUpAddressOtherAddressId === otherId) {
+      Alert.alert("Error", "Pick and Delivery address cannot be same");
+      return;
+    }
 
-  // Sync deliveryMode with formData
-  useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      deliveryMode,
-    }));
-  }, [deliveryMode]);
-
-  // Animate tab indicator position
-  useEffect(() => {
-    indicatorPosition.value = withTiming(
-      deliveryMode === "Home Delivery" ? 0 : TAB_WIDTH,
-      { duration: 300 }
-    );
-  }, [deliveryMode]);
+    setFormData({
+      ...formData,
+      deliveryAddressType: type,
+      deliveryAddressOtherAddressId: otherId,
+    });
+  };
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+        style={[props.style, commonStyles.backdrop]}
+      />
     ),
     []
   );
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <>
       <ScreenWrapper>
         <Header title="Pick & Drop" />
+
         <ScrollView
           contentContainerStyle={{
-            paddingBottom: verticalScale(120),
+            paddingBottom: verticalScale(20),
             paddingTop: verticalScale(20),
           }}
           showsVerticalScrollIndicator={false}
         >
-          {deliveryOption && (
-            <SchedulePicker onPress={() => scheduleSheetRef.current?.expand()} />
-          )}
+          <SchedulePicker
+            onPress={() => scheduleSheetRef.current?.snapToIndex(0)}
+            value={{
+              startDate: formData?.startDate || "",
+              endDate: formData?.endDate || "",
+              time: formData?.time || "",
+            }}
+            onClearSchedule={() =>
+              setFormData({ ...formData, startDate: "", endDate: "", time: "" })
+            }
+          />
 
-          {/* Pickup and Address in One Row */}
           <View style={styles.pickupRow}>
-            <Typo size={14} color={colors.BLACK} fontWeight={700}>
-              Pickup
+            <Typo size={14} color={colors.NEUTRAL900} fontFamily="SemiBold">
+              Pickup{" "}
+              <Typo size={13} color={colors.NEUTRAL400}>
+                (select a pickup address first)
+              </Typo>
             </Typo>
           </View>
 
           <Address
             onSelect={(type, otherId) => {
-              onAddressSelect(type, otherId);
+              setFormData({
+                ...formData,
+                pickUpAddressType: type,
+                pickUpAddressOtherAddressId: otherId,
+              });
             }}
           />
 
           <Instructions
             placeholder="Instructions (if any)"
-            onRecordComplete={onAgentVoice}
-            onChangeText={onAgentInstruction}
+            onRecordComplete={onPickVoice}
+            onChangeText={(data: string) =>
+              setFormData({ ...formData, instructionInPickup: data })
+            }
           />
 
-          <View style={styles.pickupRow}>
-            <Typo size={14} color={colors.BLACK} fontWeight={700}>
-              Drop
-            </Typo>
-          </View>
+          {formData.pickUpAddressType && (
+            <>
+              <View style={styles.pickupRow}>
+                <Typo size={14} color={colors.BLACK} fontWeight={700}>
+                  Drop
+                </Typo>
+              </View>
 
-          <Address
-            onSelect={(type, otherId) => {
-              onAddressSelect(type, otherId);
-            }}
-          />
+              <Address onSelect={handleSelectDeliveryAddress} />
+
+              <Instructions
+                placeholder="Instructions (if any)"
+                onRecordComplete={onDeliveryVoice}
+                onChangeText={(data: string) =>
+                  setFormData({ ...formData, instructionInDelivery: data })
+                }
+              />
+            </>
+          )}
         </ScrollView>
-        <View style={styles.confirmContainer}>
-          <Button
-            title="Confirm Order detail"
-            onPress={() => "Button Pressed"}
-          />
-        </View>
+
+        {formData.pickUpAddressType && formData.deliveryAddressType && (
+          <View style={styles.confirmContainer}>
+            <Button title="Enter package detail" onPress={() => {}} />
+          </View>
+        )}
       </ScreenWrapper>
 
       <BottomSheet
         ref={scheduleSheetRef}
         index={-1}
-        snapPoints={variantSheetSnapPoints}
+        snapPoints={scheduleSheetSnapPoints}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
       >
-        <ScheduleSheet />
+        <ScheduleSheet
+          onPress={(startDate: string, endDate: string, time: string) =>
+            setFormData({ ...formData, startDate, endDate, time })
+          }
+        />
       </BottomSheet>
-    </GestureHandlerRootView>
+    </>
   );
 };
 
@@ -201,32 +188,22 @@ export default PickDropScreen;
 
 const styles = StyleSheet.create({
   pickupRow: {
-    marginBottom: 25,
+    marginBottom: verticalScale(24),
+    marginTop: verticalScale(10),
+    marginHorizontal: scale(20),
     flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: 20,
-    marginTop: 10,
-  },
-  pickupText: {
-    marginLeft: 5,
-    opacity: 0.5,
   },
   confirmContainer: {
-      position: "absolute",
-      bottom: 0,
-      width: SCREEN_WIDTH,
-      backgroundColor: colors.WHITE,
-      paddingVertical: verticalScale(24),
-      flexDirection: "row",
-      justifyContent: "center",
-      paddingHorizontal: scale(20),
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 12,
-      },
-      shadowOpacity: 0.58,
-      shadowRadius: 16.0,
-      elevation: 24,
+    paddingHorizontal: scale(20),
+    paddingVertical: verticalScale(20),
+    backgroundColor: colors.WHITE,
+    shadowOffset: {
+      width: 0,
+      height: -12,
     },
+    shadowOpacity: 0.58,
+    shadowRadius: 16.0,
+    elevation: 24,
+  },
 });
