@@ -14,14 +14,14 @@ import { Grayscale } from "react-native-color-matrix-image-filters";
 import { updateCart } from "@/localDB/controller/cartController";
 import { database } from "@/localDB/database";
 import Cart from "@/localDB/models/Cart";
-import { Q } from "@nozbe/watermelondb";
 
 const ProductCard: FC<{
   item: ProductProps;
   openVariant?: (product: ProductProps) => void;
   cartCount?: number | null;
   showAddCart: boolean;
-}> = ({ item, openVariant, cartCount, showAddCart }) => {
+  trigger: string;
+}> = ({ item, openVariant, cartCount, showAddCart, trigger }) => {
   const [isFavorite, setIsFavorite] = useState<boolean>(item.isFavorite);
   const [count, setCount] = useState<number | null>(cartCount || null);
 
@@ -52,7 +52,7 @@ const ProductCard: FC<{
       };
 
       fetchCartQuantity();
-    }, [item, selectedMerchant])
+    }, [item, selectedMerchant, trigger])
   );
 
   useEffect(() => {
@@ -118,24 +118,14 @@ const ProductCard: FC<{
           <Grayscale>
             <Image
               source={{ uri: item.productImageURL }}
-              style={{
-                width: scale(120),
-                height: scale(120),
-                position: "relative",
-                borderRadius: radius._10,
-              }}
+              style={styles.image}
               resizeMode="cover"
             />
           </Grayscale>
         ) : (
           <Image
             source={{ uri: item.productImageURL }}
-            style={{
-              width: scale(120),
-              height: scale(120),
-              position: "relative",
-              borderRadius: radius._10,
-            }}
+            style={styles.image}
             resizeMode="cover"
           />
         )}
@@ -161,7 +151,7 @@ const ProductCard: FC<{
         )}
       </View>
 
-      <View style={{ flex: 1, paddingTop: verticalScale(10) }}>
+      <View style={styles.contentContainer}>
         <Typo
           size={14}
           color={colors.NEUTRAL800}
@@ -171,13 +161,7 @@ const ProductCard: FC<{
           {item.productName}
         </Typo>
 
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: spacingX._10,
-          }}
-        >
+        <View style={styles.priceContainer}>
           <Typo
             size={14}
             color={colors.NEUTRAL400}
@@ -218,5 +202,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: spacingX._15,
+  },
+  image: {
+    width: scale(120),
+    height: scale(120),
+    position: "relative",
+    borderRadius: radius._10,
+  },
+  contentContainer: {
+    flex: 1,
+    paddingTop: verticalScale(10),
+  },
+  priceContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacingX._10,
   },
 });

@@ -8,11 +8,11 @@ import {
 } from "react-native";
 import { FC, useEffect, useState } from "react";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { AddVariantProps, ProductProps, Variant } from "@/types";
+import { ProductProps, Variant } from "@/types";
 import Typo from "../Typo";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius, spacingX } from "@/constants/theme";
-import { addProductToCart, getVariants } from "@/service/universal";
+import { getVariants } from "@/service/universal";
 import { updateCart } from "@/localDB/controller/cartController";
 import { useAuthStore } from "@/store/store";
 import { useQuery } from "@tanstack/react-query";
@@ -41,6 +41,10 @@ const VariantSheet: FC<{
   });
 
   useEffect(() => {
+    setCount(1);
+  }, []);
+
+  useEffect(() => {
     if (variants && variants?.length > 0 && !selected.variantTypeId) {
       setSelected({
         variantTypeId: variants[0]?.variantTypes[0]?._id || "",
@@ -50,8 +54,6 @@ const VariantSheet: FC<{
           null,
         variantTypeName: variants[0].variantTypes[0].typeName,
       });
-
-      setCount(1);
     }
   }, [variants]);
 

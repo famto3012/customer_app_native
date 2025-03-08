@@ -15,16 +15,11 @@ import Typo from "@/components/Typo";
 import { XCircle } from "phosphor-react-native";
 import SearchView from "@/components/SearchView";
 import { productFilters } from "@/utils/defaultData";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAuthStore } from "@/store/store";
-import { AddVariantProps, MerchantDataProps, ProductProps } from "@/types";
-import {
-  addProductToCart,
-  getAllCategory,
-  getMerchantData,
-  haveValidCart,
-} from "@/service/universal";
+import { MerchantDataProps, ProductProps } from "@/types";
+import { getAllCategory, getMerchantData } from "@/service/universal";
 import { useSafeLocation } from "@/utils/helpers";
 import FloatingCart from "@/components/universal/FloatingCart";
 import BottomSheet, {
@@ -33,11 +28,7 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import VariantSheet from "@/components/BottomSheets/VariantSheet";
-import {
-  useInfiniteQuery,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import MerchantData from "@/components/universal/MerchantData";
 import MerchantBanner from "@/components/universal/MerchantBanner";
 import { commonStyles } from "@/constants/commonStyles";
@@ -54,6 +45,7 @@ const Product = () => {
   const [product, setProduct] = useState<ProductProps | null>(null);
   const [duplicateProduct, setDuplicateProductId] =
     useState<ProductProps | null>(null);
+  const [trigger, setTrigger] = useState<string>(`${new Date()}`);
 
   const variantSheetRef = useRef<BottomSheet>(null);
   const clearCartSheetRef = useRef<BottomSheet>(null);
@@ -70,8 +62,6 @@ const Product = () => {
   const { latitude, longitude } = useSafeLocation();
 
   const CATEGORY_LIMIT: number = 5;
-
-  const queryClient = useQueryClient();
 
   const {
     data: categoryData,
@@ -90,6 +80,9 @@ const Product = () => {
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) =>
       lastPage.hasNextPage ? allPages.length + 1 : undefined,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
   });
 
   const { data: merchantData } = useQuery<MerchantDataProps>({
@@ -107,8 +100,6 @@ const Product = () => {
 
   const openVariantSheet = (product: ProductProps) => {
     if (!product) return;
-
-    console.log("product", product);
 
     if (product.cartCount) {
       setDuplicateProductId(product);
@@ -175,7 +166,11 @@ const Product = () => {
         <FlatList
           data={categoryData?.pages.flatMap((page) => page.data) || []}
           renderItem={({ item }) => (
-            <CategoryItem category={item} openVariant={openVariantSheet} />
+            <CategoryItem
+              category={item}
+              openVariant={openVariantSheet}
+              trigger={trigger}
+            />
           )}
           keyExtractor={(item, index) => `category-${item.categoryId}-${index}`}
           onEndReached={() => hasNextCategoryPage && fetchNextCategoryPage()}
@@ -238,8 +233,10 @@ const Product = () => {
         >
           <VariantSheet
             product={product ? product : null}
-            // onAddItem={onAddItem}
-            onAddItem={() => variantSheetRef.current?.close()}
+            onAddItem={() => {
+              setTrigger((prev) => `${prev}-${new Date().getTime()}`); // Ensure unique value
+              variantSheetRef.current?.close();
+            }}
           />
         </BottomSheet>
 
@@ -267,6 +264,7 @@ const Product = () => {
           <DuplicateVariantSheet
             product={duplicateProduct}
             onNewCustomization={handleNewCustomization}
+            closeSheet={() => duplicateVariantSheetRef.current?.close()}
           />
         </BottomSheet>
 
