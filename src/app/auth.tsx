@@ -181,7 +181,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import { requestLocationPermission } from "@/utils/helpers";
 import { resetAndNavigate } from "@/utils/navigation";
 import { useOTPStore } from "@/store/useOTP";
-import auth from "@react-native-firebase/auth";
 
 const Auth = () => {
   const phoneNumberRef = useRef<string>("");

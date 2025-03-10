@@ -21,7 +21,7 @@ import Animated, {
   FadeOut,
   LinearTransition,
 } from "react-native-reanimated";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 
 const useProducts = (categoryId: string, userId: string) => {
   return useInfiniteQuery({
@@ -54,6 +54,7 @@ const ProductList: FC<{
     isLoading,
     isError,
   } = useProducts(categoryId, userId || "");
+  const isFocused = useIsFocused();
 
   useFocusEffect(
     useCallback(() => {
@@ -83,6 +84,7 @@ const ProductList: FC<{
           cartCount={item?.cartCount || null}
           showAddCart={true}
           trigger={trigger}
+          isFocused={isFocused}
         />
       )}
       onEndReached={() => hasNextPage && fetchNextPage()}
