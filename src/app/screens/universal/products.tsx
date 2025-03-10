@@ -118,6 +118,10 @@ const Product = () => {
     }
   };
 
+  const handleBottomSheetClose = useCallback(() => {
+    setTrigger((prev) => `${prev}-${Date.now()}`);
+  }, []);
+
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop
@@ -249,7 +253,10 @@ const Product = () => {
           backdropComponent={renderBackdrop}
         >
           <ClearCartSheet
-            closeClearCartSheet={() => clearCartSheetRef.current?.close()}
+            closeClearCartSheet={() => {
+              handleBottomSheetClose();
+              clearCartSheetRef.current?.close();
+            }}
           />
         </BottomSheet>
 
@@ -260,11 +267,15 @@ const Product = () => {
           enableDynamicSizing={false}
           enablePanDownToClose
           backdropComponent={renderBackdrop}
+          onClose={handleBottomSheetClose}
         >
           <DuplicateVariantSheet
             product={duplicateProduct}
             onNewCustomization={handleNewCustomization}
-            closeSheet={() => duplicateVariantSheetRef.current?.close()}
+            closeSheet={() => {
+              setTrigger((prev) => `${prev}-${new Date().getTime()}`);
+              duplicateVariantSheetRef.current?.close();
+            }}
           />
         </BottomSheet>
 

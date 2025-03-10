@@ -73,16 +73,21 @@ const VariantSheet: FC<{
 
   const handleAddItem = async () => {
     if (selected && count > 0 && product?.productId) {
-      updateCart(
-        useAuthStore.getState().selectedMerchant.merchantId || "",
-        product?.productId,
-        product.productName,
-        selected?.price || 0,
-        count,
-        selected.variantTypeId,
-        selected.variantTypeName
-      );
-      onAddItem();
+      try {
+        await updateCart(
+          useAuthStore.getState().selectedMerchant.merchantId || "",
+          product?.productId,
+          product.productName,
+          selected?.price || 0,
+          count,
+          selected.variantTypeId,
+          selected.variantTypeName
+        );
+
+        onAddItem(); // Only triggers after cart update is successful
+      } catch (error) {
+        console.error("Error updating cart:", error);
+      }
     }
   };
 

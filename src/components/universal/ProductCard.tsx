@@ -19,9 +19,10 @@ const ProductCard: FC<{
   item: ProductProps;
   openVariant?: (product: ProductProps) => void;
   cartCount?: number | null;
+  isFocused: boolean;
   showAddCart: boolean;
   trigger?: string;
-}> = ({ item, openVariant, cartCount, showAddCart, trigger }) => {
+}> = ({ item, openVariant, cartCount, isFocused, showAddCart, trigger }) => {
   const [isFavorite, setIsFavorite] = useState<boolean>(item.isFavorite);
   const [count, setCount] = useState<number | null>(cartCount || null);
 
@@ -30,29 +31,34 @@ const ProductCard: FC<{
   useFocusEffect(
     useCallback(() => {
       const fetchCartQuantity = async () => {
-        if (!selectedMerchant?.merchantId) return;
-        const cartCollection = database.get<Cart>("cart");
-        const cartItems = await cartCollection
-          .query()
-          .fetch()
-          .then((items) =>
-            items.filter(
-              (cartItem) =>
-                cartItem.merchantId === selectedMerchant.merchantId &&
-                cartItem.productId === item.productId &&
-                cartItem.quantity > 0
-            )
+        if (!selectedMerchant?.merchantId) {
+          return;
+        }
+
+        try {
+          const cartCollection = database.get<Cart>("cart");
+          const allCartItems = await cartCollection.query().fetch();
+
+          const filteredCartItems = allCartItems.filter(
+            (cartItem) =>
+              cartItem.merchantId === selectedMerchant.merchantId &&
+              cartItem.productId === item.productId &&
+              cartItem.quantity > 0
           );
 
-        const totalQuantity = cartItems.reduce(
-          (sum, cartItem) => sum + cartItem.quantity,
-          0
-        );
-        setCount(totalQuantity);
+          const totalQuantity = filteredCartItems.reduce(
+            (sum, cartItem) => sum + cartItem.quantity,
+            0
+          );
+
+          setCount(totalQuantity);
+        } catch (error) {
+          console.error("❌ Error fetching cart quantity:", error);
+        }
       };
 
       fetchCartQuantity();
-    }, [item, selectedMerchant, trigger])
+    }, [item, selectedMerchant, trigger, isFocused])
   );
 
   useEffect(() => {
