@@ -72,14 +72,7 @@ const TemporaryOrderSheet = () => {
           style={styles.cancelBtn}
         >
           {item.orderId === selected && handleCancelOrderMutation.isPending ? (
-            <ActivityIndicator
-              size="small"
-              color={colors.WHITE}
-              style={{
-                paddingHorizontal: scale(20),
-                paddingVertical: verticalScale(10),
-              }}
-            />
+            <ActivityIndicator size="small" color={colors.WHITE} />
           ) : (
             <Typo size={13} color={colors.WHITE}>
               Cancel

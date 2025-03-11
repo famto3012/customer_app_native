@@ -16,6 +16,13 @@ import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLoyaltyAndFamtoCash } from "@/service/userService";
 import { useAuthStore } from "@/store/store";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
+import WalletRecharge from "@/components/BottomSheets/user/WalletRecharge";
+import { useCallback, useMemo, useRef } from "react";
+import { commonStyles } from "@/constants/commonStyles";
 
 interface WalletProps {
   walletBalance: string;
@@ -23,13 +30,32 @@ interface WalletProps {
 }
 
 const Wallet = () => {
+  const rechargeSheetRef = useRef<BottomSheet>(null);
+
+  const rechargeSnapPoints = useMemo(() => ["40%"], []);
+
   const { token } = useAuthStore.getState();
 
   const { data } = useQuery<WalletProps>({
     queryKey: ["loyalty-and-famto-cash"],
     queryFn: () => fetchLoyaltyAndFamtoCash(),
     enabled: !!token,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+        style={[props.style, commonStyles.backdrop]}
+      />
+    ),
+    []
+  );
 
   return (
     <ScreenWrapper>
@@ -67,6 +93,8 @@ const Wallet = () => {
 
                   return;
                 }
+
+                rechargeSheetRef.current?.expand();
               }}
               style={styles.addBtn}
             >
@@ -143,6 +171,17 @@ const Wallet = () => {
           </Typo>
         </View>
       </ScrollView>
+
+      <BottomSheet
+        ref={rechargeSheetRef}
+        index={-1}
+        snapPoints={rechargeSnapPoints}
+        enableDynamicSizing={true}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+      >
+        <WalletRecharge onClose={() => rechargeSheetRef.current?.close()} />
+      </BottomSheet>
     </ScreenWrapper>
   );
 };
