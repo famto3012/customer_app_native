@@ -1,5 +1,4 @@
 import { FlatList, Image, ScrollView, StyleSheet, View } from "react-native";
-import { useEffect } from "react";
 import { useLocalSearchParams } from "expo-router";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
@@ -23,14 +22,7 @@ const OrderDetail = () => {
     enabled: !!token && !!orderId,
   });
 
-  console.log("Order", orderId);
-  useEffect(() => {
-    console.log("OrderData", data);
-  }, [data]);
-
   const renderItem = ({ item }: any) => {
-    console.log("Items", item);
-
     if (
       data?.deliveryMode !== "Home Delivery" &&
       data?.deliveryMode !== "Take Away"

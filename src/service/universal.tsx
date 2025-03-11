@@ -264,10 +264,6 @@ export const addProductToCart = async (
   variantTypeId?: string
 ) => {
   try {
-    console.log("productId", productId);
-    console.log("quantity", quantity);
-    console.log("variantTypeId", variantTypeId);
-
     const res = await appAxios.put("/customers/update-cart", {
       productId,
       quantity,
@@ -431,7 +427,11 @@ export const getProductsWithVariantsInCart = async (productId: string) => {
 export const verifyPayment = async (
   orderId: string,
   amount: string | number
-): Promise<{ orderId: string; createdAt: string } | null> => {
+): Promise<{
+  orderId: string;
+  createdAt: string;
+  merchantName: string;
+} | null> => {
   try {
     const razorpayKey = process.env.EXPO_PUBLIC_RAZORPAY_KEY;
 
@@ -549,5 +549,20 @@ export const filterAndSearchProducts = async (
     console.error(`Error in searching products:`, err);
     Alert.alert("Error", "Something went wrong!");
     return [];
+  }
+};
+
+export const cancelOrder = async (orderId: string) => {
+  try {
+    const res = await appAxios.post(
+      `/customers/cancel-universal-order/${orderId}`,
+      {}
+    );
+
+    return res.status === 200 ? res.data : null;
+  } catch (err) {
+    console.error(`Error in cancelling order:`, err);
+    Alert.alert("Error", "Order already confirmed or not found");
+    return null;
   }
 };

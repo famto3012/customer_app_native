@@ -83,7 +83,7 @@ const Bill = () => {
         }
       } else {
         if (data?.success && data?.orderId) {
-          addOrder(data?.orderId, data?.createdAt);
+          addOrder(data?.orderId, data?.createdAt, data?.merchantName);
 
           useAuthStore.setState({
             cart: {
@@ -105,7 +105,7 @@ const Bill = () => {
       verifyPayment(orderId, amount),
     onSuccess: (data) => {
       if (data) {
-        addOrder(data?.orderId, data?.createdAt);
+        addOrder(data?.orderId, data?.createdAt, data?.merchantName);
 
         useAuthStore.setState({
           cart: {

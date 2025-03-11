@@ -23,7 +23,7 @@ export const useOTPStore = create<OTPState>((set) => ({
     try {
       const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
       set({ verificationId: confirmation.verificationId });
-      console.log("Verification ID set:", confirmation.verificationId);
+      // console.log("Verification ID set:", confirmation.verificationId);
     } catch (error) {
       console.error("Phone number verification failed:", error);
       throw new Error("Phone number verification failed. Please try again.");
@@ -38,7 +38,7 @@ export const useOTPStore = create<OTPState>((set) => ({
       const credential = auth.PhoneAuthProvider.credential(verificationId, otp);
       await auth().signInWithCredential(credential);
       set({ isVerified: true });
-      console.log("OTP verified successfully!");
+      // console.log("OTP verified successfully!");
     } catch (error: any) {
       console.error("OTP Verification failed:", error.message);
       throw new Error("Invalid OTP. Please try again.");
