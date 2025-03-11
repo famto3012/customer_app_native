@@ -1,8 +1,12 @@
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
-import { useQuery } from "@tanstack/react-query";
-import { fetchCustomerSubscriptions } from "@/service/userService";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  fetchCustomerSubscriptions,
+  initiateSubscription,
+  verifySubscription,
+} from "@/service/userService";
 import { useAuthStore } from "@/store/store";
 import Typo from "@/components/Typo";
 import { scale, verticalScale } from "@/utils/styling";
@@ -20,12 +24,47 @@ interface PlanProps {
 }
 
 const Subscription = () => {
-  const { token } = useAuthStore.getState();
+  const { token, userId } = useAuthStore.getState();
+
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["customer-subscription"],
     queryFn: fetchCustomerSubscriptions,
     enabled: !!token,
+  });
+
+  const handleInitiatePaymentMutation = useMutation({
+    mutationKey: ["initiate-subscription-payment"],
+    mutationFn: (planId: string) => initiateSubscription(planId),
+    onSuccess: (data) => {
+      if (data?.orderId) {
+        handleVerifyPaymentMutation.mutate({
+          orderId: data.orderId,
+          amount: data.amount,
+          userId: userId ? userId : "",
+          currentPlan: data.currentPlan,
+        });
+      }
+    },
+  });
+
+  const handleVerifyPaymentMutation = useMutation({
+    mutationKey: ["verify-subscription-payment"],
+    mutationFn: ({
+      orderId,
+      amount,
+      userId,
+      currentPlan,
+    }: {
+      orderId: string;
+      amount: number;
+      userId: string;
+      currentPlan: string;
+    }) => verifySubscription(orderId, amount, userId, currentPlan),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customer-subscription"] });
+    },
   });
 
   const renderItem = ({ item }: { item: PlanProps }) => {
@@ -50,7 +89,10 @@ const Subscription = () => {
           {item.description}
         </Typo>
 
-        <TouchableOpacity style={styles.btn}>
+        <TouchableOpacity
+          onPress={() => handleInitiatePaymentMutation.mutate(item.planId)}
+          style={styles.btn}
+        >
           <Typo size={14} color={colors.WHITE}>
             Recharge
           </Typo>

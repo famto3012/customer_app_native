@@ -10,7 +10,13 @@ import {
 } from "react-native-paper";
 import { SocketProvider } from "@/service/socketProvider";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnReconnect: true,
+    },
+  },
+});
 
 const theme = {
   ...DefaultTheme,

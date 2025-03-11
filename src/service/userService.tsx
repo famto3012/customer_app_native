@@ -1,5 +1,6 @@
 import { appAxios } from "@/config/apiInterceptor";
 import { Alert } from "react-native";
+import RazorpayCheckout from "react-native-razorpay";
 
 export const fetchUserAddress = async () => {
   try {
@@ -171,6 +172,175 @@ export const removeAppliedPromoCode = async (
   } catch (err: any) {
     console.error(`Error in removing promo code:`, err);
     Alert.alert("Error", "Something went wrong!");
+    return null;
+  }
+};
+
+export const initiateWalletDeposit = async (amount: number) => {
+  try {
+    const res = await appAxios.post(`/customers/wallet-recharge`, {
+      amount,
+    });
+
+    return res.data.success ? res.data : null;
+  } catch (err) {
+    console.error(`Error in initiating deposit:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return null;
+  }
+};
+
+export const verifyWalletPayment = async (
+  orderId: string,
+  amount: string | number
+): Promise<{
+  message: string;
+} | null> => {
+  try {
+    const razorpayKey = process.env.EXPO_PUBLIC_RAZORPAY_KEY;
+
+    if (!razorpayKey) {
+      throw new Error("Razorpay key is missing. Check environment variables.");
+    }
+
+    const amountInPaise = Math.round(Number(amount) * 100);
+
+    const options = {
+      key: razorpayKey,
+      amount: amountInPaise,
+      currency: "INR",
+      name: "Famto",
+      description: "Wallet recharge",
+      order_id: orderId,
+      prefill: {
+        name: "",
+        email: "",
+        contact: "",
+      },
+      theme: {
+        color: "#00CED1",
+      },
+    };
+
+    return new Promise((resolve, reject) => {
+      RazorpayCheckout.open(options)
+        .then(async (response) => {
+          const paymentDetails = {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          };
+
+          try {
+            const res = await appAxios.post(
+              `/customers/verify-wallet-recharge`,
+              {
+                amount,
+                paymentDetails,
+              }
+            );
+
+            resolve(res.status === 200 ? res.data : null);
+          } catch (error) {
+            console.error("❌ Error in Payment Verification API:", error);
+            reject(error);
+          }
+        })
+        .catch((error) => {
+          console.error("❌ Payment failed or canceled:", error);
+          reject(error);
+        });
+    });
+  } catch (err) {
+    console.error("❌ Error in verifying payment:", err);
+    return null;
+  }
+};
+
+export const initiateSubscription = async (planId: string) => {
+  try {
+    const res = await appAxios.post(
+      `/admin/subscription-payment/customer-subscription-payment-user`,
+      {
+        planId,
+        paymentMode: "Online",
+      }
+    );
+
+    return res.status === 201 ? res.data : null;
+  } catch (err) {
+    console.error(`Error in initiating deposit:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return null;
+  }
+};
+
+export const verifySubscription = async (
+  orderId: string,
+  amount: string | number,
+  userId: string,
+  currentPlan: string
+): Promise<{
+  message: string;
+} | null> => {
+  try {
+    const razorpayKey = process.env.EXPO_PUBLIC_RAZORPAY_KEY;
+
+    if (!razorpayKey) {
+      throw new Error("Razorpay key is missing. Check environment variables.");
+    }
+
+    const amountInPaise = Math.round(Number(amount) * 100);
+
+    const options = {
+      key: razorpayKey,
+      amount: amountInPaise,
+      currency: "INR",
+      name: "Famto",
+      description: "Subscription payment",
+      order_id: orderId,
+      prefill: {
+        name: "",
+        email: "",
+        contact: "",
+      },
+      theme: {
+        color: "#00CED1",
+      },
+    };
+
+    return new Promise((resolve, reject) => {
+      RazorpayCheckout.open(options)
+        .then(async (response) => {
+          const paymentDetails = {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            amount,
+            paymentMode: "Online",
+            userId,
+            currentPlan,
+          };
+
+          try {
+            const res = await appAxios.post(
+              `/admin/subscription-payment/customer-subscription-payment-verification`,
+              paymentDetails
+            );
+
+            resolve(res.status === 200 ? res.data : null);
+          } catch (error) {
+            console.error("❌ Error in Payment Verification API:", error);
+            reject(error);
+          }
+        })
+        .catch((error) => {
+          console.error("❌ Payment failed or canceled:", error);
+          reject(error);
+        });
+    });
+  } catch (err) {
+    console.error("❌ Error in verifying payment:", err);
     return null;
   }
 };
