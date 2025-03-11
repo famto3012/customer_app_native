@@ -1,5 +1,16 @@
-import { FlatList, Image, ScrollView, StyleSheet, View } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+
+import {
+  Alert,
+  FlatList,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useEffect } from "react";
+import { router, useLocalSearchParams } from "expo-router";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import Typo from "@/components/Typo";
@@ -10,6 +21,7 @@ import { useAuthStore } from "@/store/store";
 import { getOrderDetail } from "@/service/orderService";
 import { scale, verticalScale } from "@/utils/styling";
 import OrderBillDetail from "@/components/orders/OrderBillDetail";
+import { ChatTeardropDots } from "phosphor-react-native";
 
 const OrderDetail = () => {
   const { orderId } = useLocalSearchParams();
@@ -119,15 +131,45 @@ const OrderDetail = () => {
         contentContainerStyle={{ paddingBottom: scale(10) }}
         showsVerticalScrollIndicator={false}
       >
+        {data?.status === "On-going" && data?.deliveryMode !== "Take Away" && (
+          <View
+            style={{
+              backgroundColor: colors.NEUTRAL400,
+              width: SCREEN_WIDTH,
+              height: SCREEN_HEIGHT * 0.4,
+              marginTop: scale(10),
+            }}
+          >
+            <Typo>Map</Typo>
+          </View>
+        )}
         <View style={styles.headerTile}>
-          <Typo size={16} fontFamily="SemiBold" color={colors.NEUTRAL900}>
-            Order ID: {orderId}{" "}
-          </Typo>
-          <Typo size={12} color={colors.NEUTRAL900}>
-            {data?.status === "Completed"
-              ? `Order delivered on ${data?.orderDate} ${data?.orderTime}`
-              : `Order will be delivered at ${data?.deliveryTime} `}
-          </Typo>
+          <View>
+            <Typo size={16} fontFamily="SemiBold" color={colors.NEUTRAL900}>
+              Order ID: {orderId}{" "}
+            </Typo>
+            <Typo size={12} color={colors.NEUTRAL900}>
+              {data?.status === "Completed"
+                ? `Order delivered on ${data?.orderDate} ${data?.orderTime}`
+                : `Order will be delivered at ${data?.deliveryTime} `}
+            </Typo>
+          </View>
+          <View>
+            <Pressable
+              onPress={() => {
+                if (data?.agentId) {
+                  router.push({
+                    pathname: "/screens/user/chatPage",
+                    params: { agentId: data?.agentId },
+                  });
+                } else {
+                  Alert.alert("No agent assigned for this order");
+                }
+              }}
+            >
+              <ChatTeardropDots size={32} color={colors.PRIMARY} />
+            </Pressable>
+          </View>
         </View>
         <View style={styles.deliveryMode}>
           <Typo size={12} color={colors.NEUTRAL900}>
@@ -300,6 +342,9 @@ const styles = StyleSheet.create({
     marginTop: 40,
     marginBottom: scale(20),
     borderRadius: 10,
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   deliveryMode: {
     backgroundColor: colors.PRIMARY_LIGHT,

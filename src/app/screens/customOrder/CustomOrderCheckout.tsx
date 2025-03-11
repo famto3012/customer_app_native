@@ -41,7 +41,7 @@ const CustomOrderCheckout = () => {
     useState<CustomOrderItemsProps | null>(null);
   const [itemId, setItemId] = useState<string>("");
   const [addressData, setAddressData] = useState({
-    deliveryAddressType: "",
+    deliveryAddressType: "home",
     deliveryAddressOtherAddressId: "",
     instructionInDelivery: "",
   });

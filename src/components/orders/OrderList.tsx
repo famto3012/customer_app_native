@@ -11,9 +11,9 @@ import Typo from "../Typo";
 import { colors, radius } from "@/constants/theme";
 import { useQuery } from "@tanstack/react-query";
 import { getOrderList } from "@/service/orderService";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, FC } from "react";
 import { OrderItemProps } from "@/types";
-import { SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAuthStore } from "@/store/store";
 import LottieView from "lottie-react-native";
@@ -49,7 +49,136 @@ const OrderList = () => {
     setRefreshing(false);
   }, [refetch]);
 
-  const renderItem = ({ item }: any) => {
+  // const renderItem = ({ item }: any) => {
+  //   console.log("item", item);
+  //   return (
+  //     <Pressable
+  //       style={styles.orderItem}
+  //       onPress={() => {
+  //         router.push({
+  //           pathname: "/screens/user/OrderDetail",
+  //           params: { orderId: item.orderId },
+  //         });
+  //       }}
+  //     >
+  //       <View style={styles.orderItemHeader}>
+  //         {item.deliveryMode === "Home Delivery" ||
+  //         item.deliveryMode === "Take Away" ? (
+  //           <LottieView
+  //             source={require("@/assets/images/universal-order.json")} // Path to your Lottie JSON file
+  //             autoPlay
+  //             loop
+  //             style={styles.image} // Adjust size as needed
+  //           />
+  //         ) : item.deliveryMode === "Pick and Drop" ? (
+  //           <LottieView
+  //             source={require("@/assets/images/pick-drop-order.json")} // Path to your Lottie JSON file
+  //             autoPlay
+  //             loop
+  //             style={styles.image} // Adjust size as needed
+  //           />
+  //         ) : (
+  //           <LottieView
+  //             source={require("@/assets/images/custom-order.json")} // Path to your Lottie JSON file
+  //             autoPlay
+  //             loop
+  //             style={styles.image} // Adjust size as needed
+  //           />
+  //         )}
+
+  //         <View style={styles.orderDetail}>
+  //           <View>
+  //             <Typo size={16} color={colors.NEUTRAL900} fontFamily="Medium">
+  //               {item.deliveryMode === "Home Delivery" ||
+  //               item.deliveryMode === "Take Away"
+  //                 ? item.merchantName
+  //                 : item.deliveryMode}
+  //             </Typo>
+  //             <Typo size={12} color={colors.NEUTRAL400}>
+  //               {item.deliveryMode === "Home Delivery" ||
+  //               item.deliveryMode === "Take Away"
+  //                 ? item.displayAddress
+  //                 : ""}
+  //             </Typo>
+  //             <Typo
+  //               size={12}
+  //               color={colors.PRIMARY}
+  //               style={{ paddingTop: verticalScale(10) }}
+  //             >
+  //               {item.orderDate} | {item.orderTime}
+  //             </Typo>
+  //           </View>
+
+  //           <Typo
+  //             size={12}
+  //             color={
+  //               item.orderStatus === "On-going" ||
+  //               item.orderStatus === "Pending"
+  //                 ? colors.YELLOW
+  //                 : item.orderStatus === "Completed"
+  //                 ? colors.GREEN
+  //                 : colors.RED
+  //             }
+  //             style={styles.completed}
+  //           >
+  //             {item.orderStatus}
+  //           </Typo>
+  //         </View>
+  //       </View>
+
+  //       <View style={styles.orderItemFooter}>
+  //         <Typo size={13} color={colors.PRIMARY} fontFamily="Medium">
+  //           Grand Total
+  //         </Typo>
+  //         <Typo
+  //           size={item?.grandTotal ? 16 : 12}
+  //           color={colors.NEUTRAL900}
+  //           fontFamily="SemiBold"
+  //         >
+  //           {item?.grandTotal
+  //             ? ` ₹ ${item?.grandTotal}`
+  //             : "Will be updated soon"}
+  //         </Typo>
+  //       </View>
+  //     </Pressable>
+  //   );
+  // };
+
+  const OrderItem: FC<{ item: any }> = ({ item }) => {
+    const [remainingTime, setRemainingTime] = useState("");
+
+    useEffect(() => {
+      if (item.orderStatus === "On-going") {
+        const interval = setInterval(() => {
+          const now = new Date().getTime();
+
+          const [orderHours, orderMinutes] = item.orderTime
+            .split(":")
+            .map(Number);
+          const orderDate = new Date();
+          orderDate.setHours(orderHours, orderMinutes, 0, 0);
+
+          const deliveryTime: any = new Date(
+            orderDate.getTime() + 30 * 60 * 1000
+          );
+
+          const diffInMinutes = Math.max(
+            0,
+            Math.floor((deliveryTime - now) / 60000)
+          );
+
+          if (diffInMinutes > 0) {
+            setRemainingTime(`${diffInMinutes} min`);
+          } else {
+            setRemainingTime("Arriving soon");
+            clearInterval(interval);
+          }
+        }, 1000);
+
+        return () => clearInterval(interval);
+      }
+    }, [item.orderStatus, item.orderTime]);
+
     return (
       <Pressable
         style={styles.orderItem}
@@ -64,24 +193,24 @@ const OrderList = () => {
           {item.deliveryMode === "Home Delivery" ||
           item.deliveryMode === "Take Away" ? (
             <LottieView
-              source={require("@/assets/images/universal-order.json")} // Path to your Lottie JSON file
+              source={require("@/assets/images/universal-order.json")}
               autoPlay
               loop
-              style={styles.image} // Adjust size as needed
+              style={styles.image}
             />
           ) : item.deliveryMode === "Pick and Drop" ? (
             <LottieView
-              source={require("@/assets/images/pick-drop-order.json")} // Path to your Lottie JSON file
+              source={require("@/assets/images/pick-drop-order.json")}
               autoPlay
               loop
-              style={styles.image} // Adjust size as needed
+              style={styles.image}
             />
           ) : (
             <LottieView
-              source={require("@/assets/images/custom-order.json")} // Path to your Lottie JSON file
+              source={require("@/assets/images/custom-order.json")}
               autoPlay
               loop
-              style={styles.image} // Adjust size as needed
+              style={styles.image}
             />
           )}
 
@@ -108,20 +237,42 @@ const OrderList = () => {
               </Typo>
             </View>
 
-            <Typo
-              size={12}
-              color={
-                item.orderStatus === "On-going" ||
-                item.orderStatus === "Pending"
-                  ? colors.YELLOW
-                  : item.orderStatus === "Completed"
-                  ? colors.GREEN
-                  : colors.RED
-              }
-              style={styles.completed}
-            >
-              {item.orderStatus}
-            </Typo>
+            <View style={{ flexDirection: "column", alignItems: "center" }}>
+              {item.orderStatus === "On-going" && (
+                <Typo
+                  size={12}
+                  color={
+                    remainingTime === "Arriving soon"
+                      ? colors.RED
+                      : colors.GREEN
+                  }
+                  style={{
+                    width: SCREEN_WIDTH * 0.25,
+                    backgroundColor: colors.NEUTRAL100,
+                    paddingVertical: verticalScale(4),
+                    borderRadius: radius._20,
+                    justifyContent: "center",
+                    textAlign: "center",
+                  }}
+                >
+                  {remainingTime}
+                </Typo>
+              )}
+              <Typo
+                size={12}
+                color={
+                  item.orderStatus === "On-going" ||
+                  item.orderStatus === "Pending"
+                    ? colors.YELLOW
+                    : item.orderStatus === "Completed"
+                    ? colors.GREEN
+                    : colors.RED
+                }
+                style={styles.completed}
+              >
+                {item.orderStatus}
+              </Typo>
+            </View>
           </View>
         </View>
 
@@ -142,6 +293,8 @@ const OrderList = () => {
       </Pressable>
     );
   };
+
+  const renderItem = ({ item }: any) => <OrderItem item={item} />;
 
   return (
     <FlatList
@@ -235,6 +388,7 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(4),
     paddingHorizontal: scale(8),
     borderRadius: radius._20,
+    marginTop: scale(8),
   },
   orderImage: {
     width: scale(340),
