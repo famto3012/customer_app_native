@@ -1,3 +1,4 @@
+
 import {
   Alert,
   FlatList,
@@ -32,11 +33,6 @@ const OrderDetail = () => {
     queryFn: () => getOrderDetail(orderId.toString()),
     enabled: !!token && !!orderId,
   });
-
-  console.log("Order", orderId);
-  useEffect(() => {
-    console.log("OrderData", data);
-  }, [data]);
 
   const renderItem = ({ item }: any) => {
     if (

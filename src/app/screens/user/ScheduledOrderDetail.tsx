@@ -20,21 +20,12 @@ const ScheduledOrderDetail = () => {
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["scheduled-order-details", orderId, deliveryMode],
-    queryFn: () => getScheduledOrderDetail(orderId, deliveryMode),
+    queryFn: () =>
+      getScheduledOrderDetail(orderId.toString(), deliveryMode.toString()),
     enabled: !!token && !!orderId && !!deliveryMode,
   });
 
-  console.log("Order", orderId);
-  useEffect(() => {
-    console.log("OrderDataScheduled", data);
-  }, [data]);
-
-  console.log("Order", orderId);
-  console.log("deliveryMode", deliveryMode);
-
   const renderItem = ({ item }: any) => {
-    console.log("Items", item);
-
     if (
       data?.deliveryMode !== "Home Delivery" &&
       data?.deliveryMode !== "Take Away"
