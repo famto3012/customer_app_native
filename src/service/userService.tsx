@@ -162,8 +162,6 @@ export const removeAppliedPromoCode = async (
   deliveryMode: string
 ) => {
   try {
-    console.log("Remove promo", cartId, deliveryMode);
-
     const res = await appAxios.put(`/customers/remove-promo-code`, {
       cartId,
       deliveryMode,

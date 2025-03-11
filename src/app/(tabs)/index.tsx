@@ -20,7 +20,7 @@ import {
 } from "@/utils/styling";
 import TopService from "@/components/TopService";
 import BusinessCategories from "@/components/universal/BusinessCategories";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { requestLocationPermission } from "@/utils/helpers";
 import FloatingPreparingOrder from "@/components/universal/FloatingPreparingOrder";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -31,8 +31,18 @@ import { router } from "expo-router";
 import { getAppBanner } from "@/service/userService";
 import { interpolate } from "react-native-reanimated";
 import Carousel, { TAnimationStyle } from "react-native-reanimated-carousel";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
+import { commonStyles } from "@/constants/commonStyles";
+import TemporaryOrderSheet from "@/components/BottomSheets/universal/TemporaryOrderSheet";
 
 const Home = () => {
+  const temporaryOrderSheet = useRef<BottomSheet>(null);
+
+  const temporarySnapPoints = useMemo(() => ["60%"], []);
+
   const { token } = useAuthStore.getState();
 
   useEffect(() => {
@@ -41,7 +51,7 @@ const Home = () => {
 
   const queryClient = useQueryClient();
 
-  const { data } = useQuery({
+  const { data: ongoingOrder, refetch: refetchOngoingOrder } = useQuery({
     queryKey: ["ongoingOrder"],
     queryFn: () => getOngoingOrder(),
     enabled: !!token,
@@ -72,16 +82,25 @@ const Home = () => {
     };
   }, []);
 
-  // useEffect(() => {
-  //   console.log("bannerData", bannerData);
-  // }, [bannerData]);
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+        style={[props.style, commonStyles.backdrop]}
+      />
+    ),
+    []
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.WHITE }}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: data?.length ? verticalScale(70) : 0,
+          paddingBottom: ongoingOrder?.length ? verticalScale(70) : 0,
           marginTop: -20,
           backgroundColor: colors.WHITE,
         }}
@@ -136,8 +155,23 @@ const Home = () => {
       </ScrollView>
 
       <View style={styles.floatingContainer}>
-        <FloatingPreparingOrder data={data} />
+        <FloatingPreparingOrder
+          data={ongoingOrder}
+          refetchOngoingOrder={refetchOngoingOrder}
+          openTempOrderSheet={() => temporaryOrderSheet.current?.snapToIndex(0)}
+        />
       </View>
+
+      <BottomSheet
+        ref={temporaryOrderSheet}
+        index={-1}
+        snapPoints={temporarySnapPoints}
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+      >
+        <TemporaryOrderSheet />
+      </BottomSheet>
     </View>
   );
 };

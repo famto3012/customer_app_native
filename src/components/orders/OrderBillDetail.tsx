@@ -25,7 +25,6 @@ const OrderBillDetail: FC<{ data: UniversalBillProps; isLoading: boolean }> = ({
   const discountLabel = data?.promoCodeUsed
     ? `Discount (${data.promoCodeUsed})`
     : `Discount`;
-  console.log("Bill detail", data);
 
   const RenderBillField = ({
     field,
