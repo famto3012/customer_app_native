@@ -107,7 +107,8 @@ export const SocketProvider: FC<{ children: React.ReactNode }> = ({
       const imageUrl =
         remoteMessage?.notification?.android?.imageUrl ||
         remoteMessage?.data?.imageUrl ||
-        remoteMessage?.notification?.imageUrl;
+        remoteMessage?.notification?.imageUrl ||
+        "";
 
       const notificationContent = {
         title,
@@ -121,7 +122,7 @@ export const SocketProvider: FC<{ children: React.ReactNode }> = ({
           },
           importance: AndroidImportance.HIGH,
           showTimestamp: true,
-          largeIcon: imageUrl,
+          ...(imageUrl ? { largeIcon: imageUrl } : {}),
         },
         ios: {
           sound: "default",
@@ -152,11 +153,22 @@ export const SocketProvider: FC<{ children: React.ReactNode }> = ({
 
     messaging().setBackgroundMessageHandler(async (remoteMessage) => {
       console.log("📩 Background message received:", remoteMessage);
+      await displayForegroundNotification(remoteMessage);
     });
 
     const notifeeUnsubscribe = notifee.onForegroundEvent(({ type, detail }) => {
       if (type === EventType.PRESS) {
         console.log("👆 User pressed notification:", detail.notification);
+      }
+    });
+
+    notifee.onBackgroundEvent(async ({ type, detail }) => {
+      if (type === EventType.PRESS) {
+        console.log(
+          "📩 User interacted with notification in background:",
+          detail.notification
+        );
+        // Handle navigation or other logic when user taps on notification
       }
     });
 
