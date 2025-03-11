@@ -10,8 +10,8 @@ import { clearCart } from "@/localDB/controller/cartController";
 const ClearCartSheet: FC<{ closeClearCartSheet: () => void }> = ({
   closeClearCartSheet,
 }) => {
-  const handleClearCart = () => {
-    clearCart();
+  const handleClearCart = async () => {
+    await clearCart();
     closeClearCartSheet();
   };
 

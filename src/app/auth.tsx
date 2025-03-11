@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { requestLocationPermission } from "@/utils/helpers";
 import { resetAndNavigate } from "@/utils/navigation";
+import { useOTPStore } from "@/store/useOTP";
 
 const Auth = () => {
   const phoneNumberRef = useRef<string>("");
