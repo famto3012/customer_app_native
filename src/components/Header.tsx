@@ -13,6 +13,7 @@ const Header = ({
   showRightIcon = false,
   icon,
   onPress,
+  iconStyle,
 }: HeaderProps) => {
   return (
     <View style={styles.container}>
@@ -42,7 +43,11 @@ const Header = ({
           <Pressable onPress={onPress} style={styles.rightIcon}>
             <Image
               source={icon}
-              style={{ width: scale(24), height: verticalScale(24) }}
+              style={{
+                width: scale(24),
+                height: verticalScale(24),
+                ...(iconStyle || {}),
+              }}
             />
           </Pressable>
         )}

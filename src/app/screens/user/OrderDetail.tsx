@@ -1,8 +1,8 @@
-
 import {
   Alert,
   FlatList,
   Image,
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -21,7 +21,7 @@ import { useAuthStore } from "@/store/store";
 import { getOrderDetail } from "@/service/orderService";
 import { scale, verticalScale } from "@/utils/styling";
 import OrderBillDetail from "@/components/orders/OrderBillDetail";
-import { ChatTeardropDots } from "phosphor-react-native";
+import { ChatTeardropDots, Phone } from "phosphor-react-native";
 
 const OrderDetail = () => {
   const { orderId } = useLocalSearchParams();
@@ -33,6 +33,8 @@ const OrderDetail = () => {
     queryFn: () => getOrderDetail(orderId.toString()),
     enabled: !!token && !!orderId,
   });
+
+  // console.log("data", data);
 
   const renderItem = ({ item }: any) => {
     if (
@@ -154,22 +156,51 @@ const OrderDetail = () => {
                 : `Order will be delivered at ${data?.deliveryTime} `}
             </Typo>
           </View>
-          <View>
-            <Pressable
-              onPress={() => {
-                if (data?.agentId) {
-                  router.push({
-                    pathname: "/screens/user/chatPage",
-                    params: { agentId: data?.agentId },
-                  });
-                } else {
-                  Alert.alert("No agent assigned for this order");
-                }
-              }}
-            >
-              <ChatTeardropDots size={32} color={colors.PRIMARY} />
-            </Pressable>
-          </View>
+          {data?.status === "On-going" &&
+            data?.deliveryMode !== "Take Away" && (
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  justifyContent: "flex-end",
+                  gap: scale(15),
+                }}
+              >
+                <Pressable
+                  onPress={() => {
+                    if (data?.agentId) {
+                      const dialerUrl = `tel:${data?.agentPhone}`;
+                      Linking.openURL(dialerUrl).catch((err) =>
+                        Alert.alert("Error", "Unable to open dialer")
+                      );
+                    } else {
+                      Alert.alert("No agent assigned for this order");
+                    }
+                  }}
+                >
+                  <Phone size={32} color={colors.PRIMARY} />
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    if (data?.agentId) {
+                      router.push({
+                        pathname: "/screens/user/chatPage",
+                        params: {
+                          agentId: data?.agentId,
+                          agentImage: data?.agentImageURL,
+                          agentName: data?.agentName,
+                          agentPhone: data?.agentPhone,
+                        },
+                      });
+                    } else {
+                      Alert.alert("No agent assigned for this order");
+                    }
+                  }}
+                >
+                  <ChatTeardropDots size={32} color={colors.PRIMARY} />
+                </Pressable>
+              </View>
+            )}
         </View>
         <View style={styles.deliveryMode}>
           <Typo size={12} color={colors.NEUTRAL900}>

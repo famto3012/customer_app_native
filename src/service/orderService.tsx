@@ -87,3 +87,39 @@ export const getScheduledOrderDetail = async (
     return [];
   }
 };
+
+export const getChatMessages = async (agentId: string) => {
+  try {
+    const res = await appAxios.get(`/customers/chat/${agentId}`);
+
+    if (res.status === 200) {
+      return res.data || [];
+    } else {
+      throw new Error("Failed to fetch messages");
+    }
+  } catch (err) {
+    console.error(`Error in getting messages:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return [];
+  }
+};
+
+export const sendChatMessages = async (formData: FormData) => {
+  try {
+    const res = await appAxios.post(`/customers/chat`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    if (res.status === 201) {
+      return res.data || {};
+    } else {
+      throw new Error("Failed to send message");
+    }
+  } catch (err) {
+    console.error(`Error in sending message:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return [];
+  }
+};
