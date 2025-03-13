@@ -1,4 +1,5 @@
 import { appAxios } from "@/config/apiInterceptor";
+import { AddAddressDetailProps } from "@/types";
 import { Alert } from "react-native";
 import RazorpayCheckout from "react-native-razorpay";
 
@@ -342,5 +343,19 @@ export const verifySubscription = async (
   } catch (err) {
     console.error("❌ Error in verifying payment:", err);
     return null;
+  }
+};
+
+export const addAddressDetail = async (data: {
+  addresses: AddAddressDetailProps;
+}) => {
+  try {
+    const res = await appAxios.patch(`/customers/update-address`, data);
+
+    return res.status === 200 ? res.data : {};
+  } catch (err: any) {
+    console.error(`Error in adding customer address:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return false;
   }
 };

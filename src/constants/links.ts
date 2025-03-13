@@ -9,3 +9,10 @@ export const MESSAGING_SENDER_ID =
   process.env.EXPO_PUBLIC_MESSAGING_SENDER_ID || "";
 export const APP_ID = process.env.EXPO_PUBLIC_APP_ID || "";
 export const MEASUREMENT_ID = process.env.EXPO_PUBLIC_MEASUREMENT_ID || "";
+
+export const MAPPLS_REST_API_KEY =
+  process.env.EXPO_PUBLIC_MAPPLS_REST_API_KEY || "";
+export const MAPPLS_CLIENT_ID =
+  process.env.EXPO_PUBLIC_MAPPLS_CLIENT_ID_KEY || "";
+export const MAPPLS_CLIENT_SECRET_KEY =
+  process.env.EXPO_PUBLIC_MAPPLS_CLIENT_SECRET_KEY || "";
