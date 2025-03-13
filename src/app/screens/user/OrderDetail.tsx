@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
@@ -22,8 +22,33 @@ import { getOrderDetail } from "@/service/orderService";
 import { scale, verticalScale } from "@/utils/styling";
 import OrderBillDetail from "@/components/orders/OrderBillDetail";
 import { ChatTeardropDots, Phone } from "phosphor-react-native";
+import Map from "@/components/common/Map";
+
+type MapDataType = {
+  pickupLocation: {
+    latitude: number;
+    longitude: number;
+  };
+  deliveryLocation: {
+    latitude: number;
+    longitude: number;
+  };
+  orderId: string;
+};
 
 const OrderDetail = () => {
+  const [mapData, setMapData] = useState<MapDataType>({
+    pickupLocation: {
+      latitude: 0,
+      longitude: 0,
+    },
+    deliveryLocation: {
+      latitude: 0,
+      longitude: 0,
+    },
+    orderId: "",
+  });
+
   const { orderId } = useLocalSearchParams();
 
   const { token } = useAuthStore.getState();
@@ -34,7 +59,21 @@ const OrderDetail = () => {
     enabled: !!token && !!orderId,
   });
 
-  // console.log("data", data);
+  useEffect(() => {
+    if (data) {
+      setMapData({
+        pickupLocation: {
+          latitude: data.pickUpLocation[0],
+          longitude: data.pickUpLocation[1],
+        },
+        deliveryLocation: {
+          latitude: data.deliveryLocation[0],
+          longitude: data.deliveryLocation[1],
+        },
+        orderId: orderId || "",
+      });
+    }
+  }, [data]);
 
   const renderItem = ({ item }: any) => {
     if (
@@ -133,18 +172,23 @@ const OrderDetail = () => {
         contentContainerStyle={{ paddingBottom: scale(10) }}
         showsVerticalScrollIndicator={false}
       >
-        {data?.status === "On-going" && data?.deliveryMode !== "Take Away" && (
-          <View
-            style={{
-              backgroundColor: colors.NEUTRAL400,
-              width: SCREEN_WIDTH,
-              height: SCREEN_HEIGHT * 0.4,
-              marginTop: scale(10),
-            }}
-          >
-            <Typo>Map</Typo>
-          </View>
-        )}
+        {(data?.status === "On-going" || data?.status === "Pending") &&
+          data?.deliveryMode !== "Take Away" &&
+          data?.deliveryMode !== "Custom Order" && (
+            <View
+              style={{
+                width: SCREEN_WIDTH,
+                height: SCREEN_HEIGHT * 0.4,
+                marginTop: scale(10),
+              }}
+            >
+              <Map
+                pickupLocation={mapData.pickupLocation}
+                deliveryLocation={mapData.deliveryLocation}
+                orderId={mapData.orderId}
+              />
+            </View>
+          )}
         <View style={styles.headerTile}>
           <View>
             <Typo size={16} fontFamily="SemiBold" color={colors.NEUTRAL900}>
@@ -156,7 +200,7 @@ const OrderDetail = () => {
                 : `Order will be delivered at ${data?.deliveryTime} `}
             </Typo>
           </View>
-          {data?.status === "On-going" &&
+          {(data?.status === "On-going" || data?.status === "Pending") &&
             data?.deliveryMode !== "Take Away" && (
               <View
                 style={{

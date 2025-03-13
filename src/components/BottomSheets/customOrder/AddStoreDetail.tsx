@@ -22,18 +22,33 @@ import { AddCustomStoreProps, AddStoreResponse } from "@/types";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-const AddStoreDetail = ({ addStoreSheetRef }: { addStoreSheetRef: any }) => {
+const AddStoreDetail = ({
+  addStoreSheetRef,
+  shopData,
+}: {
+  addStoreSheetRef: any;
+  shopData: any;
+}) => {
+  console.log("ShopData", shopData);
   const [storeData, setStoreData] = useState<AddCustomStoreProps>({
-    latitude: null,
-    longitude: null,
-    shopName: "",
-    place: "",
+    latitude: shopData?.latitude || null,
+    longitude: shopData?.longitude || null,
+    shopName: shopData?.shopName.split(",")[0] || "",
+    place: shopData?.place || "",
     buyFromAnyWhere: false,
   });
 
   useEffect(() => {
-    setStoreData({ ...storeData, latitude: 8.565349, longitude: 76.876014 });
-  }, []);
+    if (shopData) {
+      setStoreData((prevState) => ({
+        ...prevState,
+        latitude: shopData.latitude,
+        longitude: shopData.longitude,
+        shopName: shopData.shopName.split(",")[0],
+        place: shopData.place,
+      }));
+    }
+  }, [shopData]);
 
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [dynamicSnapPoints, setDynamicSnapPoints] = useState(["38%"]); // Default snap points
