@@ -256,3 +256,23 @@ export type PickAndDropItemProps = {
   unit: string;
   weight: string | number;
 };
+
+export type LocationAddressProps = {
+  placeType: string | null;
+  address: string | null;
+  state: string | null;
+  pinCode: string | null;
+  district: string | null;
+  locality: string | null;
+  poi: string | null;
+};
+
+export type AddAddressDetailProps = {
+  type: string | null;
+  fullName: string | null;
+  phoneNumber: string | null;
+  flat: string | null;
+  area: string | null;
+  landmark: string | null;
+  coordinates: number[] | null;
+}[];

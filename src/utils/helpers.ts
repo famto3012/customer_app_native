@@ -31,6 +31,7 @@ export const requestLocationPermission = async () => {
     }
 
     const { latitude, longitude } = location.coords;
+    console.log("Location", location.coords);
     setLocation({ latitude, longitude });
 
     return true;
