@@ -1,7 +1,7 @@
 import { ScrollView, StyleSheet, View } from "react-native";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
-import ItemSpecification from "@/components/customOrder/ItemSpecification";
+import ItemSpecification from "@/components/pickandDrop/ItemSpecification";
 import AddTip from "@/components/common/AddTip";
 import Typo from "@/components/Typo";
 import { router, useLocalSearchParams } from "expo-router";
@@ -11,7 +11,7 @@ import {
   confirmCustomOrder,
   fetchCustomCartBill,
 } from "@/service/customOrderService";
-import { colors, radius } from "@/constants/theme";
+import { colors, radius, spacingX } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
 import Button from "@/components/Button";
 import PromoCode from "@/components/common/Promocode";
@@ -26,10 +26,10 @@ import CustomBillDetail from "@/components/customOrder/CustomBillDetail";
 import { CustomCartBill } from "@/types";
 import { useAuthStore } from "@/store/store";
 import AppliedPromoCode from "@/components/common/AppliedPromoCode";
+import { addPickAndDropTipAndPromoCode } from "@/service/pickandDropService";
 
-const Pickcheck = () => {
-  const { cartId: cartIdParam } = useLocalSearchParams();
-  const cartId = cartIdParam?.toString() ?? ""; // Ensure cartId is always a string
+const PickAndDropCheckout = () => {
+  const { cartId, items } = useLocalSearchParams();
 
   const [promoCodeUsed, setPromoCodeUsed] = useState<string>("");
 
@@ -48,26 +48,23 @@ const Pickcheck = () => {
 
   const { data: cartBill } = useQuery<CustomCartBill>({
     queryKey,
-    queryFn: () => fetchCustomCartBill(cartId),
+    queryFn: () => fetchCustomCartBill(cartId.toString()),
     enabled: !!cartId,
   });
 
   // Mutation to apply tip
   const handleAddTipMutation = useMutation({
-    mutationKey: ["custom-order-tip"],
-    mutationFn: (addedTip: number) => applyCustomOrderTipAndPromoCode(addedTip),
+    mutationKey: ["pick-and-drop-tip"],
+    mutationFn: (addedTip: number) => addPickAndDropTipAndPromoCode(addedTip),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey });
-    },
-    onError: (error) => {
-      console.error("Failed to add tip:", error);
+      queryClient.invalidateQueries({});
     },
   });
 
   // Mutation to confirm order
   const handleConfirmOrder = useMutation({
     mutationKey: ["confirm-custom-order"],
-    mutationFn: () => confirmCustomOrder(cartId),
+    mutationFn: () => confirmCustomOrder(cartId.toString()),
     onSuccess: (data) => {
       if (data?.orderId) {
         useAuthStore.setState({ promoCode: null });
@@ -106,7 +103,7 @@ const Pickcheck = () => {
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <Header title="Checkout" />
 
-          <ItemSpecification cartId={cartId} />
+          <ItemSpecification items={items.toString()} />
 
           <AddTip
             previousTip={cartBill?.addedTip ?? 0}
@@ -125,13 +122,13 @@ const Pickcheck = () => {
 
               <View style={styles.separator} />
 
-              <PromoCode deliveryMode="Custom Order" orderAmount={200} />
+              <PromoCode deliveryMode="Pick and Drop" orderAmount={200} />
             </View>
           </View>
 
           {promoCodeUsed && (
             <AppliedPromoCode
-              cartId={cartId}
+              cartId={cartId.toString()}
               deliveryMode="Custom Order"
               onRemove={() => setPromoCodeUsed("")}
               promoCode={promoCodeUsed}
@@ -139,12 +136,23 @@ const Pickcheck = () => {
           )}
         </ScrollView>
 
-        <View style={styles.btnContainer}>
-          <Button
-            title="Confirm Order"
-            onPress={confirmOrder}
-            isLoading={handleConfirmOrder.isPending}
-          />
+        <View style={[commonStyles.flexRowBetween, styles.btnContainer]}>
+          <View>
+            <Typo size={13} color={colors.NEUTRAL400}>
+              Pay
+            </Typo>
+            <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
+              Pay Online
+            </Typo>
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <Button
+              title="Confirm Order"
+              onPress={confirmOrder}
+              isLoading={handleConfirmOrder.isPending}
+            />
+          </View>
         </View>
       </ScreenWrapper>
 
@@ -162,12 +170,13 @@ const Pickcheck = () => {
   );
 };
 
-export default Pickcheck;
+export default PickAndDropCheckout;
 
 const styles = StyleSheet.create({
   btnContainer: {
     paddingHorizontal: scale(20),
     marginVertical: verticalScale(20),
+    gap: spacingX._40,
   },
   billContainer: {
     paddingHorizontal: scale(20),

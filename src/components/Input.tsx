@@ -4,10 +4,11 @@ import { verticalScale } from "@/utils/styling";
 import { colors, radius, spacingX } from "@/constants/theme";
 import { InputProps } from "@/types";
 
-const Input = (props: InputProps) => {
+const Input = ({ inputRef, ...props }: InputProps) => {
   return (
     <View style={styles.container}>
       <TextInput
+        ref={inputRef} // Set the ref here
         style={styles.input}
         placeholderTextColor={colors.NEUTRAL400}
         {...props}

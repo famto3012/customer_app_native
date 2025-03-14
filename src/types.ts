@@ -247,3 +247,12 @@ export type CustomCartBill = {
   surgePrice: number | null;
   promoCodeUsed: string | null;
 } | null;
+
+export type PickAndDropItemProps = {
+  itemName: string;
+  length: string | number;
+  width: string | number;
+  height: string | number;
+  unit: string;
+  weight: string | number;
+};
