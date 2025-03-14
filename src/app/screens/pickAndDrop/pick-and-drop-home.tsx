@@ -24,6 +24,8 @@ import {
   pickAndDropHomeImages,
   pickAndDropSubtexts,
 } from "@/utils/defaultData";
+import { useMutation } from "@tanstack/react-query";
+import { initializePickAndDrop } from "@/service/pickandDropService";
 
 const PickAndDropHome = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -75,6 +77,18 @@ const PickAndDropHome = () => {
   const animatedTextStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: textOffset.value }],
   }));
+
+  const initializeMutation = useMutation({
+    mutationKey: ["initialize-cart"],
+    mutationFn: initializePickAndDrop,
+    onSuccess: (res) => {
+      if (res) {
+        router.push({
+          pathname: "/screens/pickAndDrop/Pick-and-Drop_ordering",
+        });
+      }
+    },
+  });
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
@@ -143,11 +157,8 @@ const PickAndDropHome = () => {
 
         <Button
           title="Place your order"
-          onPress={() => {
-            router.push({
-              pathname: "/screens/pickAndDrop/Pick-and-Drop_ordering",
-            });
-          }}
+          onPress={() => initializeMutation.mutate()}
+          isLoading={initializeMutation.isPending}
           style={styles.button}
         />
       </ScreenWrapper>

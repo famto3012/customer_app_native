@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { spacingX } from "./theme";
 
 export const commonStyles = StyleSheet.create({
   // For background overlay of Bottom Sheet
@@ -9,5 +10,23 @@ export const commonStyles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: "rgba(0, 0, 0, 1)",
+  },
+  flexRowBetween: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  flexRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  flexRowGap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacingX._10,
+  },
+  center: {
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

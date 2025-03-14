@@ -118,3 +118,34 @@ export const pickAndDropSubtexts = [
   "Our delivery agents are at your service",
   "We ensure safe and fast delivery every time",
 ];
+
+export const pickAndDropItemTypes = [
+  { label: "Documents & Parcels", value: "Documents & Parcels" },
+  { label: "Food & Groceries", value: "Food & Groceries" },
+  { label: "Clothing & Laundry", value: "Clothing & Laundry" },
+  { label: "Medical Supplies", value: "Medical Supplies" },
+  { label: "Personal Items", value: "Personal Items" },
+  { label: "Gifts & Flowers", value: "Gifts & Flowers" },
+  { label: "Electronics", value: "Electronics" },
+  { label: "Household Items", value: "Household Items" },
+  { label: "Books & Stationery", value: "Books & Stationery" },
+  { label: "Online Orders", value: "Online Orders" },
+  { label: "Pet Supplies", value: "Pet Supplies" },
+  { label: "Automotive Parts", value: "Automotive Parts" },
+  { label: "Others", value: "Others" },
+];
+
+export const pickAndDropVehicleDetail = [
+  {
+    image: require("@/assets/icons/scooter.webp"),
+    name: "Scooter",
+    capacity: "20kg",
+    size: "45cm*45cm*45cm",
+  },
+  {
+    image: require("@/assets/icons/motorcycle.webp"),
+    name: "Bike",
+    capacity: "20kg",
+    size: "45cm*45cm*45cm",
+  },
+];

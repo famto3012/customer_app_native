@@ -248,6 +248,15 @@ export type CustomCartBill = {
   promoCodeUsed: string | null;
 } | null;
 
+export type PickAndDropItemProps = {
+  itemName: string;
+  length: string | number;
+  width: string | number;
+  height: string | number;
+  unit: string;
+  weight: string | number;
+};
+
 export type LocationAddressProps = {
   placeType: string | null;
   address: string | null;
