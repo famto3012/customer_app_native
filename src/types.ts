@@ -276,3 +276,15 @@ export type AddAddressDetailProps = {
   landmark: string | null;
   coordinates: number[] | null;
 }[];
+
+export type PickAndDropCartBill = {
+  deliveryCharge: number | null;
+  discountedAmount: number | null;
+  grandTotal: number | null;
+  taxAmount: number | null;
+  itemTotal: number | null;
+  addedTip: number | null;
+  subTotal: number | null;
+  surgePrice: number | null;
+  promoCodeUsed: string | null;
+} | null;

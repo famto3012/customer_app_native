@@ -50,10 +50,10 @@ const Bill = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (promoCode?.toString()) {
-      setPromoCodeUsed(promoCode?.toString() || "");
+    if (promoCode?.universal?.toString()) {
+      setPromoCodeUsed(promoCode?.universal?.toString() || "");
     }
-  }, [promoCode]);
+  }, [promoCode?.universal]);
 
   const handleAddTipMutation = useMutation({
     mutationKey: ["universal-tip"],

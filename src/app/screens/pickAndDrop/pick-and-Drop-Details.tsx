@@ -150,7 +150,7 @@ const PickAndDropDetail = () => {
                   item={item || []}
                   onEditItem={(item: PickAndDropItemProps, index: number) => {
                     setSelectedItem({ item, index });
-                    addItemSheetRef.current?.expand();
+                    editItemSheetRef.current?.expand();
                   }}
                   onDeleteItem={(itemIndex: number) =>
                     setItems((prevItems) =>
@@ -192,7 +192,7 @@ const PickAndDropDetail = () => {
                   </View>
 
                   <VehicleCard
-                    data={vehicleData}
+                    data={vehicleData?.length > 0 ? vehicleData : []}
                     onVehicleSelect={(
                       vehicleType: string,
                       deliveryCharges: number

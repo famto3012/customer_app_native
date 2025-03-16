@@ -76,6 +76,9 @@ const Main = () => {
 
   const proceedNavigation = () => {
     setTimeout(() => {
+      console.log("token", token);
+      console.log("newUser", newUser);
+
       if (token) {
         resetAndNavigate("/(tabs)");
       } else if (newUser) {

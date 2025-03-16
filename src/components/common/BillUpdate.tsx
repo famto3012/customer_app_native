@@ -4,7 +4,12 @@ import { colors, radius } from "@/constants/theme";
 import Typo from "../Typo";
 import { FC } from "react";
 
-const BillUpdate: FC<{ onPress: () => void }> = ({ onPress }) => {
+interface BillUpdateProps {
+  total?: number | null;
+  onPress: () => void;
+}
+
+const BillUpdate: FC<BillUpdateProps> = ({ total, onPress }) => {
   return (
     <Pressable onPress={onPress} style={styles.container}>
       <Image
@@ -13,12 +18,21 @@ const BillUpdate: FC<{ onPress: () => void }> = ({ onPress }) => {
       />
 
       <View style={{ flex: 1, marginLeft: scale(15) }}>
-        <Typo size={13} color={colors.NEUTRAL900}>
-          Your total bill{" "}
-          <Typo size={13} fontFamily="SemiBold" color={colors.NEUTRAL900}>
-            will be updated soon
+        {total ? (
+          <Typo size={13} color={colors.NEUTRAL900}>
+            Your total bill is{" "}
+            <Typo size={13} fontFamily="SemiBold" color={colors.NEUTRAL900}>
+              ₹{total.toFixed(2)}
+            </Typo>
           </Typo>
-        </Typo>
+        ) : (
+          <Typo size={13} color={colors.NEUTRAL900}>
+            Your total bill{" "}
+            <Typo size={13} fontFamily="SemiBold" color={colors.NEUTRAL900}>
+              will be updated soon
+            </Typo>
+          </Typo>
+        )}
         <Typo size={12}>Including all charges and tax</Typo>
       </View>
 

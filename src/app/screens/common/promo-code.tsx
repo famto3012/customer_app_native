@@ -20,6 +20,7 @@ import { applyUniversalPromoCode } from "@/service/universal";
 import { useEffect, useState } from "react";
 import { Grayscale } from "react-native-color-matrix-image-filters";
 import { applyCustomOrderTipAndPromoCode } from "@/service/customOrderService";
+import { addPickAndDropTipAndPromoCode } from "@/service/pickandDropService";
 
 interface PromoCodeProps {
   id: string;
@@ -60,7 +61,12 @@ const PromoCodeList = () => {
       // Apply promo code mutation before navigating back
       applyUniversalPromoCode(item.promoCode).then(() => {
         queryClient.invalidateQueries({ queryKey: ["universal-bill"] });
-        useAuthStore.setState({ promoCode: item.promoCode });
+        useAuthStore.setState({
+          promoCode: {
+            ...useAuthStore.getState().promoCode,
+            universal: item.promoCode,
+          },
+        });
         router.back();
       });
 
@@ -71,7 +77,28 @@ const PromoCodeList = () => {
       // Apply promo code mutation before navigating back
       applyCustomOrderTipAndPromoCode(null, item.promoCode).then(() => {
         queryClient.invalidateQueries({ queryKey: ["custom-order-bill"] });
-        useAuthStore.setState({ promoCode: item.promoCode });
+        useAuthStore.setState({
+          promoCode: {
+            ...useAuthStore.getState().promoCode,
+            customOrder: item.promoCode,
+          },
+        });
+
+        router.back();
+      });
+
+      return;
+    }
+
+    if (deliveryMode === "Pick and Drop") {
+      addPickAndDropTipAndPromoCode(null, item.promoCode).then(() => {
+        queryClient.invalidateQueries({ queryKey: ["pick-and-drop-bill"] });
+        useAuthStore.setState({
+          promoCode: {
+            ...useAuthStore.getState().promoCode,
+            pickAndDrop: item.promoCode,
+          },
+        });
         router.back();
       });
 
