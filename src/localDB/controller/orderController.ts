@@ -4,14 +4,14 @@ import Order from "../models/Order";
 export const addOrder = async (
   orderId: string,
   createdAt: string,
-  merchantName: string
+  merchantName?: string
 ) => {
   try {
     await database.write(async () => {
       await database.get<Order>("order").create((order) => {
         order.orderId = orderId;
         order.createdAt = createdAt;
-        order.merchantName = merchantName;
+        order.merchantName = merchantName || "";
       });
     });
     // console.log("Order added successfully");

@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import ItemSpecification from "@/components/pickandDrop/ItemSpecification";
@@ -6,13 +6,8 @@ import AddTip from "@/components/common/AddTip";
 import Typo from "@/components/Typo";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  applyCustomOrderTipAndPromoCode,
-  confirmCustomOrder,
-  fetchCustomCartBill,
-} from "@/service/customOrderService";
 import { colors, radius, spacingX } from "@/constants/theme";
-import { scale, verticalScale } from "@/utils/styling";
+import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import Button from "@/components/Button";
 import PromoCode from "@/components/common/Promocode";
 import BillUpdate from "@/components/common/BillUpdate";
@@ -22,33 +17,44 @@ import BottomSheet, {
   BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
 import { commonStyles } from "@/constants/commonStyles";
-import CustomBillDetail from "@/components/customOrder/CustomBillDetail";
-import { CustomCartBill } from "@/types";
+import { PickAndDropCartBill } from "@/types";
 import { useAuthStore } from "@/store/store";
 import AppliedPromoCode from "@/components/common/AppliedPromoCode";
-import { addPickAndDropTipAndPromoCode } from "@/service/pickandDropService";
+import {
+  addPickAndDropTipAndPromoCode,
+  confirmPickAndDropOrder,
+  getPickAndDropBill,
+  verifyPickAndDropPayment,
+} from "@/service/pickandDropService";
+import BillSheet from "@/components/pickandDrop/BillSheet";
+import { CaretUp } from "phosphor-react-native";
+import PaymentOptionSheet from "@/components/BottomSheets/common/PaymentOptionSheet";
+import { addOrder } from "@/localDB/controller/orderController";
 
 const PickAndDropCheckout = () => {
+  const [promoCodeUsed, setPromoCodeUsed] = useState<string>("");
+  const [selectedPaymentMode, setSelectedPaymentMode] =
+    useState<string>("Online-payment");
+
   const { cartId, items } = useLocalSearchParams();
 
-  const [promoCodeUsed, setPromoCodeUsed] = useState<string>("");
-
   const { promoCode } = useAuthStore.getState();
-  const customBillSheetRef = useRef<BottomSheet>(null);
-  const customBillSnapPoints = useMemo(() => ["60%"], []);
+
+  const billSheetRef = useRef<BottomSheet>(null);
+  const paymentSheetRef = useRef<BottomSheet>(null);
+
+  const paymentSheetSnapPoints = useMemo(() => ["35%"], []);
+  const billSnapPoints = useMemo(() => ["45%"], []);
 
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    setPromoCodeUsed(promoCode?.toString() ?? "");
-  }, [promoCode]);
+    setPromoCodeUsed(promoCode?.pickAndDrop?.toString() ?? "");
+  }, [promoCode?.pickAndDrop]);
 
-  // Memoized query key for performance optimization
-  const queryKey = useMemo(() => ["custom-order-bill", cartId], [cartId]);
-
-  const { data: cartBill } = useQuery<CustomCartBill>({
-    queryKey,
-    queryFn: () => fetchCustomCartBill(cartId.toString()),
+  const { data: cartBill } = useQuery<PickAndDropCartBill>({
+    queryKey: ["pick-and-drop-bill", cartId],
+    queryFn: () => getPickAndDropBill(cartId.toString()),
     enabled: !!cartId,
   });
 
@@ -57,32 +63,64 @@ const PickAndDropCheckout = () => {
     mutationKey: ["pick-and-drop-tip"],
     mutationFn: (addedTip: number) => addPickAndDropTipAndPromoCode(addedTip),
     onSuccess: () => {
-      queryClient.invalidateQueries({});
+      queryClient.invalidateQueries({
+        queryKey: ["pick-and-drop-bill"],
+      });
     },
   });
 
   // Mutation to confirm order
   const handleConfirmOrder = useMutation({
-    mutationKey: ["confirm-custom-order"],
-    mutationFn: () => confirmCustomOrder(cartId.toString()),
+    mutationKey: ["confirm-pick-and-drop-order"],
+    mutationFn: () => confirmPickAndDropOrder(selectedPaymentMode),
     onSuccess: (data) => {
-      if (data?.orderId) {
-        useAuthStore.setState({ promoCode: null });
-        router.push({
-          pathname: "/(tabs)",
-          params: { orderId: data.orderId },
+      console.log("data", data);
+      console.log("selectedPaymentMode", selectedPaymentMode);
+      if (selectedPaymentMode === "Online-payment") {
+        handleVerifyPaymentMutation.mutate({
+          orderId: data.orderId,
+          amount: data?.amount as number,
         });
+      } else if (selectedPaymentMode === "Famto-cash") {
+        if (data?.success && data?.orderId && data?.createdAt) {
+          addOrder(data.orderId, data.createdAt);
+
+          useAuthStore.setState({
+            promoCode: {
+              ...useAuthStore.getState().promoCode,
+              pickAndDrop: null,
+            },
+          });
+
+          router.push({
+            pathname: "/(tabs)",
+          });
+        }
       }
-    },
-    onError: (error) => {
-      console.error("Order confirmation failed:", error);
     },
   });
 
-  const confirmOrder = () => {
-    if (!cartId) return;
-    handleConfirmOrder.mutate();
-  };
+  const handleVerifyPaymentMutation = useMutation({
+    mutationKey: ["verify-pick-and-drop-payment"],
+    mutationFn: ({ orderId, amount }: { orderId: string; amount: number }) =>
+      verifyPickAndDropPayment(orderId, amount),
+    onSuccess: (data) => {
+      if (data?.success && data?.orderId && data?.createdAt) {
+        addOrder(data.orderId, data.createdAt);
+
+        useAuthStore.setState({
+          promoCode: {
+            ...useAuthStore.getState().promoCode,
+            pickAndDrop: null,
+          },
+        });
+
+        router.push({
+          pathname: "/(tabs)",
+        });
+      }
+    },
+  });
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
@@ -117,12 +155,16 @@ const PickAndDropCheckout = () => {
 
             <View style={styles.promoContainer}>
               <BillUpdate
-                onPress={() => customBillSheetRef.current?.snapToIndex(0)}
+                total={cartBill?.grandTotal}
+                onPress={() => billSheetRef.current?.snapToIndex(0)}
               />
 
               <View style={styles.separator} />
 
-              <PromoCode deliveryMode="Pick and Drop" orderAmount={200} />
+              <PromoCode
+                deliveryMode="Pick and Drop"
+                orderAmount={cartBill?.grandTotal || 0}
+              />
             </View>
           </View>
 
@@ -136,35 +178,102 @@ const PickAndDropCheckout = () => {
           )}
         </ScrollView>
 
-        <View style={[commonStyles.flexRowBetween, styles.btnContainer]}>
-          <View>
-            <Typo size={13} color={colors.NEUTRAL400}>
-              Pay
-            </Typo>
-            <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
-              Pay Online
-            </Typo>
-          </View>
+        <View
+          style={{
+            backgroundColor: "white",
+            padding: 15,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              width: "98%",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 30,
+            }}
+          >
+            <View>
+              <Typo size={13} color={colors.NEUTRAL400}>
+                Pay
+              </Typo>
 
-          <View style={{ flex: 1 }}>
-            <Button
-              title="Confirm Order"
-              onPress={confirmOrder}
-              isLoading={handleConfirmOrder.isPending}
-            />
+              <Pressable
+                onPress={() => paymentSheetRef.current?.expand()}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingVertical: verticalScale(5),
+                  position: "relative",
+                }}
+              >
+                <Typo
+                  fontFamily="Medium"
+                  size={14}
+                  color={colors.NEUTRAL900}
+                  style={{
+                    marginRight: 10,
+                    minWidth: SCREEN_WIDTH * 0.3,
+                  }}
+                >
+                  {selectedPaymentMode}
+                </Typo>
+
+                <View
+                  style={{
+                    borderWidth: 1,
+                    borderRadius: radius._6,
+                    paddingVertical: verticalScale(2),
+                    paddingHorizontal: scale(1.5),
+                  }}
+                >
+                  <CaretUp size={scale(15)} />
+                </View>
+              </Pressable>
+            </View>
+
+            <View style={{ flex: 1 }}>
+              <Button
+                title="Place Order"
+                onPress={() => handleConfirmOrder.mutate()}
+                isLoading={
+                  handleConfirmOrder.isPending ||
+                  handleVerifyPaymentMutation.isPending
+                }
+              />
+            </View>
           </View>
         </View>
       </ScreenWrapper>
 
       <BottomSheet
-        ref={customBillSheetRef}
+        ref={billSheetRef}
         index={-1}
-        snapPoints={customBillSnapPoints}
+        snapPoints={billSnapPoints}
+        enableDynamicSizing={true}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+      >
+        <BillSheet data={cartBill ?? null} />
+      </BottomSheet>
+
+      <BottomSheet
+        ref={paymentSheetRef}
+        index={-1}
+        snapPoints={paymentSheetSnapPoints}
         enableDynamicSizing={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
       >
-        <CustomBillDetail data={cartBill ?? null} />
+        <PaymentOptionSheet
+          onSelect={(value) => {
+            setSelectedPaymentMode(value);
+          }}
+          value={selectedPaymentMode}
+          onConfirm={() => paymentSheetRef.current?.close()}
+          grandTotal={cartBill?.grandTotal || 0}
+          disabled={["Cash-on-delivery"]}
+        />
       </BottomSheet>
     </>
   );

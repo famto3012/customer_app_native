@@ -28,9 +28,14 @@ const VehicleCard: FC<VehicleCardProps> = ({
   const [selected, setSelected] = useState<string>("");
 
   useEffect(() => {
-    setSelected(data[0].vehicleType);
-    onVehicleSelect(data[0].vehicleType, data[0].deliveryCharges);
+    data?.length && setSelected(data[0]?.vehicleType);
+    data?.length &&
+      onVehicleSelect(data[0]?.vehicleType, data[0]?.deliveryCharges);
   }, [data]);
+
+  if (!data?.length) {
+    return null;
+  }
 
   return (
     <>

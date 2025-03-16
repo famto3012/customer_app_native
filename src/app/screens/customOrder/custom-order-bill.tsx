@@ -41,10 +41,10 @@ const CustomOrderBill = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (promoCode?.toString()) {
-      setPromoCodeUsed(promoCode?.toString() || "");
+    if (promoCode?.customOrder?.toString()) {
+      setPromoCodeUsed(promoCode?.customOrder?.toString() || "");
     }
-  }, [promoCode]);
+  }, [promoCode?.customOrder]);
 
   const { data: cartBill } = useQuery<CustomCartBill>({
     queryKey: ["custom-order-bill", cartId],
@@ -67,7 +67,13 @@ const CustomOrderBill = () => {
     mutationFn: () => confirmCustomOrder(cartId.toString()),
     onSuccess: (data) => {
       if (data.orderId) {
-        useAuthStore.setState({ promoCode: null });
+        useAuthStore.setState({
+          promoCode: {
+            ...useAuthStore.getState().promoCode,
+            customOrder: null,
+          },
+        });
+
         router.push({
           pathname: "/(tabs)",
           params: { orderId: data.orderId },

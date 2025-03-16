@@ -12,7 +12,8 @@ const PaymentOptionSheet: FC<{
   value: string;
   onConfirm: () => void;
   grandTotal: number;
-}> = ({ onSelect, value, onConfirm, grandTotal }) => {
+  disabled?: string[];
+}> = ({ onSelect, value, onConfirm, grandTotal, disabled }) => {
   const [selected, setSelected] = useState<string>("");
 
   const { data } = useQuery({
@@ -86,25 +87,27 @@ const PaymentOptionSheet: FC<{
         </View>
       </Pressable>
 
-      <Pressable
-        onPress={() => handleSelect("Cash-on-delivery")}
-        style={styles.optionContainer}
-      >
-        <Typo size={14} fontFamily="Medium" color={colors.NEUTRAL900}>
-          Cash on Delivery
-        </Typo>
-
-        <View
-          style={[
-            styles.radio,
-            selected === "Cash-on-delivery" && styles.radioSelected,
-          ]}
+      {!disabled?.includes("Cash-on-delivery") && (
+        <Pressable
+          onPress={() => handleSelect("Cash-on-delivery")}
+          style={styles.optionContainer}
         >
-          {selected === "Cash-on-delivery" && (
-            <View style={styles.radioInner} />
-          )}
-        </View>
-      </Pressable>
+          <Typo size={14} fontFamily="Medium" color={colors.NEUTRAL900}>
+            Cash on Delivery
+          </Typo>
+
+          <View
+            style={[
+              styles.radio,
+              selected === "Cash-on-delivery" && styles.radioSelected,
+            ]}
+          >
+            {selected === "Cash-on-delivery" && (
+              <View style={styles.radioInner} />
+            )}
+          </View>
+        </Pressable>
+      )}
 
       <Button
         title="Confirm"
