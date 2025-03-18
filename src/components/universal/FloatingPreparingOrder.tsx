@@ -151,6 +151,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     elevation: 5,
     flexDirection: "row",
+    marginBottom: verticalScale(75),
   },
   text: {
     color: colors.WHITE,

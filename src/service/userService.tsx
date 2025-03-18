@@ -1,5 +1,5 @@
 import { appAxios } from "@/config/apiInterceptor";
-import { AddAddressDetailProps } from "@/types";
+import { UserAddressProps } from "@/types";
 import { Alert } from "react-native";
 import RazorpayCheckout from "react-native-razorpay";
 
@@ -346,16 +346,35 @@ export const verifySubscription = async (
   }
 };
 
-export const addAddressDetail = async (data: {
-  addresses: AddAddressDetailProps;
-}) => {
+export const addAddressDetail = async (
+  data: UserAddressProps
+): Promise<{ success: boolean; address: UserAddressProps | null }> => {
   try {
+    console.log(data);
+
     const res = await appAxios.patch(`/customers/update-address`, data);
 
-    return res.status === 200 ? res.data : {};
+    return res.status === 200 ? res.data : { success: false, address: null };
   } catch (err: any) {
     console.error(`Error in adding customer address:`, err);
     Alert.alert("Error", "Something went wrong!");
-    return false;
+    return { success: false, address: null };
+  }
+};
+
+export const verifyCustomerAddressLocation = async (
+  latitude: number,
+  longitude: number
+): Promise<{ success: boolean }> => {
+  try {
+    const res = await appAxios.post(`/customers/verify-geofence`, {
+      latitude,
+      longitude,
+    });
+
+    return res.status === 200 ? res.data.success : { success: false };
+  } catch (err: any) {
+    console.error(`Error in verifying customer geofence:`, err);
+    return { success: false };
   }
 };

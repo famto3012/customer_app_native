@@ -267,7 +267,8 @@ export type LocationAddressProps = {
   poi: string | null;
 };
 
-export type AddAddressDetailProps = {
+export type UserAddressProps = {
+  id?: string;
   type: string | null;
   fullName: string | null;
   phoneNumber: string | null;
@@ -275,7 +276,7 @@ export type AddAddressDetailProps = {
   area: string | null;
   landmark: string | null;
   coordinates: number[] | null;
-}[];
+};
 
 export type PickAndDropCartBill = {
   deliveryCharge: number | null;

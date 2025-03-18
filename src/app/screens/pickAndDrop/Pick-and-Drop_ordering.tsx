@@ -191,6 +191,7 @@ const PickDropScreen = () => {
           </View>
 
           <Address
+            alreadySelect={false}
             onSelect={(type, otherId) => {
               setFormData({
                 ...formData,

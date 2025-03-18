@@ -9,6 +9,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
+import { verticalScale } from "@/utils/styling";
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const [dimensions, setDimensions] = useState({ height: 20, width: 100 });
@@ -41,15 +42,13 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
   return (
     <View style={styles.tabBarContainer}>
-      {/* Fake Shadow View */}
       <LinearGradient
-        colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.38)"]} // Transparent at top, dark at bottom
-        start={{ x: 0, y: 0 }} // Start from bottom
-        end={{ x: 0, y: 1 }} // End at top (transparent)
+        colors={["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.38)"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
         style={styles.shadowView}
       />
 
-      {/* Actual Tab Bar */}
       <View onLayout={onTabBarLayout} style={styles.tabBar}>
         <Animated.View
           style={[
@@ -117,11 +116,19 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
 const styles = StyleSheet.create({
   tabBarContainer: {
-    backgroundColor: colors.WHITE,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: verticalScale(75),
+    width: "100%",
+    backgroundColor: "transparent",
+    zIndex: 10,
+    elevation: 10,
   },
   shadowView: {
     position: "absolute",
-    top: -25,
+    top: -15,
     left: 0,
     right: 0,
     height: 190,
@@ -129,16 +136,17 @@ const styles = StyleSheet.create({
   tabBar: {
     borderTopRightRadius: 40,
     borderTopLeftRadius: 40,
+    borderCurve: "continuous",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: colors.WHITE,
     paddingVertical: 15,
     width: "100%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -5 }, // Small negative height moves shadow above
-    shadowOpacity: 0.15, // Subtle but visible
-    shadowRadius: 10,
-    elevation: 0, // Remove default bottom shadow
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: -5 },
+    // shadowOpacity: 0.15,
+    // shadowRadius: 10,
+    // elevation: 0,
   },
 });

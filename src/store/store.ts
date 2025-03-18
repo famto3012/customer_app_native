@@ -6,14 +6,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const secureStorage = {
   setItem: async (key: string, value: string) => {
     if (key === "token" || key === "refreshToken" || key === "biometricAuth") {
-      await Keychain.setGenericPassword(key, value);
+      // await Keychain.setGenericPassword(key, value);
+      await Keychain.setGenericPassword(key, value, { service: key });
     } else {
       await AsyncStorage.setItem(key, value);
     }
   },
   getItem: async (key: string) => {
     if (key === "token" || key === "refreshToken" || key === "biometricAuth") {
-      const credentials = await Keychain.getGenericPassword();
+      // const credentials = await Keychain.getGenericPassword();
+      const credentials = await Keychain.getGenericPassword({ service: key });
       return credentials && credentials.username === key
         ? credentials.password
         : null;
@@ -23,7 +25,8 @@ const secureStorage = {
   },
   removeItem: async (key: string) => {
     if (key === "token" || key === "refreshToken" || key === "biometricAuth") {
-      await Keychain.resetGenericPassword();
+      // await Keychain.resetGenericPassword();
+      await Keychain.resetGenericPassword({ service: key });
     } else {
       await AsyncStorage.removeItem(key);
     }
@@ -52,6 +55,8 @@ interface AuthStore {
   orders: Order[];
   biometricAuth: boolean;
   selectedMerchant: { merchantId: string | null; merchantName: string | null };
+  outsideGeofence: boolean;
+  userAddress: { type: string; otherId: string; address: string };
   setUserId: (userId: string) => void;
   setToken: (token: string) => void;
   setRefreshToken: (refreshToken: string) => void;
@@ -73,6 +78,12 @@ interface AuthStore {
   clearFcmToken: () => void;
   setBiometricAuth: (status: boolean) => void;
   setSelectedMerchant: (merchantId: string, merchantName: string) => void;
+  setOutsideGeofence: (data: boolean) => void;
+  setUserAddress: (userAddress: {
+    type: string;
+    otherId: string;
+    address: string;
+  }) => void;
   clearStorage: () => void;
 }
 
@@ -91,6 +102,8 @@ export const useAuthStore = create<AuthStore>()(
       orders: [],
       biometricAuth: false,
       selectedMerchant: { merchantId: null, merchantName: null },
+      outsideGeofence: false,
+      userAddress: { type: "", otherId: "", address: "" },
 
       setUserId: async (userId) => {
         set({ userId });
@@ -157,6 +170,17 @@ export const useAuthStore = create<AuthStore>()(
           "selectedMerchant",
           JSON.stringify(selectedMerchant)
         );
+      },
+      setOutsideGeofence: async (outsideGeofence) => {
+        set({ outsideGeofence });
+        await secureStorage.setItem(
+          "outsideGeofence",
+          JSON.stringify(outsideGeofence)
+        );
+      },
+      setUserAddress: async (userAddress) => {
+        set({ userAddress });
+        await secureStorage.setItem("userAddress", JSON.stringify(userAddress));
       },
       clearStorage: async () => {
         set({
