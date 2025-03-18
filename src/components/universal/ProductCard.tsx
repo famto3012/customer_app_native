@@ -22,7 +22,16 @@ const ProductCard: FC<{
   isFocused: boolean;
   showAddCart: boolean;
   trigger?: string;
-}> = ({ item, openVariant, cartCount, isFocused, showAddCart, trigger }) => {
+  onProductPress: (product: ProductProps) => void;
+}> = ({
+  item,
+  openVariant,
+  cartCount,
+  isFocused,
+  showAddCart,
+  trigger,
+  onProductPress,
+}) => {
   const [isFavorite, setIsFavorite] = useState<boolean>(item.isFavorite);
   const [count, setCount] = useState<number | null>(cartCount || null);
 
@@ -118,85 +127,89 @@ const ProductCard: FC<{
   };
 
   return (
-    <View style={styles.container}>
-      <View>
-        {!item.inventory ? (
-          <Grayscale>
-            <Image
-              source={{ uri: item.productImageURL }}
-              style={styles.image}
-              resizeMode="cover"
+    <>
+      <View style={styles.container}>
+        <View>
+          <Pressable onPress={() => onProductPress(item)}>
+            {!item.inventory ? (
+              <Grayscale>
+                <Image
+                  source={{ uri: item.productImageURL }}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+              </Grayscale>
+            ) : (
+              <Image
+                source={{ uri: item.productImageURL }}
+                style={styles.image}
+                resizeMode="cover"
+              />
+            )}
+          </Pressable>
+
+          <Pressable
+            onPress={() => handleFavoriteMutation.mutate()}
+            style={{ position: "absolute", right: 0, padding: scale(7) }}
+          >
+            <Heart
+              color={isFavorite ? colors.RED : colors.WHITE}
+              weight={isFavorite ? "fill" : "regular"}
             />
-          </Grayscale>
-        ) : (
-          <Image
-            source={{ uri: item.productImageURL }}
-            style={styles.image}
-            resizeMode="cover"
-          />
-        )}
+          </Pressable>
 
-        <Pressable
-          onPress={() => handleFavoriteMutation.mutate()}
-          style={{ position: "absolute", right: 0, padding: scale(7) }}
-        >
-          <Heart
-            color={isFavorite ? colors.RED : colors.WHITE}
-            weight={isFavorite ? "fill" : "regular"}
-          />
-        </Pressable>
-
-        {showAddCart && (
-          <AddCartButton
-            onDecrement={handleDecrement}
-            onIncrement={handleIncrement}
-            onPress={handleIncrement}
-            count={count ? count : 0}
-            inventory={item?.inventory}
-          />
-        )}
-      </View>
-
-      <View style={styles.contentContainer}>
-        <Typo
-          size={14}
-          color={colors.NEUTRAL800}
-          fontFamily="Medium"
-          textProps={{ numberOfLines: 2 }}
-        >
-          {item.productName}
-        </Typo>
-
-        <View style={styles.priceContainer}>
-          <Typo
-            size={14}
-            color={colors.NEUTRAL400}
-            textProps={{ numberOfLines: 3 }}
-            style={{
-              display: item?.discountPrice ? "flex" : "none",
-              textDecorationLine: "line-through",
-            }}
-          >
-            ₹ {item?.price}
-          </Typo>
-          <Typo
-            size={16}
-            color={colors.NEUTRAL800}
-            textProps={{ numberOfLines: 3 }}
-          >
-            ₹ {item?.discountPrice ? item.discountPrice : item.price}
-          </Typo>
+          {showAddCart && (
+            <AddCartButton
+              onDecrement={handleDecrement}
+              onIncrement={handleIncrement}
+              onPress={handleIncrement}
+              count={count ? count : 0}
+              inventory={item?.inventory}
+            />
+          )}
         </View>
 
-        <Typo
-          size={12}
-          color={colors.NEUTRAL400}
-          textProps={{ numberOfLines: 3 }}
-        >
-          {item.description}
-        </Typo>
+        <View style={styles.contentContainer}>
+          <Typo
+            size={14}
+            color={colors.NEUTRAL800}
+            fontFamily="Medium"
+            textProps={{ numberOfLines: 2 }}
+          >
+            {item.productName}
+          </Typo>
+
+          <View style={styles.priceContainer}>
+            <Typo
+              size={14}
+              color={colors.NEUTRAL400}
+              textProps={{ numberOfLines: 3 }}
+              style={{
+                display: item?.discountPrice ? "flex" : "none",
+                textDecorationLine: "line-through",
+              }}
+            >
+              ₹ {item?.price}
+            </Typo>
+            <Typo
+              size={16}
+              color={colors.NEUTRAL800}
+              textProps={{ numberOfLines: 3 }}
+            >
+              ₹ {item?.discountPrice ? item.discountPrice : item.price}
+            </Typo>
+          </View>
+
+          <Typo
+            size={12}
+            color={colors.NEUTRAL400}
+            textProps={{ numberOfLines: 3 }}
+          >
+            {item.longDescription}
+          </Typo>
+        </View>
       </View>
-    </View>
+    </>
   );
 };
 

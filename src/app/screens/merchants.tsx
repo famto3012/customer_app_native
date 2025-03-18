@@ -23,7 +23,8 @@ import { useSafeLocation } from "@/utils/helpers";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 const Merchants = () => {
-  const { businessCategory, businessCategoryId } = useLocalSearchParams();
+  const { businessCategory, businessCategoryId, productName, merchantId } =
+    useLocalSearchParams();
   const [selectedFilter, setSelectedFilter] = useState<string>("");
   const [merchants, setMerchants] = useState<MerchantCardProps[]>([]);
   const [query, setQuery] = useState<string>("");
@@ -36,7 +37,14 @@ const Merchants = () => {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
     useInfiniteQuery({
-      queryKey: ["merchants", businessCategory, selectedFilter, query],
+      queryKey: [
+        "merchants",
+        businessCategory,
+        selectedFilter,
+        query,
+        productName,
+        merchantId,
+      ],
       queryFn: ({ pageParam = 1 }) =>
         getMerchants(
           latitude,
@@ -44,6 +52,8 @@ const Merchants = () => {
           businessCategoryId?.toString() || "",
           selectedFilter,
           query,
+          productName,
+          merchantId,
           pageParam,
           MERCHANT_LIMIT
         ),

@@ -359,3 +359,35 @@ export const addAddressDetail = async (data: {
     return false;
   }
 };
+
+export const searchMerchantAndProducts = async (
+  query: string,
+  page: number,
+  limit: number
+) => {
+  try {
+    const res = await appAxios.get(`/customers/get-merchant-product`, {
+      params: {
+        query,
+        page,
+        limit,
+      },
+    });
+    if (res.status === 200) {
+      return {
+        data: res.data.results,
+        page: res.data.page,
+        hasNextPage: res.data.hasNextPage,
+      };
+    } else {
+      return {
+        data: [],
+        hasNextPage: false,
+      };
+    }
+  } catch (err) {
+    console.error(`Error in searching merchant and products:`, err);
+    Alert.alert("Error", "Something went wrong!");
+    return { data: [], hasNextPage: false };
+  }
+};

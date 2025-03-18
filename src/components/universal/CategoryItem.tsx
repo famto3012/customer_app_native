@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -22,6 +22,12 @@ import Animated, {
   LinearTransition,
 } from "react-native-reanimated";
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
+import { commonStyles } from "@/constants/commonStyles";
+import ProductDetailSheet from "../BottomSheets/universal/ProductDetailSheet";
 
 const useProducts = (categoryId: string, userId: string) => {
   return useInfiniteQuery({
@@ -41,8 +47,9 @@ const useProducts = (categoryId: string, userId: string) => {
 const ProductList: FC<{
   categoryId: string;
   openVariant: (product: ProductProps) => void;
+  onProductPress: (product: ProductProps) => void;
   trigger: string;
-}> = ({ categoryId, openVariant, trigger }) => {
+}> = ({ categoryId, openVariant, onProductPress, trigger }) => {
   const { userId } = useAuthStore.getState();
   const queryClient = useQueryClient();
 
@@ -55,6 +62,38 @@ const ProductList: FC<{
     isError,
   } = useProducts(categoryId, userId || "");
   const isFocused = useIsFocused();
+
+  // const [selectedProduct, setSelectedProduct] = useState<ProductProps | null>(
+  //   null
+  // );
+  // const productDetailRef = useRef<BottomSheet>(null);
+  // const productDetailSnapPoints = useMemo(() => ["60%"], []);
+
+  // const renderBackdrop = useCallback(
+  //   (props: BottomSheetBackdropProps) => (
+  //     <BottomSheetBackdrop
+  //       {...props}
+  //       disappearsOnIndex={-1}
+  //       appearsOnIndex={0}
+  //       opacity={0.5}
+  //       style={[props.style, commonStyles.backdrop]}
+  //     />
+  //   ),
+  //   []
+  // );
+
+  // // Function to open product details
+  // const handleOpenProductDetails = (product: ProductProps) => {
+  //   setSelectedProduct(product);
+  //   console.log("Opening Product:", product);
+  //   console.log("BottomSheet Ref:", productDetailRef.current);
+
+  //   if (productDetailRef.current) {
+  //     productDetailRef.current.expand();
+  //   } else {
+  //     console.warn("BottomSheet ref is NULL. Ensure it's assigned correctly.");
+  //   }
+  // };
 
   useFocusEffect(
     useCallback(() => {
@@ -74,40 +113,62 @@ const ProductList: FC<{
   );
 
   return (
-    <FlatList
-      data={products}
-      keyExtractor={(item) => item.productId}
-      renderItem={({ item }) => (
-        <ProductCard
-          item={item}
-          openVariant={(product: ProductProps) => openVariant(product)}
-          cartCount={item?.cartCount || null}
-          showAddCart={true}
-          trigger={trigger}
-          isFocused={isFocused}
-        />
-      )}
-      onEndReached={() => hasNextPage && fetchNextPage()}
-      onEndReachedThreshold={0.5}
-      ListFooterComponent={
-        isFetchingNextPage ? <ActivityIndicator size="small" /> : null
-      }
-      ItemSeparatorComponent={() => (
-        <View style={{ height: verticalScale(15) }} />
-      )}
-      windowSize={10}
-      initialNumToRender={5}
-      maxToRenderPerBatch={5}
-      scrollEnabled={false}
-    />
+    <>
+      <FlatList
+        data={products}
+        keyExtractor={(item) => item.productId}
+        renderItem={({ item }) => (
+          <ProductCard
+            item={item}
+            openVariant={(product: ProductProps) => openVariant(product)}
+            cartCount={item?.cartCount || null}
+            showAddCart={true}
+            trigger={trigger}
+            isFocused={isFocused}
+            onProductPress={(product) => {
+              console.log("Product pressed in ProductList:", product.productId);
+              onProductPress(product);
+            }}
+          />
+        )}
+        onEndReached={() => hasNextPage && fetchNextPage()}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          isFetchingNextPage ? <ActivityIndicator size="small" /> : null
+        }
+        ItemSeparatorComponent={() => (
+          <View style={{ height: verticalScale(15) }} />
+        )}
+        windowSize={10}
+        initialNumToRender={5}
+        maxToRenderPerBatch={5}
+        scrollEnabled={false}
+      />
+      {/* <BottomSheet
+        ref={productDetailRef}
+        index={-1}
+        snapPoints={productDetailSnapPoints}
+        enableDynamicSizing={true}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+      >
+        {selectedProduct && (
+          <ProductDetailSheet
+            product={selectedProduct}
+            onClose={() => productDetailRef.current?.close()}
+          />
+        )}
+      </BottomSheet> */}
+    </>
   );
 };
 
 const CategoryItem: FC<{
   category: CategoryProps;
   openVariant: (product: ProductProps) => void;
+  onProductPress: (product: ProductProps) => void;
   trigger: string;
-}> = ({ category, openVariant, trigger }) => {
+}> = ({ category, openVariant, onProductPress, trigger }) => {
   const [isExpanded, setIsExpanded] = useState(category.status);
 
   return (
@@ -146,6 +207,13 @@ const CategoryItem: FC<{
           <ProductList
             categoryId={category.categoryId}
             openVariant={(product: ProductProps) => openVariant(product)}
+            onProductPress={(product) => {
+              console.log(
+                "Product pressed in CategoryItem:",
+                product.productId
+              );
+              onProductPress(product);
+            }}
             trigger={trigger}
           />
         </Animated.View>

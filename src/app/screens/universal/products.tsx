@@ -15,7 +15,7 @@ import Typo from "@/components/Typo";
 import { XCircle } from "phosphor-react-native";
 import SearchView from "@/components/SearchView";
 import { productFilters } from "@/utils/defaultData";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAuthStore } from "@/store/store";
 import { MerchantDataProps, ProductProps } from "@/types";
@@ -37,6 +37,8 @@ import CategoryItem from "@/components/universal/CategoryItem";
 import ClearCartSheet from "@/components/BottomSheets/universal/ClearCartSheet";
 import DuplicateVariantSheet from "@/components/BottomSheets/universal/DuplicateVariantSheet";
 import MerchantRatingSheet from "@/components/BottomSheets/universal/MerchantRatingSheet";
+import ProductDetailSheet from "@/components/BottomSheets/universal/ProductDetailSheet";
+import DistanceWarning from "@/components/BottomSheets/universal/DistanceWarning";
 
 const { height } = Dimensions.get("window");
 
@@ -46,16 +48,22 @@ const Product = () => {
   const [duplicateProduct, setDuplicateProductId] =
     useState<ProductProps | null>(null);
   const [trigger, setTrigger] = useState<string>(`${new Date()}`);
+  const [selectedDetailProduct, setSelectedDetailProduct] =
+    useState<ProductProps | null>(null);
 
   const variantSheetRef = useRef<BottomSheet>(null);
   const clearCartSheetRef = useRef<BottomSheet>(null);
   const duplicateVariantSheetRef = useRef<BottomSheet>(null);
   const ratingSheetRef = useRef<BottomSheet>(null);
+  const productDetailRef = useRef<BottomSheet>(null);
+  const distanceWarningSheetRef = useRef<BottomSheet>(null);
 
   const variantSheetSnapPoints = useMemo(() => ["60%"], []);
   const clearCartSheetSnapPoints = useMemo(() => ["28%"], []);
   const duplicateSheetSnapPoints = useMemo(() => ["40%"], []);
   const ratingSheetSnapPoints = useMemo(() => ["45%"], []);
+  const productDetailSnapPoints = useMemo(() => ["55%"], []);
+  const distanceWarningSheetSnapPoints = useMemo(() => ["50%"], []);
 
   const { merchantId } = useLocalSearchParams();
   const { selectedBusiness } = useAuthStore.getState();
@@ -90,11 +98,31 @@ const Product = () => {
     queryFn: () => getMerchantData(merchantId.toString(), latitude, longitude),
   });
 
+  useEffect(() => {
+    console.log("merchantData", merchantData);
+    if (merchantData?.distanceWarning) {
+      console.log("Inside");
+      distanceWarningSheetRef.current?.snapToIndex(0);
+    }
+  }, [merchantData]);
+
   const handleSelectFilter = (value: string) => {
     if (value === selectedFilter) {
       setSelectedFilter("");
     } else {
       setSelectedFilter(value);
+    }
+  };
+
+  const handleOpenProductDetails = (product: ProductProps) => {
+    setSelectedDetailProduct(product);
+    console.log("Opening Product:", product);
+
+    if (productDetailRef.current) {
+      console.log("Inside product");
+      productDetailRef.current.snapToIndex(0);
+    } else {
+      console.warn("ProductDetail BottomSheet ref is NULL");
     }
   };
 
@@ -173,6 +201,7 @@ const Product = () => {
             <CategoryItem
               category={item}
               openVariant={openVariantSheet}
+              onProductPress={handleOpenProductDetails}
               trigger={trigger}
             />
           )}
@@ -291,6 +320,43 @@ const Product = () => {
             merchantId={merchantId.toString()}
             rating={merchantData?.rating || 0}
             onPress={() => ratingSheetRef.current?.close()}
+          />
+        </BottomSheet>
+        <BottomSheet
+          ref={productDetailRef}
+          index={-1}
+          snapPoints={productDetailSnapPoints}
+          enableDynamicSizing={false}
+          enablePanDownToClose
+          backdropComponent={renderBackdrop}
+          onClose={() => {
+            handleBottomSheetClose();
+          }}
+        >
+          {selectedDetailProduct && (
+            <ProductDetailSheet
+              product={selectedDetailProduct}
+              onClose={() => {
+                // setTrigger((prev) => `${prev}-${Date.now()}`);
+                productDetailRef.current?.close();
+              }}
+            />
+          )}
+        </BottomSheet>
+
+        <BottomSheet
+          ref={distanceWarningSheetRef}
+          index={-1}
+          snapPoints={distanceWarningSheetSnapPoints}
+          enableDynamicSizing={false}
+          enablePanDownToClose
+          backdropComponent={renderBackdrop}
+        >
+          <DistanceWarning
+            closeDistanceWarningSheet={() => {
+              setTrigger((prev) => `${prev}-${Date.now()}`);
+              distanceWarningSheetRef.current?.close();
+            }}
           />
         </BottomSheet>
       </View>
