@@ -35,6 +35,7 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { commonStyles } from "@/constants/commonStyles";
 import TemporaryOrderSheet from "@/components/BottomSheets/universal/TemporaryOrderSheet";
+import FastImage from "react-native-fast-image";
 import SelectAddress from "@/components/BottomSheets/user/SelectAddress";
 import { Portal } from "react-native-paper";
 
@@ -146,13 +147,16 @@ const Home = () => {
               }}
               autoPlay
               autoPlayInterval={4000}
-              scrollAnimationDuration={2000}
-              width={Math.round(SCREEN_WIDTH)}
-              height={Math.round(SCREEN_HEIGHT * 0.48)}
+              scrollAnimationDuration={2500}
+              width={Math.round(SCREEN_WIDTH)} // Ensuring whole number
+              height={Math.round(SCREEN_HEIGHT * 0.48)} // Ensuring whole number
               data={bannerData || []}
               renderItem={({ item }: any) => (
-                <Image
-                  source={{ uri: item?.imageUrl }}
+                <FastImage
+                  source={{
+                    uri: item?.imageUrl,
+                    priority: FastImage.priority.high,
+                  }}
                   resizeMode="cover"
                   style={{
                     width: SCREEN_WIDTH,

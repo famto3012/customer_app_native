@@ -67,6 +67,8 @@ const ScheduledOrderList = () => {
               autoPlay
               loop
               style={styles.image} // Adjust size as needed
+              renderMode="HARDWARE"
+              cacheComposition={true}
             />
           ) : item.deliveryMode === "Pick and Drop" ? (
             <LottieView
@@ -74,6 +76,8 @@ const ScheduledOrderList = () => {
               autoPlay
               loop
               style={styles.image} // Adjust size as needed
+              renderMode="HARDWARE"
+              cacheComposition={true}
             />
           ) : (
             <LottieView
@@ -81,6 +85,8 @@ const ScheduledOrderList = () => {
               autoPlay
               loop
               style={styles.image} // Adjust size as needed
+              renderMode="HARDWARE"
+              cacheComposition={true}
             />
           )}
           <View style={{ flex: 1 }}>

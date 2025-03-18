@@ -99,9 +99,7 @@ const Product = () => {
   });
 
   useEffect(() => {
-    console.log("merchantData", merchantData);
     if (merchantData?.distanceWarning) {
-      console.log("Inside");
       distanceWarningSheetRef.current?.snapToIndex(0);
     }
   }, [merchantData]);
@@ -116,10 +114,8 @@ const Product = () => {
 
   const handleOpenProductDetails = (product: ProductProps) => {
     setSelectedDetailProduct(product);
-    console.log("Opening Product:", product);
 
     if (productDetailRef.current) {
-      console.log("Inside product");
       productDetailRef.current.snapToIndex(0);
     } else {
       console.warn("ProductDetail BottomSheet ref is NULL");
@@ -337,7 +333,6 @@ const Product = () => {
             <ProductDetailSheet
               product={selectedDetailProduct}
               onClose={() => {
-                // setTrigger((prev) => `${prev}-${Date.now()}`);
                 productDetailRef.current?.close();
               }}
             />

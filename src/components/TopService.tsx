@@ -29,6 +29,8 @@ const TopService = () => {
             autoPlay
             loop
             style={{ width: verticalScale(90), height: verticalScale(90) }}
+            renderMode="HARDWARE"
+            cacheComposition={true}
           />
 
           <View>
@@ -54,6 +56,8 @@ const TopService = () => {
             autoPlay
             loop
             style={{ width: verticalScale(70), height: verticalScale(70) }} // Adjust size as needed
+            renderMode="HARDWARE"
+            cacheComposition={true}
           />
 
           <View>
