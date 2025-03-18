@@ -12,7 +12,6 @@ const ProductDetailSheet: FC<{
   product: ProductProps;
   onClose: () => void;
 }> = ({ product, onClose }) => {
-  console.log("Product", product);
   return (
     <View style={styles.container}>
       <BottomSheetScrollView showsVerticalScrollIndicator={false}>

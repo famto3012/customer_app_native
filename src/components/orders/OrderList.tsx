@@ -197,6 +197,8 @@ const OrderList = () => {
               autoPlay
               loop
               style={styles.image}
+              renderMode="HARDWARE"
+              cacheComposition={true}
             />
           ) : item.deliveryMode === "Pick and Drop" ? (
             <LottieView
@@ -204,6 +206,8 @@ const OrderList = () => {
               autoPlay
               loop
               style={styles.image}
+              renderMode="HARDWARE"
+              cacheComposition={true}
             />
           ) : (
             <LottieView
@@ -211,6 +215,8 @@ const OrderList = () => {
               autoPlay
               loop
               style={styles.image}
+              renderMode="HARDWARE"
+              cacheComposition={true}
             />
           )}
 

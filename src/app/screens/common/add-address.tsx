@@ -290,6 +290,8 @@ const AddAddress = () => {
               autoPlay
               loop
               style={styles.centerMarker}
+              renderMode="HARDWARE"
+              cacheComposition={true}
             />
           </View>
 
