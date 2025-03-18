@@ -1,5 +1,6 @@
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   StyleSheet,
   TextInput,
@@ -37,6 +38,8 @@ import {
 } from "@/constants/links";
 import AddAddressDetail from "./AddAddressDetail";
 import { commonStyles } from "@/constants/commonStyles";
+import { useMutation } from "@tanstack/react-query";
+import { verifyCustomerAddressLocation } from "@/service/userService";
 
 const { MapView, Camera, RestApi, UserLocation } = MapplsGL;
 
@@ -71,7 +74,6 @@ const AddAddress = () => {
       setLoading(true);
       const [longitude, latitude] = coordinates;
 
-      // Format: longitude,latitude
       const reverseGeoParams = {
         longitude,
         latitude,
@@ -206,6 +208,22 @@ const AddAddress = () => {
     requestLocationPermission();
   }, []);
 
+  const verifyLocationMutation = useMutation({
+    mutationKey: ["verify-location"],
+    mutationFn: () =>
+      verifyCustomerAddressLocation(markerCoordinates[1], markerCoordinates[0]),
+    onSuccess: (data) => {
+      if (data) {
+        addAddressSheetRef.current?.expand();
+      } else {
+        Alert.alert(
+          "",
+          "Sorry we're not currently delivering to this location"
+        );
+      }
+    },
+  });
+
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop
@@ -239,7 +257,7 @@ const AddAddress = () => {
               }
               if (geometry && geometry.coordinates) {
                 const [longitude, latitude] = geometry.coordinates;
-                console.log("Map moved to:", latitude, longitude);
+                // console.log("Map moved to:", latitude, longitude);
                 const newCoords = [longitude, latitude];
                 setMarkerCoordinates(newCoords);
                 reverseGeocode(newCoords);
@@ -370,7 +388,8 @@ const AddAddress = () => {
                   <Button
                     title="Confirm Location"
                     style={{ marginTop: scale(10) }}
-                    onPress={() => addAddressSheetRef.current?.expand()}
+                    isLoading={verifyLocationMutation.isPending}
+                    onPress={() => verifyLocationMutation.mutate()}
                   />
                 </>
               ) : (
@@ -382,6 +401,7 @@ const AddAddress = () => {
           </View>
         </View>
       </ScreenWrapper>
+
       <BottomSheet
         ref={addAddressSheetRef}
         index={-1}

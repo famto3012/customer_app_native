@@ -16,16 +16,18 @@ import { fetchUserAddress } from "@/service/userService";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/store";
 
-const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
-  onSelect,
-}) => {
-  const [selected, setSelected] = useState<string>("home");
+const Address: FC<{
+  alreadySelect?: boolean;
+  onSelect?: (type: string, otherId?: string, address?: string) => void;
+}> = ({ onSelect, alreadySelect = false }) => {
+  const [selected, setSelected] = useState<string>("");
   const [selectedOtherId, setSelectedOtherId] = useState<string>("");
+
   const [home, setHome] = useState<AddressProps | null>(null);
   const [work, setWork] = useState<AddressProps | null>(null);
   const [other, setOther] = useState<AddressProps[]>([]);
 
-  const { token } = useAuthStore.getState();
+  const { token, userAddress } = useAuthStore.getState();
 
   const { data } = useQuery({
     queryKey: ["customer-address"],
@@ -39,6 +41,11 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
       setWork(data?.workAddress || null);
       setOther(data?.otherAddress || []);
     }
+
+    if (alreadySelect) {
+      setSelected(userAddress.type);
+      setSelectedOtherId(userAddress.otherId);
+    }
   }, [data]);
 
   useEffect(() => {
@@ -49,7 +56,7 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
     }
   }, [selected]);
 
-  const handleSelectAddress = (type: string) => {
+  const handleSelectAddress = (type: string, address?: string) => {
     setSelected(type);
 
     type === "other"
@@ -57,7 +64,9 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
       : setSelectedOtherId("");
 
     if (onSelect) {
-      type === "other" ? onSelect(type, other[0]?.id) : onSelect(type, "");
+      type === "other"
+        ? onSelect(type, other[0]?.id, address)
+        : onSelect(type, "", address);
     }
   };
 
@@ -121,7 +130,12 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
     <View style={styles.container}>
       <View style={styles.tabOptionContainer}>
         <TouchableOpacity
-          onPress={() => handleSelectAddress("home")}
+          onPress={() =>
+            handleSelectAddress(
+              "home",
+              `${home?.flat}, ${home?.area}, ${home?.landmark}`
+            )
+          }
           style={[
             styles.tabOption,
             {
@@ -129,18 +143,30 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
                 selected === "home" ? colors.PRIMARY : colors.NEUTRAL200,
             },
           ]}
+          disabled={!home?.fullName}
         >
           <Typo
             size={13}
             fontFamily="Medium"
-            color={selected === "home" ? colors.WHITE : colors.NEUTRAL600}
+            color={
+              !home?.fullName
+                ? colors.NEUTRAL400
+                : selected === "home"
+                ? colors.WHITE
+                : colors.NEUTRAL600
+            }
           >
             Home
           </Typo>
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => handleSelectAddress("work")}
+          onPress={() =>
+            handleSelectAddress(
+              "work",
+              `${work?.flat}, ${work?.area}, ${work?.landmark}`
+            )
+          }
           style={[
             styles.tabOption,
             {
@@ -148,18 +174,30 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
                 selected === "work" ? colors.PRIMARY : colors.NEUTRAL200,
             },
           ]}
+          disabled={!work?.fullName}
         >
           <Typo
             size={13}
             fontFamily="Medium"
-            color={selected === "work" ? colors.WHITE : colors.NEUTRAL600}
+            color={
+              !work?.fullName
+                ? colors.NEUTRAL400
+                : selected === "work"
+                ? colors.WHITE
+                : colors.NEUTRAL600
+            }
           >
             Work
           </Typo>
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => handleSelectAddress("other")}
+          onPress={() =>
+            handleSelectAddress(
+              "other",
+              `${other[0]?.flat}, ${other[0]?.area}, ${other[0]?.landmark}`
+            )
+          }
           style={[
             styles.tabOption,
             {
@@ -167,11 +205,18 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
                 selected === "other" ? colors.PRIMARY : colors.NEUTRAL200,
             },
           ]}
+          disabled={!other?.length}
         >
           <Typo
             size={13}
             fontFamily="Medium"
-            color={selected === "other" ? colors.WHITE : colors.NEUTRAL600}
+            color={
+              !other?.length
+                ? colors.NEUTRAL400
+                : selected === "other"
+                ? colors.WHITE
+                : colors.NEUTRAL600
+            }
           >
             Others
           </Typo>
@@ -197,7 +242,11 @@ const Address: FC<{ onSelect?: (type: string, otherId?: string) => void }> = ({
               onPress={() => {
                 setSelectedOtherId(item.id);
                 if (onSelect) {
-                  onSelect("other", item.id);
+                  onSelect(
+                    "other",
+                    item.id,
+                    `${item.flat}, ${item.area}, ${item.landmark}`
+                  );
                 }
               }}
               style={{

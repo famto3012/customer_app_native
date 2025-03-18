@@ -1,5 +1,5 @@
 import { View, Image, Pressable } from "react-native";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import Button from "@/components/Button";
@@ -13,24 +13,29 @@ import { resetAndNavigate } from "@/utils/navigation";
 import * as Notifications from "expo-notifications";
 
 const NotificationPermission = () => {
+  const [permissionChecked, setPermissionChecked] = useState(false);
+
   const checkNotificationPermission = async () => {
     const { status } = await Notifications.getPermissionsAsync();
+
     if (status === "granted") {
       resetAndNavigate("/delivery-ad");
     } else {
-      await requestNotificationPermission();
-      resetAndNavigate("/delivery-ad");
+      setPermissionChecked(true); // Only request if not granted
     }
   };
 
   const handlePermissionRequest = async () => {
     await requestNotificationPermission();
-    checkNotificationPermission();
+    resetAndNavigate("/delivery-ad");
   };
 
   useEffect(() => {
     checkNotificationPermission();
   }, []);
+
+  // If permission was already granted, user will be navigated, so no need to render UI
+  if (!permissionChecked) return null;
 
   return (
     <ScreenWrapper>

@@ -16,6 +16,7 @@ import { resetAndNavigate } from "@/utils/navigation";
 import Typo from "@/components/Typo";
 import { colors } from "@/constants/theme";
 import { Fingerprint } from "phosphor-react-native";
+import * as Keychain from "react-native-keychain";
 
 const Main = () => {
   const [loaded] = useFonts({
@@ -28,6 +29,18 @@ const Main = () => {
 
   const { token, newUser, setNewUser, biometricAuth } = useAuthStore.getState();
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  useEffect(() => {
+    const checkStoredToken = async () => {
+      const credentials = await Keychain.getGenericPassword({
+        service: "token",
+      });
+
+      console.log("Stored Token:", credentials);
+    };
+
+    checkStoredToken();
+  }, []);
 
   const authenticate = async () => {
     try {
@@ -75,13 +88,13 @@ const Main = () => {
   };
 
   const proceedNavigation = () => {
-    setTimeout(() => {
-      console.log("token", token);
-      console.log("newUser", newUser);
+    console.log("token", Boolean(token));
+    console.log("newUser", Boolean(newUser));
 
-      if (token) {
+    setTimeout(() => {
+      if (token && !newUser) {
         resetAndNavigate("/(tabs)");
-      } else if (newUser) {
+      } else if (newUser && !token) {
         setNewUser(false);
         resetAndNavigate("/notification-permission");
       } else {
