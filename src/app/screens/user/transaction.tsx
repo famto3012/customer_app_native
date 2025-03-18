@@ -102,7 +102,7 @@ const Transaction = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: scale(20),
-          flex: 1,
+          paddingBottom: verticalScale(20),
         }}
         refreshControl={
           <RefreshControl refreshing={isLoading} onRefresh={refetch} />

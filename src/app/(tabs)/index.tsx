@@ -114,7 +114,7 @@ const Home = () => {
             <View style={styles.overlayContainer}>
               <HomeHeader />
               <SearchView
-                placeholder="Search Business category"
+                placeholder="Search for dishes, restaurants & groceries"
                 onPress={() => router.push("/screens/universal/home-search")}
                 style={{ marginHorizontal: scale(20) }}
               />

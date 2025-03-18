@@ -35,6 +35,8 @@ export const getMerchants = async (
   categoryId: string,
   filterType: string,
   query: string,
+  productName: string,
+  merchantId: string,
   page: number,
   limit: number
 ) => {
@@ -46,6 +48,8 @@ export const getMerchants = async (
         longitude,
         businessCategoryId: categoryId,
         filterType,
+        productName,
+        merchantId,
         page,
         limit,
       },
