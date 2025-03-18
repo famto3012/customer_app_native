@@ -20,4 +20,7 @@
   public void onPayment*(...);
 }
 
+-keep class * implements com.ryanharter.auto.value.gson.GsonTypeAdapterFactory { *; }
+-dontwarn com.ryanharter.auto.value.gson.GsonTypeAdapterFactory
+
 # Add any project specific keep options here:
