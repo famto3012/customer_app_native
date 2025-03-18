@@ -4,11 +4,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, spacingY } from "@/constants/theme";
 import {
@@ -20,10 +19,11 @@ import Button from "@/components/Button";
 import Input from "@/components/Input";
 import Typo from "@/components/Typo";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
-import { AddAddressDetailProps } from "@/types";
+import { UserAddressProps } from "@/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addAddressDetail } from "@/service/userService";
-import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
+import { useAuthStore } from "@/store/store";
 
 const AddAddressDetail = ({
   addAddressSheetRef,
@@ -32,33 +32,28 @@ const AddAddressDetail = ({
   addAddressSheetRef: any;
   addressData: any;
 }) => {
-  const [addressDetail, setAddressDetail] = useState<AddAddressDetailProps>([
-    {
-      type: "",
-      fullName: "",
-      phoneNumber: "",
-      flat: "",
-      area: "",
-      landmark: "",
-      coordinates: [],
-    },
-  ]);
+  const [addressDetail, setAddressDetail] = useState<UserAddressProps>({
+    type: "",
+    fullName: "",
+    phoneNumber: "",
+    flat: "",
+    area: "",
+    landmark: "",
+    coordinates: [],
+  });
   const [selected, setSelected] = useState("");
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [dynamicSnapPoints, setDynamicSnapPoints] = useState(["58%"]);
 
   const queryClient = useQueryClient();
-  const navigation = useNavigation();
 
   useEffect(() => {
     if (addressData) {
-      setAddressDetail((prevState) => [
-        {
-          ...prevState[0], // Ensure we modify the first object in the array
-          area: addressData.area,
-          coordinates: [addressData.latitude, addressData.longitude],
-        },
-      ]);
+      setAddressDetail({
+        ...addressDetail,
+        area: addressData.area,
+        coordinates: [addressData.latitude, addressData.longitude],
+      });
     }
   }, [addressData]);
 
@@ -75,7 +70,7 @@ const AddAddressDetail = ({
 
         setTimeout(() => {
           if (addAddressSheetRef?.current && newSnapPoints.length > 1) {
-            addAddressSheetRef.current.snapToIndex(1); // Move up only if valid snap points exist
+            addAddressSheetRef.current.snapToIndex(1);
           }
         }, 100);
       }
@@ -102,21 +97,26 @@ const AddAddressDetail = ({
 
   const handleSelectAddress = (type: string) => {
     setSelected(type);
-    setAddressDetail((prevState) => [
-      {
-        ...prevState[0],
-        type,
-      },
-    ]);
+    setAddressDetail({
+      ...addressDetail,
+      type,
+    });
   };
 
   const handleAddAddressMutation = useMutation({
     mutationKey: ["add-address-detail"],
-    mutationFn: (data: { addresses: AddAddressDetailProps }) =>
-      addAddressDetail(data),
-    onSuccess: () => {
-      setAddressDetail([
-        {
+    mutationFn: (data: UserAddressProps) => addAddressDetail(data),
+    onSuccess: (data) => {
+      if (data.success) {
+        const address = `${data.address?.flat}, ${data.address?.area}, ${data.address?.landmark}`;
+        useAuthStore.setState({
+          userAddress: {
+            type: data.address?.type as string,
+            otherId: data.address?.id as string,
+            address,
+          },
+        });
+        setAddressDetail({
           type: "",
           fullName: "",
           phoneNumber: "",
@@ -124,34 +124,32 @@ const AddAddressDetail = ({
           area: "",
           landmark: "",
           coordinates: [],
-        },
-      ]);
-      queryClient.invalidateQueries({ queryKey: ["customer-address"] });
-      addAddressSheetRef.current.close();
-      navigation.goBack();
+        });
+        queryClient.invalidateQueries({ queryKey: ["customer-address"] });
+        addAddressSheetRef.current.close();
+        router.back();
+      }
     },
   });
 
   const handleSave = () => {
-    if (
-      !addressDetail[0].coordinates ||
-      addressDetail[0].coordinates.length === 0
-    ) {
+    if (addressDetail?.coordinates?.length !== 2) {
       Alert.alert("Error", "Please select a location");
       return;
     }
     if (
-      !addressDetail[0].fullName ||
-      !addressDetail[0].phoneNumber ||
-      !addressDetail[0].flat ||
-      !addressDetail[0].area
+      !addressDetail.fullName ||
+      !addressDetail.phoneNumber ||
+      !addressDetail.flat ||
+      !addressDetail.area ||
+      !addressDetail.type
     ) {
       Alert.alert("Error", "Please fill all details");
       return;
     }
 
     // Ensure it sends as an array
-    handleAddAddressMutation.mutate({ addresses: addressDetail });
+    handleAddAddressMutation.mutate(addressDetail);
   };
 
   return (
@@ -240,9 +238,9 @@ const AddAddressDetail = ({
             </View>
             <View style={styles.data}>
               <Input
-                value={addressDetail[0]?.fullName || ""}
+                value={addressDetail?.fullName || ""}
                 onChangeText={(text: string) =>
-                  setAddressDetail([{ ...addressDetail[0], fullName: text }])
+                  setAddressDetail({ ...addressDetail, fullName: text })
                 }
                 placeholder="Full Name"
                 style={styles.inputStyle}
@@ -250,9 +248,9 @@ const AddAddressDetail = ({
             </View>
             <View style={styles.data}>
               <Input
-                value={addressDetail[0]?.phoneNumber || ""}
+                value={addressDetail?.phoneNumber || ""}
                 onChangeText={(text: string) =>
-                  setAddressDetail([{ ...addressDetail[0], phoneNumber: text }])
+                  setAddressDetail({ ...addressDetail, phoneNumber: text })
                 }
                 placeholder="Phone Number"
                 style={styles.inputStyle}
@@ -260,9 +258,9 @@ const AddAddressDetail = ({
             </View>
             <View style={styles.data}>
               <Input
-                value={addressDetail[0]?.flat || ""}
+                value={addressDetail?.flat || ""}
                 onChangeText={(text: string) =>
-                  setAddressDetail([{ ...addressDetail[0], flat: text }])
+                  setAddressDetail({ ...addressDetail, flat: text })
                 }
                 placeholder="Flat/House no/Floor/Building"
                 style={styles.inputStyle}
@@ -270,9 +268,9 @@ const AddAddressDetail = ({
             </View>
             <View style={styles.data}>
               <Input
-                value={addressDetail[0]?.area || ""}
+                value={addressDetail?.area || ""}
                 onChangeText={(text: string) =>
-                  setAddressDetail([{ ...addressDetail[0], area: text }])
+                  setAddressDetail({ ...addressDetail, area: text })
                 }
                 placeholder="Area / Sector / Locality"
                 style={styles.inputStyle}
@@ -280,9 +278,9 @@ const AddAddressDetail = ({
             </View>
             <View style={styles.data}>
               <Input
-                value={addressDetail[0]?.landmark || ""}
+                value={addressDetail?.landmark || ""}
                 onChangeText={(text: string) =>
-                  setAddressDetail([{ ...addressDetail[0], landmark: text }])
+                  setAddressDetail({ ...addressDetail, landmark: text })
                 }
                 placeholder="Nearby landmark (optional)"
                 style={styles.inputStyle}

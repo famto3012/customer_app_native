@@ -7,7 +7,6 @@ import Order from "./models/Order";
 const adapter = new SQLiteAdapter({
   schema,
   dbName: "CustomerAppDB",
-  jsi: true,
 });
 
 export const database = new Database({

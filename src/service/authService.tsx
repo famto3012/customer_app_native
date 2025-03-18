@@ -7,15 +7,17 @@ import { Alert } from "react-native";
 
 export const signIn = async (payload: AuthPayload) => {
   try {
-    const { setUserId, setToken, setRefreshToken } = useAuthStore.getState();
+    const { setUserId, setToken, setRefreshToken, setOutsideGeofence } =
+      useAuthStore.getState();
 
     const res = await axios.post(`${BASE_URL}/customers/authenticate`, payload);
 
-    const { id, token, refreshToken } = res.data;
+    const { id, token, refreshToken, outsideGeofence } = res.data;
 
     setUserId(id);
     setToken(token);
     setRefreshToken(refreshToken);
+    setOutsideGeofence(outsideGeofence);
 
     resetAndNavigate("/(tabs)");
   } catch (err: any) {

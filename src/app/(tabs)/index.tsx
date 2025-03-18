@@ -1,17 +1,15 @@
 import {
   View,
   StyleSheet,
-  Pressable,
   Image,
   ScrollView,
   ImageBackground,
+  Modal,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import HomeHeader from "@/components/HomeHeader";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import SearchView from "@/components/SearchView";
 import { colors, radius } from "@/constants/theme";
-import Typo from "@/components/Typo";
 import {
   scale,
   SCREEN_HEIGHT,
@@ -20,7 +18,7 @@ import {
 } from "@/utils/styling";
 import TopService from "@/components/TopService";
 import BusinessCategories from "@/components/universal/BusinessCategories";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { requestLocationPermission } from "@/utils/helpers";
 import FloatingPreparingOrder from "@/components/universal/FloatingPreparingOrder";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -38,17 +36,31 @@ import BottomSheet, {
 import { commonStyles } from "@/constants/commonStyles";
 import TemporaryOrderSheet from "@/components/BottomSheets/universal/TemporaryOrderSheet";
 import FastImage from "react-native-fast-image";
+import SelectAddress from "@/components/BottomSheets/user/SelectAddress";
+import { Portal } from "react-native-paper";
 
 const Home = () => {
+  const [outSide, setOutSide] = useState<boolean>(false);
+  const [show, setShow] = useState<boolean>(false);
+
   const temporaryOrderSheet = useRef<BottomSheet>(null);
+  const addressSheet = useRef<BottomSheet>(null);
 
   const temporarySnapPoints = useMemo(() => ["60%"], []);
+  const addressSnapPoints = useMemo(() => ["40%", "80%"], []);
 
-  const { token } = useAuthStore.getState();
+  const { token, outsideGeofence } = useAuthStore.getState();
 
   useEffect(() => {
     requestLocationPermission();
   }, []);
+
+  useEffect(() => {
+    if (outsideGeofence) {
+      setOutSide(outsideGeofence);
+      addressSheet.current?.snapToIndex(0);
+    }
+  }, [outsideGeofence]);
 
   const queryClient = useQueryClient();
 
@@ -101,7 +113,9 @@ const Home = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: ongoingOrder?.length ? verticalScale(70) : 0,
+          paddingBottom: ongoingOrder?.length
+            ? verticalScale(130)
+            : verticalScale(50),
           marginTop: -20,
           backgroundColor: colors.WHITE,
         }}
@@ -113,14 +127,16 @@ const Home = () => {
             resizeMode="cover"
           >
             <View style={styles.overlayContainer}>
-              <HomeHeader />
+              <HomeHeader
+                // onPress={() => addressSheet.current?.snapToIndex(0)}
+                onPress={() => setShow(true)}
+              />
               <SearchView
                 placeholder="Search for dishes, restaurants & groceries"
                 onPress={() => router.push("/screens/universal/home-search")}
                 style={{ marginHorizontal: scale(20) }}
               />
             </View>
-
             <Carousel
               loop
               style={{
@@ -143,8 +159,8 @@ const Home = () => {
                   }}
                   resizeMode="cover"
                   style={{
-                    width: SCREEN_WIDTH, // Round to avoid floating-point errors
-                    height: Math.round(SCREEN_HEIGHT * 0.48), // Round to avoid floating-point errors
+                    width: SCREEN_WIDTH,
+                    height: Math.round(SCREEN_HEIGHT * 0.48),
                     borderBottomLeftRadius: radius._30,
                     borderBottomRightRadius: radius._30,
                   }}
@@ -176,6 +192,28 @@ const Home = () => {
       >
         <TemporaryOrderSheet />
       </BottomSheet>
+
+      <BottomSheet
+        ref={temporaryOrderSheet}
+        index={-1}
+        snapPoints={temporarySnapPoints}
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+      >
+        <TemporaryOrderSheet />
+      </BottomSheet>
+
+      <Portal>
+        <Modal
+          visible={show}
+          onDismiss={() => setShow(false)}
+          onRequestClose={() => setShow(false)}
+          animationType="slide"
+        >
+          <SelectAddress onCloseModal={() => setShow(false)} />
+        </Modal>
+      </Portal>
     </View>
   );
 };

@@ -26,7 +26,7 @@ export const SocketProvider: FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const unsubscribe = useAuthStore.subscribe((state) => {
       const { userId, fcmToken } = state;
-      console.log("userId", userId, fcmToken);
+      // console.log("userId", userId, fcmToken);
       if (!userId || !fcmToken || initialized.current) return;
 
       console.log("Initializing socket with:", { userId, fcmToken });
