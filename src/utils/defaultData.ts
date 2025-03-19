@@ -19,9 +19,10 @@ export const addressTabs = [
 ];
 
 export const scheduleDetails = [
-  "For eg: If you need a product delivered on a specific day, please select the exact date that meets your requirement. If you need a product delivered over multiple days, please select a date range that fits your schedule.",
-  "In case of multiple orders, the entire cart will be recurring, so please double-check the products before confirming your order.",
-  "You cannot cancel the multiple orders once the order is placed.",
+  "If you need a product on a specific day, choose the exact date.",
+  "If you want delivery over several days, choose a date range that is suitable for you.",
+  "The entire orders will be repeated(whichever pickups n drops your have selected for repeating) , so check your items carefully before confirming.",
+  "You cannot cancel multiple orders once they're placed.",
 ];
 
 export const profileOptions: {

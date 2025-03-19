@@ -1,5 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import { View } from "react-native";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import Address from "@/components/common/Address";
@@ -11,12 +10,10 @@ const UserAddress = () => {
       <Header title="Saved addresses" />
 
       <View style={{ marginTop: verticalScale(30) }}>
-        <Address />
+        <Address alreadySelect showActionButton />
       </View>
     </ScreenWrapper>
   );
 };
 
 export default UserAddress;
-
-const styles = StyleSheet.create({});

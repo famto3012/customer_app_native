@@ -1,10 +1,5 @@
 import { Image, StyleSheet, View } from "react-native";
 import { FC } from "react";
-import {
-  BottomSheetScrollView,
-  SCREEN_HEIGHT,
-  SCREEN_WIDTH,
-} from "@gorhom/bottom-sheet";
 import Typo from "@/components/Typo";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, spacingX } from "@/constants/theme";
@@ -18,8 +13,8 @@ const DistanceWarning: FC<{ closeDistanceWarningSheet: () => void }> = ({
       <Image
         source={require("@/assets/images/distance-warning.webp")}
         style={{
-          width: SCREEN_WIDTH * 0.8,
-          height: SCREEN_WIDTH * 0.6,
+          width: scale(200),
+          height: verticalScale(200),
         }}
         resizeMode="contain"
       />
@@ -47,23 +42,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    height: SCREEN_HEIGHT * 0.3,
   },
   header: {
     borderBottomWidth: 0.6,
     paddingBottom: verticalScale(10),
     borderBottomColor: colors.NEUTRAL350,
   },
-  content: {
-    flex: 1, // Makes sure this section expands to push buttons to the bottom
-    justifyContent: "space-between",
-  },
-  text: {
-    marginTop: verticalScale(24),
-  },
   buttonContainer: {
     flexDirection: "row",
     gap: spacingX._10,
-    marginTop: "auto", // Pushes buttons to the bottom
+    marginTop: "auto",
   },
 });

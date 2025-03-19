@@ -9,7 +9,6 @@ import {
   MD3LightTheme as DefaultTheme,
 } from "react-native-paper";
 import { SocketProvider } from "@/service/socketProvider";
-import { Portal } from "react-native-paper"; // ✅ Use this
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,17 +33,29 @@ const theme = {
   },
 };
 
+const Layout = () => {
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen
+        name="(modals)/SelectAddress"
+        options={{
+          presentation: "modal",
+          animation: "slide_from_bottom",
+          gestureEnabled: true,
+          gestureDirection: "vertical",
+        }}
+      />
+    </Stack>
+  );
+};
+
 const RootLayout = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView>
         <SocketProvider>
           <PaperProvider theme={theme}>
-            {/* <Portal.Host> */}
-            <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
-              <Stack.Screen name="index" />
-            </Stack>
-            {/* </Portal.Host> */}
+            <Layout />
           </PaperProvider>
         </SocketProvider>
       </GestureHandlerRootView>

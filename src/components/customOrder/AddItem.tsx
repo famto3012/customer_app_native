@@ -146,7 +146,7 @@ const AddItem: FC<{
           valueField="value"
           placeholder="Unit"
           placeholderStyle={{
-            fontSize: 16,
+            fontSize: verticalScale(16),
           }}
           onChange={(data: { label: string; value: string }) =>
             setItem({ ...item, unit: data.value })
@@ -159,7 +159,7 @@ const AddItem: FC<{
             borderWidth: 1,
             borderRadius: radius._10,
             paddingHorizontal: scale(10),
-            width: SCREEN_WIDTH * 0.2,
+            width: SCREEN_WIDTH * 0.23,
           }}
           mode="auto"
         />

@@ -20,9 +20,15 @@ import { formatDate, formatTime } from "@/utils/helpers";
 
 interface ScheduleSheetProps {
   onPress: (startDate: string, endDate: string, time: string) => void;
+  playSound: () => void;
+  isPlaying: boolean;
 }
 
-const ScheduleSheet: FC<ScheduleSheetProps> = ({ onPress }) => {
+const ScheduleSheet: FC<ScheduleSheetProps> = ({
+  onPress,
+  isPlaying,
+  playSound,
+}) => {
   const [selectedDates, setSelectedDates] = useState<{
     startDate: Date | null;
     endDate: Date | null;
@@ -126,9 +132,13 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({ onPress }) => {
             Schedule Order
           </Typo>
 
-          <TouchableOpacity>
+          <TouchableOpacity onPress={playSound}>
             <Image
-              source={require("@/assets/icons/volume-high.webp")}
+              source={
+                isPlaying
+                  ? require("@/assets/icons/volume-slash.webp")
+                  : require("@/assets/icons/volume-high.webp")
+              }
               style={{ width: scale(24), height: scale(24) }}
               resizeMode="cover"
             />

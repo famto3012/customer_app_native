@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Image,
-  Text,
   TouchableOpacity,
   Modal,
   BackHandler,
@@ -16,7 +15,6 @@ import { resetAndNavigate } from "@/utils/navigation";
 import Typo from "@/components/Typo";
 import { colors } from "@/constants/theme";
 import { Fingerprint } from "phosphor-react-native";
-import * as Keychain from "react-native-keychain";
 
 const Main = () => {
   const [loaded] = useFonts({
@@ -29,18 +27,6 @@ const Main = () => {
 
   const { token, newUser, setNewUser, biometricAuth } = useAuthStore.getState();
   const [showAuthModal, setShowAuthModal] = useState(false);
-
-  useEffect(() => {
-    const checkStoredToken = async () => {
-      const credentials = await Keychain.getGenericPassword({
-        service: "token",
-      });
-
-      console.log("Stored Token:", credentials);
-    };
-
-    checkStoredToken();
-  }, []);
 
   const authenticate = async () => {
     try {
@@ -88,9 +74,6 @@ const Main = () => {
   };
 
   const proceedNavigation = () => {
-    console.log("token", Boolean(token));
-    console.log("newUser", Boolean(newUser));
-
     setTimeout(() => {
       if (token && !newUser) {
         resetAndNavigate("/(tabs)");
@@ -107,8 +90,8 @@ const Main = () => {
     if (loaded) {
       if (biometricAuth) {
         setTimeout(() => {
-          authenticate(); // Ensure fresh authentication every time the app starts
-        }, 500); // Delay to avoid UI glitches
+          authenticate();
+        }, 500);
       } else {
         proceedNavigation();
       }
@@ -129,7 +112,7 @@ const Main = () => {
         animationType="fade"
         transparent
         visible={showAuthModal}
-        onRequestClose={() => BackHandler.exitApp()} // Prevent user from dismissing without action
+        onRequestClose={() => BackHandler.exitApp()}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -176,7 +159,7 @@ export default Main;
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    backgroundColor: "transparent", // Semi-transparent background
+    backgroundColor: "transparent",
     justifyContent: "center",
     alignItems: "center",
   },

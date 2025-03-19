@@ -98,7 +98,10 @@ const CustomOrderBill = () => {
   return (
     <>
       <ScreenWrapper>
-        <ScrollView contentContainerStyle={{ flex: 1 }}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: verticalScale(40) }}
+        >
           <Header title="Checkout" />
 
           <ItemSpecification cartId={cartId.toString()} />

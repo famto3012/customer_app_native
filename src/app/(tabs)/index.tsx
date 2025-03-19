@@ -36,18 +36,13 @@ import BottomSheet, {
 import { commonStyles } from "@/constants/commonStyles";
 import TemporaryOrderSheet from "@/components/BottomSheets/universal/TemporaryOrderSheet";
 import FastImage from "react-native-fast-image";
-import SelectAddress from "@/components/BottomSheets/user/SelectAddress";
-import { Portal } from "react-native-paper";
+// import SelectAddress from "@/components/BottomSheets/user/SelectAddress";
+import SelectAddress from "../(modal)/SelectAddress";
 
 const Home = () => {
-  const [outSide, setOutSide] = useState<boolean>(false);
-  const [show, setShow] = useState<boolean>(false);
-
   const temporaryOrderSheet = useRef<BottomSheet>(null);
-  const addressSheet = useRef<BottomSheet>(null);
 
   const temporarySnapPoints = useMemo(() => ["60%"], []);
-  const addressSnapPoints = useMemo(() => ["40%", "80%"], []);
 
   const { token, outsideGeofence } = useAuthStore.getState();
 
@@ -57,8 +52,7 @@ const Home = () => {
 
   useEffect(() => {
     if (outsideGeofence) {
-      setOutSide(outsideGeofence);
-      addressSheet.current?.snapToIndex(0);
+      router.push("/(modal)/SelectAddress");
     }
   }, [outsideGeofence]);
 
@@ -129,7 +123,7 @@ const Home = () => {
             <View style={styles.overlayContainer}>
               <HomeHeader
                 // onPress={() => addressSheet.current?.snapToIndex(0)}
-                onPress={() => setShow(true)}
+                onPress={() => router.push("/(modal)/SelectAddress")}
               />
               <SearchView
                 placeholder="Search for dishes, restaurants & groceries"
@@ -203,17 +197,6 @@ const Home = () => {
       >
         <TemporaryOrderSheet />
       </BottomSheet>
-
-      <Portal>
-        <Modal
-          visible={show}
-          onDismiss={() => setShow(false)}
-          onRequestClose={() => setShow(false)}
-          animationType="slide"
-        >
-          <SelectAddress onCloseModal={() => setShow(false)} />
-        </Modal>
-      </Portal>
     </View>
   );
 };
@@ -252,10 +235,10 @@ const styles = StyleSheet.create({
   },
   overlayContainer: {
     position: "absolute",
-    top: verticalScale(8), // Adjust as needed
+    top: verticalScale(8),
     left: 0,
     right: 0,
-    zIndex: 100, // High zIndex to stay on top
-    elevation: 10, // For Android shadow effect
+    zIndex: 100,
+    elevation: 10,
   },
 });

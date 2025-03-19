@@ -1,5 +1,6 @@
 import {
   FlatList,
+  Image,
   Pressable,
   StyleSheet,
   TouchableOpacity,
@@ -15,11 +16,21 @@ import { AddressProps } from "@/types";
 import { fetchUserAddress } from "@/service/userService";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/store";
+import { commonStyles } from "@/constants/commonStyles";
 
 const Address: FC<{
   alreadySelect?: boolean;
   onSelect?: (type: string, otherId?: string, address?: string) => void;
-}> = ({ onSelect, alreadySelect = false }) => {
+  showActionButton?: boolean;
+  addressType?: string;
+  addressOtherId?: string;
+}> = ({
+  onSelect,
+  alreadySelect = false,
+  showActionButton = false,
+  addressType,
+  addressOtherId,
+}) => {
   const [selected, setSelected] = useState<string>("");
   const [selectedOtherId, setSelectedOtherId] = useState<string>("");
 
@@ -71,57 +82,53 @@ const Address: FC<{
   };
 
   const renderAddress = (address: AddressProps | null) => {
-    if (!address) {
-      return (
-        <View
-          style={{
+    return (
+      <View
+        style={[
+          commonStyles.flexRowBetween,
+          {
             marginTop: 15,
             borderWidth: 1,
             padding: 10,
             borderRadius: 5,
-            borderColor: colors.NEUTRAL200,
-            backgroundColor: colors.NEUTRAL200,
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
-            No address available
+            borderColor: colors.PRIMARY,
+            backgroundColor: "#E5FAFA",
+          },
+        ]}
+      >
+        <View>
+          <Typo
+            size={14}
+            color={colors.NEUTRAL900}
+            fontFamily="Medium"
+            style={{ paddingBottom: verticalScale(3) }}
+          >
+            {address?.fullName}
+          </Typo>
+          <Typo
+            size={13}
+            color={colors.NEUTRAL900}
+            style={{ paddingBottom: verticalScale(5) }}
+          >
+            {address?.phoneNumber}
+          </Typo>
+          <Typo size={12} color={colors.NEUTRAL500}>
+            {address?.flat}, {address?.area}, {address?.landmark}
           </Typo>
         </View>
-      );
-    }
 
-    return (
-      <View
-        style={{
-          marginTop: 15,
-          borderWidth: 1,
-          padding: 10,
-          borderRadius: 5,
-          borderColor: colors.PRIMARY,
-          backgroundColor: "#E5FAFA",
-        }}
-      >
-        <Typo
-          size={14}
-          color={colors.NEUTRAL900}
-          fontFamily="Medium"
-          style={{ paddingBottom: verticalScale(3) }}
-        >
-          {address?.fullName}
-        </Typo>
-        <Typo
-          size={13}
-          color={colors.NEUTRAL900}
-          style={{ paddingBottom: verticalScale(5) }}
-        >
-          {address?.phoneNumber}
-        </Typo>
-        <Typo size={12} color={colors.NEUTRAL500}>
-          {address?.flat}, {address?.area}, {address?.landmark}
-        </Typo>
+        {showActionButton && (
+          <Pressable style={{ padding: scale(8) }}>
+            <Image
+              source={require("@/assets/icons/edit.webp")}
+              style={{
+                width: scale(24),
+                height: verticalScale(24),
+                resizeMode: "cover",
+              }}
+            />
+          </Pressable>
+        )}
       </View>
     );
   };
@@ -249,41 +256,60 @@ const Address: FC<{
                   );
                 }
               }}
-              style={{
-                marginTop: 15,
-                borderWidth: 1,
-                padding: 10,
-                borderRadius: 5,
-                borderColor:
-                  selectedOtherId === item.id
-                    ? colors.PRIMARY
-                    : colors.NEUTRAL300,
-                backgroundColor:
-                  selectedOtherId === item.id ? "#E5FAFA" : "transparent",
-              }}
+              style={[
+                commonStyles.flexRowBetween,
+                {
+                  marginTop: 15,
+                  borderWidth: 1,
+                  padding: 10,
+                  borderRadius: 5,
+                  borderColor:
+                    selectedOtherId === item.id
+                      ? colors.PRIMARY
+                      : colors.NEUTRAL300,
+                  backgroundColor:
+                    selectedOtherId === item.id ? "#E5FAFA" : "transparent",
+                },
+              ]}
             >
-              <Typo
-                size={14}
-                color={colors.NEUTRAL900}
-                fontFamily="Medium"
-                style={{ paddingBottom: verticalScale(3) }}
-              >
-                {item?.fullName}
-              </Typo>
-              <Typo
-                size={13}
-                color={colors.NEUTRAL900}
-                style={{ paddingBottom: verticalScale(5) }}
-              >
-                {item?.phoneNumber}
-              </Typo>
-              <Typo size={12} color={colors.NEUTRAL500}>
-                {item?.flat}, {item?.area}, {item?.landmark}
-              </Typo>
+              <View>
+                <Typo
+                  size={14}
+                  color={colors.NEUTRAL900}
+                  fontFamily="Medium"
+                  style={{ paddingBottom: verticalScale(3) }}
+                >
+                  {item?.fullName}
+                </Typo>
+                <Typo
+                  size={13}
+                  color={colors.NEUTRAL900}
+                  style={{ paddingBottom: verticalScale(5) }}
+                >
+                  {item?.phoneNumber}
+                </Typo>
+                <Typo size={12} color={colors.NEUTRAL500}>
+                  {item?.flat}, {item?.area}, {item?.landmark}
+                </Typo>
+              </View>
+
+              {showActionButton && (
+                <Pressable style={{ padding: scale(8) }}>
+                  <Image
+                    source={require("@/assets/icons/edit.webp")}
+                    style={{
+                      width: scale(24),
+                      height: verticalScale(24),
+                      resizeMode: "cover",
+                    }}
+                  />
+                </Pressable>
+              )}
             </Pressable>
           )}
           keyExtractor={(item) => item.id.toString()}
-          scrollEnabled={false}
+          scrollEnabled={alreadySelect}
+          showsVerticalScrollIndicator={false}
         />
       )}
     </View>

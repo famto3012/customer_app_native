@@ -2,7 +2,6 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Modal,
   ScrollView,
   StyleSheet,
   View,
@@ -32,15 +31,11 @@ import {
   deleteItem,
   fetchCustomOrderItems,
 } from "@/service/customOrderService";
-import Address from "@/components/common/Address";
 import Instructions from "@/components/common/Instructions";
 import { commonStyles } from "@/constants/commonStyles";
 import UserSelectedAddress from "@/components/common/UserSelectedAddress";
-import { Portal } from "react-native-paper";
-import SelectAddress from "@/components/BottomSheets/user/SelectAddress";
 
 const CustomOrderCheckout = () => {
-  const [show, setShow] = useState<boolean>(false);
   const [cartItem, setCartItem] = useState<CustomOrderItemsProps[]>([]);
   const [selectedItem, setSelectedItem] =
     useState<CustomOrderItemsProps | null>(null);
@@ -261,7 +256,7 @@ const CustomOrderCheckout = () => {
               </Typo>
             </View>
 
-            <UserSelectedAddress onPress={() => setShow(true)} />
+            <UserSelectedAddress />
 
             <Instructions
               onChangeText={(data: string) =>
@@ -323,17 +318,6 @@ const CustomOrderCheckout = () => {
       >
         <CustomOrderImageSheet item={selectedItem ? selectedItem : null} />
       </BottomSheet>
-
-      <Portal>
-        <Modal
-          visible={show}
-          onDismiss={() => setShow(false)}
-          onRequestClose={() => setShow(false)}
-          animationType="slide"
-        >
-          <SelectAddress onCloseModal={() => setShow(false)} />
-        </Modal>
-      </Portal>
     </ScreenWrapper>
   );
 };

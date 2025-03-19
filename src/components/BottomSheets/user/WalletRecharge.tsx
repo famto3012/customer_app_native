@@ -10,6 +10,7 @@ import {
   initiateWalletDeposit,
   verifyWalletPayment,
 } from "@/service/userService";
+import { commonStyles } from "@/constants/commonStyles";
 
 const WalletRecharge: FC<{ onClose: () => void }> = ({ onClose }) => {
   const [selectedAmount, setSelectedAmount] = useState<string | null>(null);
@@ -60,14 +61,13 @@ const WalletRecharge: FC<{ onClose: () => void }> = ({ onClose }) => {
       />
 
       <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: spacingX._10,
-          marginVertical: verticalScale(15),
-          marginBottom: "auto",
-        }}
+        style={[
+          commonStyles.flexRowBetween,
+          {
+            gap: spacingX._10,
+            marginVertical: verticalScale(15),
+          },
+        ]}
       >
         {["100", "200", "500", "1000"].map((value) => (
           <Pressable
