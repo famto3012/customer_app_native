@@ -20,6 +20,7 @@ import { PickAndDropItemProps } from "@/types";
 import { useMutation } from "@tanstack/react-query";
 import { addPickAndDropAddress } from "@/service/pickandDropService";
 import { router } from "expo-router";
+import { Audio, AVPlaybackStatusSuccess } from "expo-av";
 
 interface FormDataProps {
   pickUpAddressType: string;
@@ -50,6 +51,8 @@ const PickDropScreen = () => {
     delivery: "",
   });
   const [item, setItem] = useState<PickAndDropItemProps | null>(null);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const scheduleSheetRef = useRef<BottomSheet>(null);
   const addItemSheetRef = useRef<BottomSheet>(null);
@@ -63,6 +66,44 @@ const PickDropScreen = () => {
 
   const onDeliveryVoice = (data: string) => {
     setVoiceInstruction({ ...voiceInstruction, delivery: data });
+  };
+
+  const playOrStopSound = async () => {
+    try {
+      if (sound && isPlaying) {
+        await stopSound();
+      } else {
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          {
+            uri: "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FScheduled%20Order.mp3?alt=media&token=da59e122-08f8-4964-8b6f-bfebc8c32fbe",
+          },
+          { shouldPlay: true }
+        );
+
+        setSound(newSound);
+        setIsPlaying(true);
+
+        newSound.setOnPlaybackStatusUpdate((status) => {
+          if (
+            status.isLoaded &&
+            (status as AVPlaybackStatusSuccess).didJustFinish
+          ) {
+            stopSound();
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error playing/stopping sound:", error);
+    }
+  };
+
+  const stopSound = async () => {
+    if (sound) {
+      await sound.stopAsync();
+      await sound.unloadAsync();
+      setSound(null);
+      setIsPlaying(false);
+    }
   };
 
   const handleSelectDeliveryAddress = (type: string, otherId?: string) => {
@@ -199,6 +240,8 @@ const PickDropScreen = () => {
                 pickUpAddressOtherAddressId: otherId,
               });
             }}
+            addressType={formData.pickUpAddressType}
+            addressOtherId={formData.pickUpAddressOtherAddressId}
           />
 
           <Instructions
@@ -217,7 +260,11 @@ const PickDropScreen = () => {
                 </Typo>
               </View>
 
-              <Address onSelect={handleSelectDeliveryAddress} />
+              <Address
+                onSelect={handleSelectDeliveryAddress}
+                addressType={formData.pickUpAddressType}
+                addressOtherId={formData.pickUpAddressOtherAddressId}
+              />
 
               <Instructions
                 placeholder="Instructions (if any)"
@@ -251,6 +298,8 @@ const PickDropScreen = () => {
           onPress={(startDate: string, endDate: string, time: string) =>
             setFormData({ ...formData, startDate, endDate, time })
           }
+          playSound={playOrStopSound}
+          isPlaying={isPlaying}
         />
       </BottomSheet>
 

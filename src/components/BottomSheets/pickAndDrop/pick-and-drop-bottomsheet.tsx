@@ -6,18 +6,25 @@ import { colors } from "@/constants/theme";
 import Button from "@/components/Button";
 import { scale, verticalScale } from "@/utils/styling";
 
-const PickAndDropBottomSheet: FC<{ closeSheet: () => void }> = ({
-  closeSheet,
-}) => {
+const PickAndDropBottomSheet: FC<{
+  closeSheet: () => void;
+  playSound: () => void;
+  isPlaying: boolean;
+}> = ({ closeSheet, playSound, isPlaying }) => {
   return (
     <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
       <View style={styles.headerContainer}>
         <Typo size={15} fontFamily="SemiBold" color={colors.NEUTRAL900}>
           Pick and Drop?
         </Typo>
-        <TouchableOpacity>
+
+        <TouchableOpacity onPress={playSound}>
           <Image
-            source={require("@/assets/icons/volume-high.webp")}
+            source={
+              isPlaying
+                ? require("@/assets/icons/volume-slash.webp")
+                : require("@/assets/icons/volume-high.webp")
+            }
             style={styles.volumeIcon}
             resizeMode="cover"
           />

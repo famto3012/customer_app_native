@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/store/store";
 import * as Location from "expo-location";
-import { Audio } from "expo-av";
+import { Audio, AVPlaybackStatusSuccess } from "expo-av";
 import { Alert, Linking, PermissionsAndroid, Platform } from "react-native";
 import messaging from "@react-native-firebase/messaging";
 
@@ -168,5 +168,53 @@ export const toggleNotificationPermission = async (enable: boolean) => {
     }
   } catch (error) {
     console.log("Error toggling notification permission:", error);
+  }
+};
+
+export const playOrStopScheduleSound = async (
+  sound: Audio.Sound | null,
+  isPlaying: boolean,
+  setSound: (data: Audio.Sound | null) => void,
+  setIsPlaying: (data: boolean) => void,
+  stopSound: () => void
+) => {
+  try {
+    if (sound && isPlaying) {
+      await stopSound();
+    } else {
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        {
+          uri: "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FScheduled%20Order.mp3?alt=media&token=da59e122-08f8-4964-8b6f-bfebc8c32fbe",
+        },
+        { shouldPlay: true }
+      );
+
+      setSound(newSound);
+      setIsPlaying(true);
+
+      newSound.setOnPlaybackStatusUpdate((status) => {
+        if (
+          status.isLoaded &&
+          (status as AVPlaybackStatusSuccess).didJustFinish
+        ) {
+          stopSound();
+        }
+      });
+    }
+  } catch (error) {
+    console.error("Error playing/stopping sound:", error);
+  }
+};
+
+export const stopScheduleSound = async (
+  sound: Audio.Sound | null,
+  setSound: (data: Audio.Sound | null) => void,
+  setIsPlaying: (data: boolean) => void
+) => {
+  if (sound) {
+    await sound.stopAsync();
+    await sound.unloadAsync();
+    setSound(null);
+    setIsPlaying(false);
   }
 };

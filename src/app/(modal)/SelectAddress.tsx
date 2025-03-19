@@ -6,6 +6,7 @@ import { CaretLeft } from "phosphor-react-native";
 import { colors, radius } from "@/constants/theme";
 import { FC, useState } from "react";
 import { useAuthStore } from "@/store/store";
+import { router } from "expo-router";
 
 const SelectAddress: FC<{ onCloseModal: () => void }> = ({ onCloseModal }) => {
   const [address, setAddress] = useState<{
@@ -26,7 +27,7 @@ const SelectAddress: FC<{ onCloseModal: () => void }> = ({ onCloseModal }) => {
         style={{ paddingHorizontal: scale(20), marginTop: verticalScale(30) }}
       >
         <Pressable
-          onPress={onCloseModal}
+          onPress={() => router.back()}
           style={{
             padding: scale(5),
             backgroundColor: colors.NEUTRAL300,

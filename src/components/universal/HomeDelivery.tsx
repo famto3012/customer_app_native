@@ -1,11 +1,9 @@
-import { Modal, View } from "react-native";
+import { View } from "react-native";
 import Instructions from "../common/Instructions";
 import ItemList from "./ItemList";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect } from "react";
 import { CartProps } from "@/types";
 import { useAuthStore } from "@/store/store";
-import { Portal } from "react-native-paper";
-import SelectAddress from "../BottomSheets/user/SelectAddress";
 import UserSelectedAddress from "../common/UserSelectedAddress";
 
 interface HomeDeliveryProps {
@@ -25,8 +23,6 @@ const HomeDelivery: FC<HomeDeliveryProps> = ({
   onMerchantInstruction,
   onAddressSelect,
 }) => {
-  const [show, setShow] = useState<boolean>(false);
-
   const { userAddress } = useAuthStore.getState();
 
   useEffect(() => {
@@ -37,7 +33,7 @@ const HomeDelivery: FC<HomeDeliveryProps> = ({
 
   return (
     <View>
-      <UserSelectedAddress onPress={() => setShow(true)} />
+      <UserSelectedAddress />
 
       <Instructions
         placeholder="Instructions (if any)"
@@ -52,17 +48,6 @@ const HomeDelivery: FC<HomeDeliveryProps> = ({
         onRecordComplete={(data) => onMerchantVoice(data)}
         onChangeText={(data) => onMerchantInstruction(data)}
       />
-
-      <Portal>
-        <Modal
-          visible={show}
-          onDismiss={() => setShow(false)}
-          onRequestClose={() => setShow(false)}
-          animationType="slide"
-        >
-          <SelectAddress onCloseModal={() => setShow(false)} />
-        </Modal>
-      </Portal>
     </View>
   );
 };

@@ -31,6 +31,7 @@ import { CartProps } from "@/types";
 import { useAuthStore } from "@/store/store";
 import Button from "@/components/Button";
 import { commonStyles } from "@/constants/commonStyles";
+import { Audio, AVPlaybackStatusSuccess } from "expo-av";
 
 const TAB_WIDTH = scale((SCREEN_WIDTH - 40) / 2);
 
@@ -69,6 +70,8 @@ const Checkout = () => {
     endDate: "",
     time: "",
   });
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const { selectedBusiness } = useAuthStore.getState();
 
@@ -148,6 +151,44 @@ const Checkout = () => {
   const animatedIndicator = useAnimatedStyle(() => ({
     transform: [{ translateX: indicatorPosition.value }],
   }));
+
+  const playOrStopSound = async () => {
+    try {
+      if (sound && isPlaying) {
+        await stopSound();
+      } else {
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          {
+            uri: "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FScheduled%20Order.mp3?alt=media&token=da59e122-08f8-4964-8b6f-bfebc8c32fbe",
+          },
+          { shouldPlay: true }
+        );
+
+        setSound(newSound);
+        setIsPlaying(true);
+
+        newSound.setOnPlaybackStatusUpdate((status) => {
+          if (
+            status.isLoaded &&
+            (status as AVPlaybackStatusSuccess).didJustFinish
+          ) {
+            stopSound();
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error playing/stopping sound:", error);
+    }
+  };
+
+  const stopSound = async () => {
+    if (sound) {
+      await sound.stopAsync();
+      await sound.unloadAsync();
+      setSound(null);
+      setIsPlaying(false);
+    }
+  };
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
@@ -357,11 +398,15 @@ const Checkout = () => {
         enableDynamicSizing={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
+        onClose={stopSound}
       >
         <ScheduleSheet
-          onPress={(startDate: string, endDate: string, time: string) =>
-            handleSchedule(startDate, endDate, time)
-          }
+          onPress={(startDate: string, endDate: string, time: string) => {
+            stopSound();
+            handleSchedule(startDate, endDate, time);
+          }}
+          playSound={playOrStopSound}
+          isPlaying={isPlaying}
         />
       </BottomSheet>
     </GestureHandlerRootView>

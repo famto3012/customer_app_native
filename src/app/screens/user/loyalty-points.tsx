@@ -1,6 +1,7 @@
+import { useCallback, useState } from "react";
 import { Image, StyleSheet, View } from "react-native";
 import { Audio, AVPlaybackStatusSuccess } from "expo-av";
-import { useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { scale, verticalScale } from "@/utils/styling";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
@@ -44,6 +45,20 @@ const LoyaltyPoints = () => {
       console.error("Error playing/stopping sound:", error);
     }
   };
+
+  // Stop and unload sound when the user leaves the screen
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        if (sound) {
+          sound.stopAsync();
+          sound.unloadAsync();
+          setSound(null);
+          setIsPlaying(false);
+        }
+      };
+    }, [sound])
+  );
 
   return (
     <ScreenWrapper>

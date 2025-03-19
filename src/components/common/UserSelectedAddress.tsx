@@ -1,17 +1,17 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import React, { FC } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius } from "@/constants/theme";
 import { CaretRight, House } from "phosphor-react-native";
 import Typo from "../Typo";
 import { useAuthStore } from "@/store/store";
+import { router } from "expo-router";
 
-const UserSelectedAddress: FC<{ onPress: () => void }> = ({ onPress }) => {
+const UserSelectedAddress = () => {
   const userAddress = useAuthStore((state) => state.userAddress);
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => router.push("/(modal)/SelectAddress")}
       style={{
         flexDirection: "row",
         alignItems: "center",

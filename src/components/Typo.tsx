@@ -20,7 +20,11 @@ const Typo = ({
   };
 
   return (
-    <Text style={[textStyles, style, { marginBottom: -3 }]} {...textProps}>
+    <Text
+      style={[textStyles, style, { marginBottom: -3 }]}
+      {...textProps}
+      allowFontScaling={false}
+    >
       {children}
     </Text>
   );

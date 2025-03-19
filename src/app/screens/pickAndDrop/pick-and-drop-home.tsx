@@ -26,16 +26,20 @@ import {
 } from "@/utils/defaultData";
 import { useMutation } from "@tanstack/react-query";
 import { initializePickAndDrop } from "@/service/pickandDropService";
+import { Audio, AVPlaybackStatusSuccess } from "expo-av";
 
 const PickAndDropHome = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
   const imageOffset = useSharedValue(-300);
   const textOffset = useSharedValue(300);
 
   const indexRef = useRef(0);
   const infoSheetRef = useRef<BottomSheet>(null);
 
-  const InfoSnapPoints = useMemo(() => ["60%"], []);
+  const InfoSnapPoints = useMemo(() => ["55%"], []);
 
   useEffect(() => {
     const cycleImages = () => {
@@ -89,6 +93,44 @@ const PickAndDropHome = () => {
       }
     },
   });
+
+  const playOrStopSound = async () => {
+    try {
+      if (sound && isPlaying) {
+        await stopSound();
+      } else {
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          {
+            uri: "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FPick%20and%20drop.mp3?alt=media&token=09ccd097-3acf-4f91-8778-39b469ea9096",
+          },
+          { shouldPlay: true }
+        );
+
+        setSound(newSound);
+        setIsPlaying(true);
+
+        newSound.setOnPlaybackStatusUpdate((status) => {
+          if (
+            status.isLoaded &&
+            (status as AVPlaybackStatusSuccess).didJustFinish
+          ) {
+            stopSound();
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error playing/stopping sound:", error);
+    }
+  };
+
+  const stopSound = async () => {
+    if (sound) {
+      await sound.stopAsync();
+      await sound.unloadAsync();
+      setSound(null);
+      setIsPlaying(false);
+    }
+  };
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
@@ -170,9 +212,15 @@ const PickAndDropHome = () => {
         enableDynamicSizing={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
+        onClose={stopSound}
       >
         <PickAndDropBottomSheet
-          closeSheet={() => infoSheetRef.current?.close()}
+          closeSheet={() => {
+            stopSound();
+            infoSheetRef.current?.close();
+          }}
+          playSound={playOrStopSound}
+          isPlaying={isPlaying}
         />
       </BottomSheet>
     </>
