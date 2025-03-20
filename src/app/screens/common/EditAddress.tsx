@@ -126,6 +126,7 @@ const EditAddress = () => {
         setAddressData((prev: any) => ({
           ...prev,
           area: result.locality || prev?.area || "",
+          coordinates: [latitude, longitude],
         }));
       } else {
         setLocationDetails({
@@ -285,6 +286,19 @@ const EditAddress = () => {
               rotateEnabled={true}
               compassEnabled={true}
               attributionEnabled={true}
+              onRegionDidChange={(event) => {
+                const { geometry, properties } = event;
+                if (properties && properties.zoomLevel) {
+                  setZoomLevel(16);
+                }
+                if (geometry && geometry.coordinates) {
+                  const [longitude, latitude] = geometry.coordinates;
+
+                  const newCoords = [longitude, latitude];
+                  setMarkerCoordinates(newCoords);
+                  reverseGeocode(newCoords);
+                }
+              }}
             >
               <Camera
                 ref={cameraRef}
@@ -293,6 +307,12 @@ const EditAddress = () => {
                 animationMode="easeTo"
                 minZoomLevel={4}
                 maxZoomLevel={20}
+              />
+
+              <UserLocation
+                visible={true}
+                animated={true}
+                showsUserHeadingIndicator={true}
               />
             </MapView>
           ) : (
