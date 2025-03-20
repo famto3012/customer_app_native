@@ -350,8 +350,6 @@ export const addAddressDetail = async (
   data: UserAddressProps
 ): Promise<{ success: boolean; address: UserAddressProps | null }> => {
   try {
-    console.log(data);
-
     const res = await appAxios.patch(`/customers/update-address`, data);
 
     return res.status === 200 ? res.data : { success: false, address: null };
