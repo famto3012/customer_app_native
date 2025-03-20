@@ -25,6 +25,7 @@ import FloatingCart from "@/components/universal/FloatingCart";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
+  SCREEN_WIDTH,
 } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import VariantSheet from "@/components/BottomSheets/VariantSheet";
@@ -240,7 +241,17 @@ const Product = () => {
           }
           ListFooterComponent={
             isFetchingNextCategoryPage ? (
-              <ActivityIndicator size="large" color={colors.PRIMARY} />
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: SCREEN_WIDTH,
+                  height: 30,
+                }}
+              >
+                <ActivityIndicator size="small" />
+              </View>
             ) : (
               <ProductFooter
                 merchantData={merchantData ? merchantData : null}

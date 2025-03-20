@@ -33,6 +33,7 @@ import {
 import { colors } from "@/constants/theme";
 import * as Location from "expo-location";
 import Typo from "@/components/Typo";
+import { useSafeLocation } from "@/utils/helpers";
 
 const { MapView, Camera, RestApi, UserLocation } = MapplsGL;
 
@@ -41,10 +42,10 @@ const CustomOrderMap = () => {
 
   const addStoreSnapPoints = useMemo(() => ["38%"], []);
 
-  const { location } = useAuthStore.getState();
+  const { latitude, longitude } = useSafeLocation();
   const [markerCoordinates, setMarkerCoordinates] = useState<number[]>([
-    location?.longitude ?? 0,
-    location?.latitude ?? 0,
+    longitude,
+    latitude,
   ]);
   const [mapplsPin, setMapplsPin] = useState("");
   const [locationDetails, setLocationDetails] =
@@ -299,6 +300,8 @@ const CustomOrderMap = () => {
                 flex: 1,
                 flexDirection: "row",
                 alignItems: "center",
+                justifyContent: "space-between",
+                paddingRight: scale(10),
               }}
             >
               <TextInput

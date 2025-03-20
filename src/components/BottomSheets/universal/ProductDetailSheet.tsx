@@ -7,6 +7,7 @@ import Typo from "@/components/Typo";
 import { ProductProps } from "@/types";
 import { Heart } from "phosphor-react-native";
 import { BottomSheetScrollView, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
+import FastImage from "react-native-fast-image";
 
 const ProductDetailSheet: FC<{
   product: ProductProps;
@@ -16,8 +17,11 @@ const ProductDetailSheet: FC<{
     <View style={styles.container}>
       <BottomSheetScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          <Image
-            source={{ uri: product?.productImageURL }}
+          <FastImage
+            source={{
+              uri: product?.productImageURL,
+              priority: FastImage.priority.high,
+            }}
             style={styles.image}
             resizeMode="cover"
           />
@@ -83,6 +87,7 @@ const ProductDetailSheet: FC<{
               style={styles.description}
             >
               {product?.longDescription ||
+                product?.description ||
                 "No description available for this product."}
             </Typo>
           </View>
@@ -97,9 +102,9 @@ const ProductDetailSheet: FC<{
         </View>
       </BottomSheetScrollView>
 
-      <View style={styles.footer}>
+      {/* <View style={styles.footer}>
         <Button onPress={onClose} title="Close" />
-      </View>
+      </View> */}
     </View>
   );
 };

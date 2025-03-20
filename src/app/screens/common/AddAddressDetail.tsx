@@ -57,6 +57,49 @@ const AddAddressDetail = ({
     }
   }, [addressData]);
 
+  // useEffect(() => {
+  //   const showSubscription = Keyboard.addListener(
+  //     "keyboardDidShow",
+  //     (event) => {
+  //       const height = event.endCoordinates.height;
+  //       setKeyboardHeight(height);
+
+  //       // Set new snap points when keyboard appears
+  //       const newSnapPoints = ["38%", `${SCREEN_HEIGHT - height - 40}px`];
+  //       setDynamicSnapPoints(newSnapPoints);
+
+  //       setTimeout(() => {
+  //         if (addAddressSheetRef?.current && newSnapPoints.length > 1) {
+  //           console.log(
+  //             "Bottom sheet opened with snap points:",
+  //             dynamicSnapPoints
+  //           );
+
+  //           addAddressSheetRef.current.snapToIndex(1);
+  //         }
+  //       }, 100);
+  //     }
+  //   );
+
+  //   const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+  //     setKeyboardHeight(0);
+
+  //     // Reset snap points when keyboard is hidden
+  //     setDynamicSnapPoints(["38%"]);
+
+  //     setTimeout(() => {
+  //       if (addAddressSheetRef?.current) {
+  //         addAddressSheetRef.current.snapToIndex(0); // Move down
+  //       }
+  //     }, 100);
+  //   });
+
+  //   return () => {
+  //     showSubscription.remove();
+  //     hideSubscription.remove();
+  //   };
+  // }, []);
+
   useEffect(() => {
     const showSubscription = Keyboard.addListener(
       "keyboardDidShow",
@@ -64,36 +107,40 @@ const AddAddressDetail = ({
         const height = event.endCoordinates.height;
         setKeyboardHeight(height);
 
-        // Set new snap points when keyboard appears
-        const newSnapPoints = ["38%", `${SCREEN_HEIGHT - height - 40}px`];
-        setDynamicSnapPoints(newSnapPoints);
+        // Ensure snap points only update if it's a real keyboard interaction
+        if (!addressData) {
+          const newSnapPoints = ["58%", `${SCREEN_HEIGHT - height - 40}px`];
+          setDynamicSnapPoints(newSnapPoints);
 
-        setTimeout(() => {
-          if (addAddressSheetRef?.current && newSnapPoints.length > 1) {
-            addAddressSheetRef.current.snapToIndex(1);
-          }
-        }, 100);
+          setTimeout(() => {
+            if (addAddressSheetRef?.current && newSnapPoints.length > 1) {
+              addAddressSheetRef.current.snapToIndex(1);
+            }
+          }, 100);
+        }
       }
     );
 
     const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
       setKeyboardHeight(0);
 
-      // Reset snap points when keyboard is hidden
-      setDynamicSnapPoints(["38%"]);
+      // Reset snap points only if the keyboard was actually open before
+      if (!addressData) {
+        setDynamicSnapPoints(["58%"]);
 
-      setTimeout(() => {
-        if (addAddressSheetRef?.current) {
-          addAddressSheetRef.current.snapToIndex(0); // Move down
-        }
-      }, 100);
+        setTimeout(() => {
+          if (addAddressSheetRef?.current) {
+            addAddressSheetRef.current.snapToIndex(0);
+          }
+        }, 100);
+      }
     });
 
     return () => {
       showSubscription.remove();
       hideSubscription.remove();
     };
-  }, []);
+  }, [addressData]);
 
   const handleSelectAddress = (type: string) => {
     setSelected(type);
@@ -309,7 +356,7 @@ const styles = StyleSheet.create({
   },
   dataContainer: {
     marginVertical: verticalScale(15),
-    gap: spacingY._20,
+    gap: spacingY._15,
   },
   data: {
     flexDirection: "row",

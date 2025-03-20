@@ -11,6 +11,7 @@ import { scale } from "@/utils/styling";
 import ScreenWrapper from "../ScreenWrapper";
 import axios from "axios";
 import { useSocket } from "@/service/socketProvider";
+import { useSafeLocation } from "@/utils/helpers";
 
 const { MapView, Camera, UserLocation, ShapeSource, LineLayer, SymbolLayer } =
   MapplsGL;
@@ -28,10 +29,10 @@ interface MapProps {
 }
 
 const Map = ({ pickupLocation, deliveryLocation, orderId }: MapProps) => {
-  const { location } = useAuthStore.getState();
+  const { latitude, longitude } = useSafeLocation();
   const [initialCoordinates, setInitialCoordinates] = useState<number[]>([
-    location?.longitude ?? 0,
-    location?.latitude ?? 0,
+    longitude,
+    latitude,
   ]);
   const [routeCoordinates, setRouteCoordinates] = useState<any[]>([]);
   const [zoomLevel, setZoomLevel] = useState(12);
@@ -56,7 +57,7 @@ const Map = ({ pickupLocation, deliveryLocation, orderId }: MapProps) => {
     const interval = setInterval(emitAgentLocationUpdate, 60000); // Every 1 minute
 
     // Listener for agent location updates
-    const handleAgentLocationUpdate = (data) => {
+    const handleAgentLocationUpdate = (data: any) => {
       console.log("Received agentCurrentLocation:", data);
       if (data.agentLocation) {
         setAgentLocation([data.agentLocation[1], data.agentLocation[0]]);

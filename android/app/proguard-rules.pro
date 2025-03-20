@@ -24,3 +24,7 @@
 -dontwarn com.ryanharter.auto.value.gson.GsonTypeAdapterFactory
 
 # Add any project specific keep options here:
+
+# Add these rules to your proguard-rules.pro file
+-keep class com.mappls.sdk.maps.** { *; }
+-keep class com.mappls.sdk.services.** { *; }

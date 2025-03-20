@@ -22,12 +22,7 @@ import Animated, {
   LinearTransition,
 } from "react-native-reanimated";
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-} from "@gorhom/bottom-sheet";
-import { commonStyles } from "@/constants/commonStyles";
-import ProductDetailSheet from "../BottomSheets/universal/ProductDetailSheet";
+import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 
 const useProducts = (categoryId: string, userId: string) => {
   return useInfiniteQuery({
@@ -63,45 +58,26 @@ const ProductList: FC<{
   } = useProducts(categoryId, userId || "");
   const isFocused = useIsFocused();
 
-  // const [selectedProduct, setSelectedProduct] = useState<ProductProps | null>(
-  //   null
-  // );
-  // const productDetailRef = useRef<BottomSheet>(null);
-  // const productDetailSnapPoints = useMemo(() => ["60%"], []);
-
-  // const renderBackdrop = useCallback(
-  //   (props: BottomSheetBackdropProps) => (
-  //     <BottomSheetBackdrop
-  //       {...props}
-  //       disappearsOnIndex={-1}
-  //       appearsOnIndex={0}
-  //       opacity={0.5}
-  //       style={[props.style, commonStyles.backdrop]}
-  //     />
-  //   ),
-  //   []
-  // );
-
-  // // Function to open product details
-  // const handleOpenProductDetails = (product: ProductProps) => {
-  //   setSelectedProduct(product);
-  //   console.log("Opening Product:", product);
-  //   console.log("BottomSheet Ref:", productDetailRef.current);
-
-  //   if (productDetailRef.current) {
-  //     productDetailRef.current.expand();
-  //   } else {
-  //     console.warn("BottomSheet ref is NULL. Ensure it's assigned correctly.");
-  //   }
-  // };
-
   useFocusEffect(
     useCallback(() => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
     }, [])
   );
 
-  if (isLoading) return <ActivityIndicator size="small" />;
+  if (isLoading)
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          width: SCREEN_WIDTH,
+          height: 30,
+        }}
+      >
+        <ActivityIndicator size="small" />
+      </View>
+    );
   if (isError) return <Text>Error loading products.</Text>;
 
   const products = Array.from(
@@ -126,7 +102,6 @@ const ProductList: FC<{
             trigger={trigger}
             isFocused={isFocused}
             onProductPress={(product) => {
-              console.log("Product pressed in ProductList:", product.productId);
               onProductPress(product);
             }}
           />
@@ -134,31 +109,23 @@ const ProductList: FC<{
         onEndReached={() => hasNextPage && fetchNextPage()}
         onEndReachedThreshold={0.5}
         ListFooterComponent={
-          isFetchingNextPage ? <ActivityIndicator size="small" /> : null
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              width: SCREEN_WIDTH,
+              height: 30,
+            }}
+          >
+            {isFetchingNextPage ? <ActivityIndicator size="small" /> : null}
+          </View>
         }
-        ItemSeparatorComponent={() => (
-          <View style={{ height: verticalScale(15) }} />
-        )}
         windowSize={10}
         initialNumToRender={5}
         maxToRenderPerBatch={5}
         scrollEnabled={false}
       />
-      {/* <BottomSheet
-        ref={productDetailRef}
-        index={-1}
-        snapPoints={productDetailSnapPoints}
-        enableDynamicSizing={true}
-        enablePanDownToClose
-        backdropComponent={renderBackdrop}
-      >
-        {selectedProduct && (
-          <ProductDetailSheet
-            product={selectedProduct}
-            onClose={() => productDetailRef.current?.close()}
-          />
-        )}
-      </BottomSheet> */}
     </>
   );
 };
@@ -208,10 +175,6 @@ const CategoryItem: FC<{
             categoryId={category.categoryId}
             openVariant={(product: ProductProps) => openVariant(product)}
             onProductPress={(product) => {
-              console.log(
-                "Product pressed in CategoryItem:",
-                product.productId
-              );
               onProductPress(product);
             }}
             trigger={trigger}

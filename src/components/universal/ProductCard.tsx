@@ -14,6 +14,7 @@ import { Grayscale } from "react-native-color-matrix-image-filters";
 import { updateCart } from "@/localDB/controller/cartController";
 import { database } from "@/localDB/database";
 import Cart from "@/localDB/models/Cart";
+import FastImage from "react-native-fast-image";
 
 const ProductCard: FC<{
   item: ProductProps;
@@ -112,7 +113,7 @@ const ProductCard: FC<{
     if (!item.inventory) return;
 
     if (item.variantAvailable) {
-      openVariant?.({ ...item, cartCount: count ? count : 0 });
+      openVariant?.({ ...item, cartCount: count ? count + 1 : 1 });
     } else {
       const newQuantity = count ? count + 1 : 1;
       setCount(newQuantity);
@@ -133,15 +134,21 @@ const ProductCard: FC<{
           <Pressable onPress={() => onProductPress(item)}>
             {!item.inventory ? (
               <Grayscale>
-                <Image
-                  source={{ uri: item.productImageURL }}
+                <FastImage
+                  source={{
+                    uri: item.productImageURL,
+                    priority: FastImage.priority.high,
+                  }}
                   style={styles.image}
                   resizeMode="cover"
                 />
               </Grayscale>
             ) : (
-              <Image
-                source={{ uri: item.productImageURL }}
+              <FastImage
+                source={{
+                  uri: item.productImageURL,
+                  priority: FastImage.priority.high,
+                }}
                 style={styles.image}
                 resizeMode="cover"
               />
@@ -205,7 +212,7 @@ const ProductCard: FC<{
             color={colors.NEUTRAL400}
             textProps={{ numberOfLines: 3 }}
           >
-            {item.longDescription}
+            {item?.longDescription ? item?.longDescription : item?.description}
           </Typo>
         </View>
       </View>
