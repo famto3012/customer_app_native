@@ -40,14 +40,15 @@ import AddAddressDetail from "./AddAddressDetail";
 import { commonStyles } from "@/constants/commonStyles";
 import { useMutation } from "@tanstack/react-query";
 import { verifyCustomerAddressLocation } from "@/service/userService";
+import { useSafeLocation } from "@/utils/helpers";
 
 const { MapView, Camera, RestApi, UserLocation } = MapplsGL;
 
 const AddAddress = () => {
-  const { location } = useAuthStore.getState();
+  const { latitude, longitude } = useSafeLocation();
   const [markerCoordinates, setMarkerCoordinates] = useState<number[]>([
-    location?.longitude ?? 0,
-    location?.latitude ?? 0,
+    longitude,
+    latitude,
   ]);
   const [mapplsPin, setMapplsPin] = useState("");
   const [locationDetails, setLocationDetails] =
@@ -321,6 +322,8 @@ const AddAddress = () => {
                 flex: 1,
                 flexDirection: "row",
                 alignItems: "center",
+                justifyContent: "space-between",
+                paddingRight: scale(10),
               }}
             >
               <TextInput

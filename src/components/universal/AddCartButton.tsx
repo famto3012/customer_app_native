@@ -89,6 +89,7 @@ const styles = StyleSheet.create({
   },
   text: {
     textAlign: "center",
+    zIndex: 2,
   },
   countText: {
     minWidth: 30,

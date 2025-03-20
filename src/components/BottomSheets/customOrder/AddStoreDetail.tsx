@@ -29,7 +29,6 @@ const AddStoreDetail = ({
   addStoreSheetRef: any;
   shopData: any;
 }) => {
-  console.log("ShopData", shopData);
   const [storeData, setStoreData] = useState<AddCustomStoreProps>({
     latitude: shopData?.latitude || null,
     longitude: shopData?.longitude || null,
@@ -53,43 +52,87 @@ const AddStoreDetail = ({
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [dynamicSnapPoints, setDynamicSnapPoints] = useState(["38%"]); // Default snap points
 
+  // useEffect(() => {
+  //   const showSubscription = Keyboard.addListener(
+  //     "keyboardDidShow",
+  //     (event) => {
+  //       const height = event.endCoordinates.height;
+  //       setKeyboardHeight(height);
+
+  //       // Set new snap points when keyboard appears
+  //       const newSnapPoints = ["38%", `${SCREEN_HEIGHT - height - 40}px`];
+  //       setDynamicSnapPoints(newSnapPoints);
+
+  //       setTimeout(() => {
+  //         if (addStoreSheetRef?.current && newSnapPoints.length > 1) {
+  //           addStoreSheetRef.current.snapToIndex(1); // Move up only if valid snap points exist
+  //         }
+  //       }, 100);
+  //     }
+  //   );
+
+  //   const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+  //     setKeyboardHeight(0);
+
+  //     // Reset snap points when keyboard is hidden
+  //     setDynamicSnapPoints(["38%"]);
+
+  //     setTimeout(() => {
+  //       if (addStoreSheetRef?.current) {
+  //         addStoreSheetRef.current.snapToIndex(0); // Move down
+  //       }
+  //     }, 100);
+  //   });
+
+  //   return () => {
+  //     showSubscription.remove();
+  //     hideSubscription.remove();
+  //   };
+  // }, []);
+
   useEffect(() => {
+    let isProgrammaticUpdate = false; // Prevent triggering when shopData updates programmatically
+
     const showSubscription = Keyboard.addListener(
       "keyboardDidShow",
       (event) => {
+        if (isProgrammaticUpdate) return; // Skip if triggered by programmatic updates
+
         const height = event.endCoordinates.height;
         setKeyboardHeight(height);
 
         // Set new snap points when keyboard appears
-        const newSnapPoints = ["38%", `${SCREEN_HEIGHT - height - 40}px`];
-        setDynamicSnapPoints(newSnapPoints);
+        if (!shopData) {
+          const newSnapPoints = ["38%", `${SCREEN_HEIGHT - height - 40}px`];
+          setDynamicSnapPoints(newSnapPoints);
 
-        setTimeout(() => {
-          if (addStoreSheetRef?.current && newSnapPoints.length > 1) {
-            addStoreSheetRef.current.snapToIndex(1); // Move up only if valid snap points exist
-          }
-        }, 100);
+          setTimeout(() => {
+            if (addStoreSheetRef?.current && newSnapPoints.length > 1) {
+              addStoreSheetRef.current.snapToIndex(1); // Move up only if valid snap points exist
+            }
+          }, 100);
+        }
       }
     );
 
     const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
       setKeyboardHeight(0);
+      if (!shopData) {
+        setDynamicSnapPoints(["38%"]); // Reset snap points
 
-      // Reset snap points when keyboard is hidden
-      setDynamicSnapPoints(["38%"]);
-
-      setTimeout(() => {
-        if (addStoreSheetRef?.current) {
-          addStoreSheetRef.current.snapToIndex(0); // Move down
-        }
-      }, 100);
+        setTimeout(() => {
+          if (addStoreSheetRef?.current) {
+            addStoreSheetRef.current.snapToIndex(0); // Move down
+          }
+        }, 100);
+      }
     });
 
     return () => {
       showSubscription.remove();
       hideSubscription.remove();
     };
-  }, []);
+  }, [shopData]); // ✅ Now correctly depends on shopData
 
   const handleAddStoreMutation = useMutation<
     AddStoreResponse | null,
