@@ -24,12 +24,14 @@ const Address: FC<{
   showActionButton?: boolean;
   addressType?: string;
   addressOtherId?: string;
+  selectedAddress?: (type: string, otherId?: string, address?: string) => void;
 }> = ({
   onSelect,
   alreadySelect = false,
   showActionButton = false,
   addressType,
   addressOtherId,
+  selectedAddress,
 }) => {
   const [selected, setSelected] = useState<string>("");
   const [selectedOtherId, setSelectedOtherId] = useState<string>("");
@@ -56,6 +58,13 @@ const Address: FC<{
     if (alreadySelect) {
       setSelected(userAddress.type);
       setSelectedOtherId(userAddress.otherId);
+      if (selectedAddress) {
+        selectedAddress(
+          userAddress.type,
+          userAddress.otherId,
+          userAddress.address
+        );
+      }
     }
   }, [data]);
 
@@ -118,7 +127,18 @@ const Address: FC<{
         </View>
 
         {showActionButton && (
-          <Pressable style={{ padding: scale(8) }}>
+          <Pressable
+            style={{ padding: scale(8) }}
+            onPress={() => {
+              router.push({
+                pathname: "/screens/common/EditAddress",
+                params: {
+                  address: JSON.stringify(address),
+                  addressType: selected,
+                },
+              });
+            }}
+          >
             <Image
               source={require("@/assets/icons/edit.webp")}
               style={{
@@ -294,7 +314,10 @@ const Address: FC<{
               </View>
 
               {showActionButton && (
-                <Pressable style={{ padding: scale(8) }}>
+                <Pressable
+                  style={{ padding: scale(8) }}
+                  onPress={() => router.push("/screens/common/EditAddress")}
+                >
                   <Image
                     source={require("@/assets/icons/edit.webp")}
                     style={{

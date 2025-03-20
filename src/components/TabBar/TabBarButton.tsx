@@ -95,6 +95,7 @@ const TabBarButton = ({
           },
           animatedTextStyle,
         ]}
+        allowFontScaling={false}
       >
         {label}
       </Animated.Text>

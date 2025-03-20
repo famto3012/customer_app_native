@@ -29,7 +29,7 @@ const SearchView: FC<{
       >
         <MagnifyingGlass size={24} color={colors.PRIMARY} />
 
-        <Typo size={14}>{placeholder}</Typo>
+        <Typo size={13}>{placeholder}</Typo>
       </Pressable>
     </View>
   );
