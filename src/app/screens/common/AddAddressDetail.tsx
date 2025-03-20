@@ -8,13 +8,9 @@ import {
   View,
 } from "react-native";
 import { useEffect, useState } from "react";
-import { scale, verticalScale } from "@/utils/styling";
+import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import { colors, spacingY } from "@/constants/theme";
-import {
-  BottomSheetScrollView,
-  SCREEN_HEIGHT,
-  SCREEN_WIDTH,
-} from "@gorhom/bottom-sheet";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import Typo from "@/components/Typo";
@@ -42,8 +38,6 @@ const AddAddressDetail = ({
     coordinates: [],
   });
   const [selected, setSelected] = useState("");
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [dynamicSnapPoints, setDynamicSnapPoints] = useState(["58%"]);
 
   const queryClient = useQueryClient();
 
@@ -55,91 +49,6 @@ const AddAddressDetail = ({
         coordinates: [addressData.latitude, addressData.longitude],
       });
     }
-  }, [addressData]);
-
-  // useEffect(() => {
-  //   const showSubscription = Keyboard.addListener(
-  //     "keyboardDidShow",
-  //     (event) => {
-  //       const height = event.endCoordinates.height;
-  //       setKeyboardHeight(height);
-
-  //       // Set new snap points when keyboard appears
-  //       const newSnapPoints = ["38%", `${SCREEN_HEIGHT - height - 40}px`];
-  //       setDynamicSnapPoints(newSnapPoints);
-
-  //       setTimeout(() => {
-  //         if (addAddressSheetRef?.current && newSnapPoints.length > 1) {
-  //           console.log(
-  //             "Bottom sheet opened with snap points:",
-  //             dynamicSnapPoints
-  //           );
-
-  //           addAddressSheetRef.current.snapToIndex(1);
-  //         }
-  //       }, 100);
-  //     }
-  //   );
-
-  //   const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
-  //     setKeyboardHeight(0);
-
-  //     // Reset snap points when keyboard is hidden
-  //     setDynamicSnapPoints(["38%"]);
-
-  //     setTimeout(() => {
-  //       if (addAddressSheetRef?.current) {
-  //         addAddressSheetRef.current.snapToIndex(0); // Move down
-  //       }
-  //     }, 100);
-  //   });
-
-  //   return () => {
-  //     showSubscription.remove();
-  //     hideSubscription.remove();
-  //   };
-  // }, []);
-
-  useEffect(() => {
-    const showSubscription = Keyboard.addListener(
-      "keyboardDidShow",
-      (event) => {
-        const height = event.endCoordinates.height;
-        setKeyboardHeight(height);
-
-        // Ensure snap points only update if it's a real keyboard interaction
-        if (!addressData) {
-          const newSnapPoints = ["58%", `${SCREEN_HEIGHT - height - 40}px`];
-          setDynamicSnapPoints(newSnapPoints);
-
-          setTimeout(() => {
-            if (addAddressSheetRef?.current && newSnapPoints.length > 1) {
-              addAddressSheetRef.current.snapToIndex(1);
-            }
-          }, 100);
-        }
-      }
-    );
-
-    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
-      setKeyboardHeight(0);
-
-      // Reset snap points only if the keyboard was actually open before
-      if (!addressData) {
-        setDynamicSnapPoints(["58%"]);
-
-        setTimeout(() => {
-          if (addAddressSheetRef?.current) {
-            addAddressSheetRef.current.snapToIndex(0);
-          }
-        }, 100);
-      }
-    });
-
-    return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
-    };
   }, [addressData]);
 
   const handleSelectAddress = (type: string) => {

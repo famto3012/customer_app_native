@@ -29,12 +29,14 @@ const FloatingCart: FC<{ onClearCart: () => void }> = ({ onClearCart }) => {
     mutationFn: ({ merchantId, items }: { merchantId: any; items: any }) =>
       addItemsToCart(merchantId, items),
     onSuccess: (data) => {
-      router.push({
-        pathname: "/screens/universal/checkout",
-        params: {
-          cartId: data,
-        },
-      });
+      if (data) {
+        router.push({
+          pathname: "/screens/universal/checkout",
+          params: {
+            cartId: data,
+          },
+        });
+      }
     },
   });
 

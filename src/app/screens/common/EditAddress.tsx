@@ -6,26 +6,17 @@ import {
   TextInput,
   View,
 } from "react-native";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import MapplsGL from "mappls-map-react-native";
 import MapplsUIWidgets from "mappls-search-widgets-react-native";
 import * as Location from "expo-location";
-import { LocationAddressProps } from "@/types";
-import { useAuthStore } from "@/store/store";
+import { LocationAddressProps, UserAddressProps } from "@/types";
 import { colors } from "@/constants/theme";
-import { scale } from "@/utils/styling";
+import { scale, SCREEN_HEIGHT, SCREEN_WIDTH } from "@/utils/styling";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
-  SCREEN_HEIGHT,
-  SCREEN_WIDTH,
 } from "@gorhom/bottom-sheet";
 import Typo from "@/components/Typo";
 import LottieView from "lottie-react-native";
@@ -36,60 +27,57 @@ import {
   MAPPLS_CLIENT_SECRET_KEY,
   MAPPLS_REST_API_KEY,
 } from "@/constants/links";
-import AddAddressDetail from "./AddAddressDetail";
 import { commonStyles } from "@/constants/commonStyles";
 import { useMutation } from "@tanstack/react-query";
 import { verifyCustomerAddressLocation } from "@/service/userService";
-import { useSafeLocation } from "@/utils/helpers";
 import EditAddressDetail from "./EditAddressDetail";
 import { useLocalSearchParams } from "expo-router";
+import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 
 const { MapView, Camera, RestApi, UserLocation } = MapplsGL;
 
 const EditAddress = () => {
-  //   const { latitude, longitude } = useSafeLocation();
   const { address, addressType }: { address: any; addressType: string } =
     useLocalSearchParams();
+
   const parsedAddress = address ? JSON.parse(address) : null;
-  const [markerCoordinates, setMarkerCoordinates] = useState<number[]>([
-    parsedAddress?.coordinates?.[1],
-    parsedAddress?.coordinates?.[0],
-  ]);
-  const [mapplsPin, setMapplsPin] = useState("");
+
+  const [isAddressParsed, setIsAddressParsed] = useState(false);
+  const [markerCoordinates, setMarkerCoordinates] = useState<number[]>(
+    parsedAddress?.coordinates?.length === 2
+      ? [parsedAddress.coordinates[1], parsedAddress.coordinates[0]]
+      : [0, 0]
+  );
+  const [mapplsPin, setMapplsPin] = useState<string>("");
   const [locationDetails, setLocationDetails] =
     useState<LocationAddressProps>();
-  const [loading, setLoading] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(15);
-  const [addressData, setAddressData] = useState<any>(
-    parsedAddress
-      ? {
-          area: parsedAddress.area || "",
-          flat: parsedAddress.flat || "",
-          phoneNumber: parsedAddress.phoneNumber || "",
-          landmark: parsedAddress.landmark || "",
-          fullName: parsedAddress.fullName || "",
-          id: parsedAddress.id || "",
-          type: addressType,
-        }
-      : null
-  );
+  const [loading, setLoading] = useState<boolean>(false);
+  const [zoomLevel, setZoomLevel] = useState<number>(15);
+  const [addressData, setAddressData] = useState<UserAddressProps>({
+    area: parsedAddress.area || "",
+    flat: parsedAddress.flat || "",
+    phoneNumber: parsedAddress.phoneNumber || "",
+    landmark: parsedAddress.landmark || "",
+    fullName: parsedAddress.fullName || "",
+    id: parsedAddress.id || "",
+    type: addressType,
+    coordinates: [],
+  });
   const cameraRef = useRef<any>(null);
   const mapRef = useRef<any>(null);
-  const editAddressSheetRef = useRef<BottomSheet>(null);
+  const editAddressSheetRef = useRef<BottomSheetMethods | null>(null);
 
   const editAddressSnapPoints = useMemo(() => ["58%"], []);
 
   // In EditAddress component
   useEffect(() => {
     if (parsedAddress?.coordinates?.length === 2) {
-      // Make sure to set the initial coordinates properly
       setMarkerCoordinates([
         parsedAddress.coordinates[1],
         parsedAddress.coordinates[0],
       ]);
 
-      // Also set it in addressData
-      setAddressData((prev) => ({
+      setAddressData((prev: UserAddressProps) => ({
         ...prev,
         area: parsedAddress.area || "",
         flat: parsedAddress.flat || "",
@@ -100,10 +88,10 @@ const EditAddress = () => {
         type: addressType,
         coordinates: parsedAddress.coordinates,
       }));
+
+      setIsAddressParsed(true); // ✅ Mark as parsed
     }
   }, [address, addressType]);
-
-  //   console.log("Received Address:", parsedAddress, addressType);
 
   useEffect(() => {
     MapplsGL.setMapSDKKey(MAPPLS_REST_API_KEY);
@@ -180,7 +168,7 @@ const EditAddress = () => {
           setMapplsPin(res.eLocation.mapplsPin);
         }
         cameraRef.current.flyWithMapplsPin(res.eLocation.mapplsPin, 1000);
-        console.log("Search Result:", res.eLocation);
+
         setLocationDetails({
           address: res.eLocation.placeAddress || "Address not available",
           locality: null,
@@ -218,7 +206,6 @@ const EditAddress = () => {
       }).catch(() => null);
 
       if (!location) {
-        console.log("Location fetch failed");
         setLoading(false);
         return false;
       }
@@ -226,7 +213,6 @@ const EditAddress = () => {
       const { latitude, longitude } = location.coords;
       const newCoords = [longitude, latitude];
       setMarkerCoordinates(newCoords);
-      // setMarkerVisible(true);
 
       // When getting current location, update camera position
       if (cameraRef.current) {
@@ -246,26 +232,29 @@ const EditAddress = () => {
     }
   };
 
-  useEffect(() => {
-    requestLocationPermission();
-  }, []);
-
   const verifyLocationMutation = useMutation({
     mutationKey: ["verify-location"],
-    mutationFn: () =>
-      verifyCustomerAddressLocation(
-        addressData.coordinates[0],
-        addressData.coordinates[1]
-      ),
+    mutationFn: async () => {
+      if (addressData?.coordinates?.length === 2) {
+        return verifyCustomerAddressLocation(
+          addressData.coordinates[0],
+          addressData.coordinates[1]
+        );
+      }
+      throw new Error("Invalid coordinates");
+    },
     onSuccess: (data) => {
       if (data) {
         editAddressSheetRef.current?.expand();
       } else {
         Alert.alert(
           "",
-          "Sorry we're not currently delivering to this location"
+          "Sorry, we're not currently delivering to this location"
         );
       }
+    },
+    onError: (error) => {
+      Alert.alert("", "An error occurred while verifying the location.");
     },
   });
 
@@ -286,52 +275,33 @@ const EditAddress = () => {
     <>
       <ScreenWrapper>
         <View style={styles.container}>
-          <MapView
-            ref={mapRef}
-            style={styles.map}
-            zoomEnabled={true}
-            scrollEnabled={true}
-            pitchEnabled={true}
-            rotateEnabled={true}
-            compassEnabled={true}
-            attributionEnabled={true}
-            onRegionDidChange={(event) => {
-              const { geometry, properties } = event;
-              if (properties && properties.zoomLevel) {
-                setZoomLevel(properties.zoomLevel);
-              }
-              if (geometry && geometry.coordinates) {
-                const [longitude, latitude] = geometry.coordinates;
-                console.log("Map moved to:", latitude, longitude);
-                const newCoords = [longitude, latitude];
-                setMarkerCoordinates(newCoords);
-                setAddressData((prev: any) => ({
-                  ...prev,
-                  coordinates: [latitude, longitude],
-                }));
-                reverseGeocode(newCoords);
-              }
-            }}
-          >
-            {/* Camera Position */}
-            <Camera
-              ref={cameraRef}
-              zoomLevel={zoomLevel | 15}
-              centerCoordinate={markerCoordinates}
-              centerMapplsPin={mapplsPin}
-              animationMode="flyTo"
-              animationDuration={1000}
-              minZoomLevel={4}
-              maxZoomLevel={20}
+          {isAddressParsed ? (
+            <MapView
+              ref={mapRef}
+              style={styles.map}
+              zoomEnabled={true}
+              scrollEnabled={true}
+              pitchEnabled={true}
+              rotateEnabled={true}
+              compassEnabled={true}
+              attributionEnabled={true}
+            >
+              <Camera
+                ref={cameraRef}
+                zoomLevel={zoomLevel || 15}
+                centerCoordinate={markerCoordinates}
+                animationMode="easeTo"
+                minZoomLevel={4}
+                maxZoomLevel={20}
+              />
+            </MapView>
+          ) : (
+            <ActivityIndicator
+              size="large"
+              color={colors.PRIMARY}
+              style={{ flex: 1 }}
             />
-
-            {/* Add UserLocation component */}
-            <UserLocation
-              visible={true}
-              animated={true}
-              showsUserHeadingIndicator={true}
-            />
-          </MapView>
+          )}
 
           <View style={styles.centerMarkerContainer}>
             <View style={styles.deliveryMessageContainer}>

@@ -316,7 +316,15 @@ const Address: FC<{
               {showActionButton && (
                 <Pressable
                   style={{ padding: scale(8) }}
-                  onPress={() => router.push("/screens/common/EditAddress")}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/screens/common/EditAddress",
+                      params: {
+                        address: JSON.stringify(item),
+                        addressType: "other",
+                      },
+                    })
+                  }
                 >
                   <Image
                     source={require("@/assets/icons/edit.webp")}
