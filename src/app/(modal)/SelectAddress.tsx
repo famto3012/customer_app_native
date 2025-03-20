@@ -22,27 +22,37 @@ const SelectAddress: FC<{ onCloseModal: () => void }> = ({ onCloseModal }) => {
   const { setUserAddress } = useAuthStore.getState();
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.WHITE }}>
       <View
-        style={{ paddingHorizontal: scale(20), marginTop: verticalScale(30) }}
+        style={{
+          paddingHorizontal: scale(20),
+          marginTop: verticalScale(30),
+        }}
       >
         <Pressable
           onPress={() => router.back()}
           style={{
             padding: scale(5),
-            backgroundColor: colors.NEUTRAL300,
+            backgroundColor: colors.WHITE,
             alignSelf: "flex-start",
             borderRadius: radius._3,
           }}
         >
-          <CaretLeft size={scale(20)} color={colors.BLACK} weight="bold" />
+          <CaretLeft size={scale(20)} color={colors.PRIMARY} weight="bold" />
         </Pressable>
       </View>
 
       <ScrollView style={{ marginTop: verticalScale(20) }}>
         <Address
-          alreadySelect
+          alreadySelect={true}
           onSelect={(type, otherId, address) =>
+            setAddress({
+              type,
+              otherId: otherId as string,
+              address: address as string,
+            })
+          }
+          selectedAddress={(type, otherId, address) =>
             setAddress({
               type,
               otherId: otherId as string,
@@ -67,7 +77,8 @@ const SelectAddress: FC<{ onCloseModal: () => void }> = ({ onCloseModal }) => {
           title="Continue"
           onPress={() => {
             setUserAddress(address);
-            onCloseModal();
+            // onCloseModal();
+            router.back();
           }}
         />
       </View>

@@ -41,27 +41,69 @@ import { commonStyles } from "@/constants/commonStyles";
 import { useMutation } from "@tanstack/react-query";
 import { verifyCustomerAddressLocation } from "@/service/userService";
 import { useSafeLocation } from "@/utils/helpers";
+import EditAddressDetail from "./EditAddressDetail";
+import { useLocalSearchParams } from "expo-router";
 
 const { MapView, Camera, RestApi, UserLocation } = MapplsGL;
 
-const AddAddress = () => {
-  const { latitude, longitude } = useSafeLocation();
+const EditAddress = () => {
+  //   const { latitude, longitude } = useSafeLocation();
+  const { address, addressType }: { address: any; addressType: string } =
+    useLocalSearchParams();
+  const parsedAddress = address ? JSON.parse(address) : null;
   const [markerCoordinates, setMarkerCoordinates] = useState<number[]>([
-    longitude,
-    latitude,
+    parsedAddress?.coordinates?.[1],
+    parsedAddress?.coordinates?.[0],
   ]);
   const [mapplsPin, setMapplsPin] = useState("");
   const [locationDetails, setLocationDetails] =
     useState<LocationAddressProps>();
   const [loading, setLoading] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(15);
-  const [addressData, setAddressData] = useState<any>(null);
-
+  const [addressData, setAddressData] = useState<any>(
+    parsedAddress
+      ? {
+          area: parsedAddress.area || "",
+          flat: parsedAddress.flat || "",
+          phoneNumber: parsedAddress.phoneNumber || "",
+          landmark: parsedAddress.landmark || "",
+          fullName: parsedAddress.fullName || "",
+          id: parsedAddress.id || "",
+          type: addressType,
+        }
+      : null
+  );
   const cameraRef = useRef<any>(null);
   const mapRef = useRef<any>(null);
-  const addAddressSheetRef = useRef<BottomSheet>(null);
+  const editAddressSheetRef = useRef<BottomSheet>(null);
 
-  const addAddressSnapPoints = useMemo(() => ["58%"], []);
+  const editAddressSnapPoints = useMemo(() => ["58%"], []);
+
+  // In EditAddress component
+  useEffect(() => {
+    if (parsedAddress?.coordinates?.length === 2) {
+      // Make sure to set the initial coordinates properly
+      setMarkerCoordinates([
+        parsedAddress.coordinates[1],
+        parsedAddress.coordinates[0],
+      ]);
+
+      // Also set it in addressData
+      setAddressData((prev) => ({
+        ...prev,
+        area: parsedAddress.area || "",
+        flat: parsedAddress.flat || "",
+        phoneNumber: parsedAddress.phoneNumber || "",
+        landmark: parsedAddress.landmark || "",
+        fullName: parsedAddress.fullName || "",
+        id: parsedAddress.id || "",
+        type: addressType,
+        coordinates: parsedAddress.coordinates,
+      }));
+    }
+  }, [address, addressType]);
+
+  //   console.log("Received Address:", parsedAddress, addressType);
 
   useEffect(() => {
     MapplsGL.setMapSDKKey(MAPPLS_REST_API_KEY);
@@ -93,11 +135,10 @@ const AddAddress = () => {
           placeType: result.street_dist || "",
           poi: result.poi || "",
         });
-        setAddressData({
-          latitude,
-          longitude,
-          area: result.locality || "",
-        });
+        setAddressData((prev: any) => ({
+          ...prev,
+          area: result.locality || prev?.area || "",
+        }));
       } else {
         setLocationDetails({
           address: "No address found for this location",
@@ -212,10 +253,13 @@ const AddAddress = () => {
   const verifyLocationMutation = useMutation({
     mutationKey: ["verify-location"],
     mutationFn: () =>
-      verifyCustomerAddressLocation(markerCoordinates[1], markerCoordinates[0]),
+      verifyCustomerAddressLocation(
+        addressData.coordinates[0],
+        addressData.coordinates[1]
+      ),
     onSuccess: (data) => {
       if (data) {
-        addAddressSheetRef.current?.expand();
+        editAddressSheetRef.current?.expand();
       } else {
         Alert.alert(
           "",
@@ -258,9 +302,13 @@ const AddAddress = () => {
               }
               if (geometry && geometry.coordinates) {
                 const [longitude, latitude] = geometry.coordinates;
-                // console.log("Map moved to:", latitude, longitude);
+                console.log("Map moved to:", latitude, longitude);
                 const newCoords = [longitude, latitude];
                 setMarkerCoordinates(newCoords);
+                setAddressData((prev: any) => ({
+                  ...prev,
+                  coordinates: [latitude, longitude],
+                }));
                 reverseGeocode(newCoords);
               }
             }}
@@ -408,15 +456,15 @@ const AddAddress = () => {
       </ScreenWrapper>
 
       <BottomSheet
-        ref={addAddressSheetRef}
+        ref={editAddressSheetRef}
         index={-1}
-        snapPoints={addAddressSnapPoints}
+        snapPoints={editAddressSnapPoints}
         enableDynamicSizing
         enablePanDownToClose
         backdropComponent={renderBackdrop}
       >
-        <AddAddressDetail
-          addAddressSheetRef={addAddressSheetRef}
+        <EditAddressDetail
+          editAddressSheetRef={editAddressSheetRef}
           addressData={addressData}
         />
       </BottomSheet>
@@ -546,4 +594,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddAddress;
+export default EditAddress;
