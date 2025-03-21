@@ -309,6 +309,7 @@ const CustomOrderMap = () => {
                 editable={false}
                 pointerEvents="none"
                 style={styles.searchInput}
+                allowFontScaling={false}
               />
               <MagnifyingGlass color={colors.NEUTRAL500} size={24} />
             </Pressable>

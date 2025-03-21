@@ -17,13 +17,14 @@ import BottomSheet, {
 import ClearCartSheet from "@/components/BottomSheets/universal/ClearCartSheet";
 import { commonStyles } from "@/constants/commonStyles";
 import { ProductProps } from "@/types";
+import SkeletonPlaceholder from "react-native-skeleton-placeholder";
 
 const ProductSearch = () => {
   const [query, setQuery] = useState<string>("");
   const [debounceQuery, setDebounceQuery] = useState<string>("");
   const [product, setProduct] = useState<ProductProps | null>(null);
-    const [duplicateProduct, setDuplicateProductId] =
-      useState<ProductProps | null>(null);
+  const [duplicateProduct, setDuplicateProductId] =
+    useState<ProductProps | null>(null);
 
   const clearCartSheetRef = useRef<BottomSheet>(null);
   const variantSheetRef = useRef<BottomSheet>(null);
@@ -31,7 +32,7 @@ const ProductSearch = () => {
 
   const clearCartSheetSnapPoints = useMemo(() => ["28%"], []);
   const variantSheetSnapPoints = useMemo(() => ["60%"], []);
-    const duplicateSheetSnapPoints = useMemo(() => ["40%"], []);
+  const duplicateSheetSnapPoints = useMemo(() => ["40%"], []);
 
   useEffect(() => {
     setTimeout(() => {
@@ -81,7 +82,76 @@ const ProductSearch = () => {
         }}
         ListEmptyComponent={
           isLoading ? (
-            <ActivityIndicator />
+            <View
+              style={{
+                paddingVertical: scale(20),
+                paddingHorizontal: scale(10),
+                justifyContent: "center",
+                alignItems: "flex-start",
+                gap: scale(20),
+              }}
+            >
+              <SkeletonPlaceholder borderRadius={4}>
+                <SkeletonPlaceholder.Item
+                  flexDirection="row"
+                  alignItems="center"
+                >
+                  <SkeletonPlaceholder.Item
+                    width={60}
+                    height={60}
+                    borderRadius={10}
+                  />
+                  <SkeletonPlaceholder.Item marginLeft={20}>
+                    <SkeletonPlaceholder.Item width={120} height={20} />
+                    <SkeletonPlaceholder.Item
+                      marginTop={6}
+                      width={80}
+                      height={20}
+                    />
+                  </SkeletonPlaceholder.Item>
+                </SkeletonPlaceholder.Item>
+              </SkeletonPlaceholder>
+              <SkeletonPlaceholder borderRadius={4}>
+                <SkeletonPlaceholder.Item
+                  flexDirection="row"
+                  alignItems="center"
+                >
+                  <SkeletonPlaceholder.Item
+                    width={60}
+                    height={60}
+                    borderRadius={10}
+                  />
+                  <SkeletonPlaceholder.Item marginLeft={20}>
+                    <SkeletonPlaceholder.Item width={120} height={20} />
+                    <SkeletonPlaceholder.Item
+                      marginTop={6}
+                      width={80}
+                      height={20}
+                    />
+                  </SkeletonPlaceholder.Item>
+                </SkeletonPlaceholder.Item>
+              </SkeletonPlaceholder>
+              <SkeletonPlaceholder borderRadius={4}>
+                <SkeletonPlaceholder.Item
+                  flexDirection="row"
+                  alignItems="center"
+                >
+                  <SkeletonPlaceholder.Item
+                    width={60}
+                    height={60}
+                    borderRadius={10}
+                  />
+                  <SkeletonPlaceholder.Item marginLeft={20}>
+                    <SkeletonPlaceholder.Item width={120} height={20} />
+                    <SkeletonPlaceholder.Item
+                      marginTop={6}
+                      width={80}
+                      height={20}
+                    />
+                  </SkeletonPlaceholder.Item>
+                </SkeletonPlaceholder.Item>
+              </SkeletonPlaceholder>
+            </View>
           ) : (
             <View>
               <Typo>No Items found !</Typo>

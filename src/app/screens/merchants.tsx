@@ -21,6 +21,7 @@ import { MerchantCardProps } from "@/types";
 import { getMerchants } from "@/service/universal";
 import { useSafeLocation } from "@/utils/helpers";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import SkeletonPlaceholder from "react-native-skeleton-placeholder";
 
 const Merchants = () => {
   const { businessCategory, businessCategoryId, productName, merchantId } =
@@ -163,16 +164,199 @@ const Merchants = () => {
                 alignItems: "center",
                 justifyContent: "center",
                 height: SCREEN_HEIGHT - verticalScale(250),
+                gap: scale(20),
               }}
             >
-              <Typo>Coming Soon...</Typo>
+              {/* <View style={styles.shadowContainer}> */}
+              <SkeletonPlaceholder borderRadius={4}>
+                <SkeletonPlaceholder.Item
+                  flexDirection="column"
+                  alignItems="center"
+                >
+                  <SkeletonPlaceholder.Item
+                    width={320}
+                    height={160}
+                    borderRadius={10}
+                  />
+                  <SkeletonPlaceholder.Item
+                    flexDirection="row"
+                    justifyContent="space-between"
+                    gap={60}
+                  >
+                    <SkeletonPlaceholder.Item>
+                      <SkeletonPlaceholder.Item
+                        width={120}
+                        height={20}
+                        marginTop={10}
+                      />
+                      <SkeletonPlaceholder.Item
+                        marginTop={10}
+                        width={80}
+                        height={20}
+                      />
+                    </SkeletonPlaceholder.Item>
+                    <SkeletonPlaceholder.Item>
+                      <SkeletonPlaceholder.Item
+                        width={120}
+                        height={20}
+                        marginTop={10}
+                      />
+                      <SkeletonPlaceholder.Item
+                        marginTop={10}
+                        width={80}
+                        height={20}
+                      />
+                    </SkeletonPlaceholder.Item>
+                  </SkeletonPlaceholder.Item>
+                </SkeletonPlaceholder.Item>
+              </SkeletonPlaceholder>
+              {/* </View> */}
+
+              {/* <View style={styles.shadowContainer}> */}
+              <SkeletonPlaceholder borderRadius={4}>
+                <SkeletonPlaceholder.Item
+                  flexDirection="column"
+                  alignItems="center"
+                >
+                  <SkeletonPlaceholder.Item
+                    width={320}
+                    height={160}
+                    borderRadius={10}
+                  />
+                  <SkeletonPlaceholder.Item
+                    flexDirection="row"
+                    justifyContent="space-between"
+                    gap={60}
+                  >
+                    <SkeletonPlaceholder.Item>
+                      <SkeletonPlaceholder.Item
+                        width={120}
+                        height={20}
+                        marginTop={10}
+                      />
+                      <SkeletonPlaceholder.Item
+                        marginTop={10}
+                        width={80}
+                        height={20}
+                      />
+                    </SkeletonPlaceholder.Item>
+                    <SkeletonPlaceholder.Item>
+                      <SkeletonPlaceholder.Item
+                        width={120}
+                        height={20}
+                        marginTop={10}
+                      />
+                      <SkeletonPlaceholder.Item
+                        marginTop={10}
+                        width={80}
+                        height={20}
+                      />
+                    </SkeletonPlaceholder.Item>
+                  </SkeletonPlaceholder.Item>
+                </SkeletonPlaceholder.Item>
+              </SkeletonPlaceholder>
+              {/* </View> */}
             </View>
           ) : null
         }
         ListFooterComponent={
           isFetchingNextPage ? (
-            <View style={{ paddingVertical: 20, alignItems: "center" }}>
-              <ActivityIndicator size="large" color={colors.PRIMARY} />
+            <View
+              style={{
+                paddingVertical: 20,
+                alignItems: "center",
+                gap: scale(20),
+              }}
+            >
+              {/* <ActivityIndicator size="large" color={colors.PRIMARY} /> */}
+              <SkeletonPlaceholder borderRadius={4}>
+                <SkeletonPlaceholder.Item
+                  flexDirection="column"
+                  alignItems="center"
+                >
+                  <SkeletonPlaceholder.Item
+                    width={320}
+                    height={160}
+                    borderRadius={10}
+                  />
+                  <SkeletonPlaceholder.Item
+                    flexDirection="row"
+                    justifyContent="space-between"
+                    gap={60}
+                  >
+                    <SkeletonPlaceholder.Item>
+                      <SkeletonPlaceholder.Item
+                        width={120}
+                        height={20}
+                        marginTop={10}
+                      />
+                      <SkeletonPlaceholder.Item
+                        marginTop={10}
+                        width={80}
+                        height={20}
+                      />
+                    </SkeletonPlaceholder.Item>
+                    <SkeletonPlaceholder.Item>
+                      <SkeletonPlaceholder.Item
+                        width={120}
+                        height={20}
+                        marginTop={10}
+                      />
+                      <SkeletonPlaceholder.Item
+                        marginTop={10}
+                        width={80}
+                        height={20}
+                      />
+                    </SkeletonPlaceholder.Item>
+                  </SkeletonPlaceholder.Item>
+                </SkeletonPlaceholder.Item>
+              </SkeletonPlaceholder>
+              {/* </View> */}
+
+              {/* <View style={styles.shadowContainer}> */}
+              <SkeletonPlaceholder borderRadius={4}>
+                <SkeletonPlaceholder.Item
+                  flexDirection="column"
+                  alignItems="center"
+                >
+                  <SkeletonPlaceholder.Item
+                    width={320}
+                    height={160}
+                    borderRadius={10}
+                  />
+                  <SkeletonPlaceholder.Item
+                    flexDirection="row"
+                    justifyContent="space-between"
+                    gap={60}
+                  >
+                    <SkeletonPlaceholder.Item>
+                      <SkeletonPlaceholder.Item
+                        width={120}
+                        height={20}
+                        marginTop={10}
+                      />
+                      <SkeletonPlaceholder.Item
+                        marginTop={10}
+                        width={80}
+                        height={20}
+                      />
+                    </SkeletonPlaceholder.Item>
+                    <SkeletonPlaceholder.Item>
+                      <SkeletonPlaceholder.Item
+                        width={120}
+                        height={20}
+                        marginTop={10}
+                      />
+                      <SkeletonPlaceholder.Item
+                        marginTop={10}
+                        width={80}
+                        height={20}
+                      />
+                    </SkeletonPlaceholder.Item>
+                  </SkeletonPlaceholder.Item>
+                </SkeletonPlaceholder.Item>
+              </SkeletonPlaceholder>
+              {/* </View> */}
             </View>
           ) : null
         }
@@ -210,5 +394,17 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(15),
     paddingBottom: verticalScale(30),
     backgroundColor: colors.WHITE,
+  },
+  shadowContainer: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5, // for Android shadow
+    backgroundColor: "#fff", // Required for iOS shadow to be visible
+    borderRadius: 10, // Match Skeleton's border radius for consistency
+    padding: scale(5), // Optional padding to prevent clipping\
+    marginBottom: verticalScale(20),
+    paddingVertical: verticalScale(10),
   },
 });

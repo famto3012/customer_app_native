@@ -34,7 +34,7 @@ export default ProductFooter;
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: verticalScale(100),
+    paddingBottom: verticalScale(50),
     paddingHorizontal: scale(20),
     gap: spacingY._15,
   },
