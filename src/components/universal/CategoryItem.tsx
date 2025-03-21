@@ -30,8 +30,8 @@ const useProducts = (categoryId: string, userId: string) => {
     queryFn: ({ pageParam = 1 }) =>
       getAllProducts(categoryId, userId, pageParam, 10),
     initialPageParam: 1,
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage.hasNextPage ? allPages.length + 1 : undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNextPage ? lastPage.page + 1 : undefined,
     enabled: !!categoryId,
     refetchOnMount: true,
     refetchOnReconnect: true,
@@ -106,7 +106,11 @@ const ProductList: FC<{
             }}
           />
         )}
-        onEndReached={() => hasNextPage && fetchNextPage()}
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
         onEndReachedThreshold={0.5}
         ListFooterComponent={
           <View
@@ -121,10 +125,11 @@ const ProductList: FC<{
             {isFetchingNextPage ? <ActivityIndicator size="small" /> : null}
           </View>
         }
-        windowSize={10}
-        initialNumToRender={5}
-        maxToRenderPerBatch={5}
-        scrollEnabled={false}
+        initialNumToRender={5} // Render only 5 items initially
+        maxToRenderPerBatch={5} // Render 5 items per batch
+        windowSize={10} // Reduce the window size for better performance
+        updateCellsBatchingPeriod={100} // Batch updates to reduce re-renders
+        removeClippedSubviews={true}
       />
     </>
   );

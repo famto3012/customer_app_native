@@ -93,19 +93,18 @@ const Address: FC<{
   const renderAddress = (address: AddressProps | null) => {
     return (
       <View
-        style={[
-          commonStyles.flexRowBetween,
-          {
-            marginTop: 15,
-            borderWidth: 1,
-            padding: 10,
-            borderRadius: 5,
-            borderColor: colors.PRIMARY,
-            backgroundColor: "#E5FAFA",
-          },
-        ]}
+        style={{
+          marginTop: 15,
+          borderWidth: 1,
+          padding: 10,
+          borderRadius: 5,
+          borderColor: colors.PRIMARY,
+          backgroundColor: "#E5FAFA",
+          flexDirection: "row",
+          alignItems: "center",
+        }}
       >
-        <View>
+        <View style={{ width: "90%" }}>
           <Typo
             size={14}
             color={colors.NEUTRAL900}
@@ -121,14 +120,14 @@ const Address: FC<{
           >
             {address?.phoneNumber}
           </Typo>
-          <Typo size={12} color={colors.NEUTRAL500}>
+          <Typo size={12} color={colors.NEUTRAL500} style={{ width: "70%" }}>
             {address?.flat}, {address?.area}, {address?.landmark}
           </Typo>
         </View>
 
         {showActionButton && (
           <Pressable
-            style={{ padding: scale(8) }}
+            style={{ padding: scale(3) }}
             onPress={() => {
               router.push({
                 pathname: "/screens/common/EditAddress",
@@ -292,7 +291,7 @@ const Address: FC<{
                 },
               ]}
             >
-              <View>
+              <View style={{ width: "90%" }}>
                 <Typo
                   size={14}
                   color={colors.NEUTRAL900}
@@ -315,7 +314,7 @@ const Address: FC<{
 
               {showActionButton && (
                 <Pressable
-                  style={{ padding: scale(8) }}
+                  style={{ padding: scale(3) }}
                   onPress={() =>
                     router.push({
                       pathname: "/screens/common/EditAddress",
