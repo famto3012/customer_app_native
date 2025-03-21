@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import Typo from "../Typo";
 import { colors, radius } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
@@ -29,12 +29,8 @@ const AddCartButton: FC<AddCartButtonProps> = ({
     >
       {count > 0 ? (
         <View style={styles.counterContainer}>
-          {/* Decrement Button with improved hitSlop */}
-          <Pressable
-            onPress={onDecrement}
-            style={styles.button}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
+          {/* Decrement Button */}
+          <Pressable onPress={onDecrement} style={styles.button}>
             <Typo size={14} color={colors.PRIMARY} style={styles.text}>
               -
             </Typo>
@@ -45,22 +41,15 @@ const AddCartButton: FC<AddCartButtonProps> = ({
             {count}
           </Typo>
 
-          {/* Increment Button with improved hitSlop */}
-          <Pressable
-            onPress={onIncrement}
-            style={styles.button}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
+          {/* Increment Button */}
+          <Pressable onPress={onIncrement} style={styles.button}>
             <Typo size={14} color={colors.PRIMARY} style={styles.text}>
               +
             </Typo>
           </Pressable>
         </View>
       ) : (
-        <Pressable
-          onPress={onPress}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
+        <Pressable onPress={onPress}>
           <Typo
             size={inventory ? 14 : 13}
             color={inventory ? colors.WHITE : colors.NEUTRAL900}
@@ -83,13 +72,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "80%",
     borderRadius: radius._6,
+    position: "absolute",
+    bottom: scale(-15),
     borderWidth: 1,
-    // Shadow for better visibility
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 3,
-    // elevation: 3,
   },
   counterContainer: {
     flexDirection: "row",

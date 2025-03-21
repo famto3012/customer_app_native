@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { FC, useEffect, useState } from "react";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { ProductProps, Variant } from "@/types";
+import { Variant } from "@/types";
 import Typo from "../Typo";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius, spacingX } from "@/constants/theme";
@@ -16,6 +16,7 @@ import { getVariants } from "@/service/universal";
 import { updateCart } from "@/localDB/controller/cartController";
 import { useAuthStore } from "@/store/store";
 import { useQuery } from "@tanstack/react-query";
+import { useData } from "@/context/DataContext";
 
 interface SelectedVariantProps {
   variantTypeId: string;
@@ -24,15 +25,17 @@ interface SelectedVariantProps {
 }
 
 const VariantSheet: FC<{
-  product: ProductProps | null;
+  // product: ProductProps | null;
   onAddItem: () => void;
-}> = ({ product, onAddItem }) => {
+}> = ({ onAddItem }) => {
   const [selected, setSelected] = useState<SelectedVariantProps>({
     variantTypeId: "",
     price: null,
     variantTypeName: "",
   });
   const [count, setCount] = useState<number>(1);
+
+  const { product, setProductCounts } = useData();
 
   const { data: variants } = useQuery<Variant[]>({
     queryKey: ["product-variants", product?.productId],
@@ -84,7 +87,15 @@ const VariantSheet: FC<{
           selected.variantTypeName
         );
 
-        onAddItem(); // Only triggers after cart update is successful
+        setProductCounts((prev) => ({
+          ...prev,
+          [product.productId]: {
+            count,
+            variantTypeId: selected.variantTypeId,
+          },
+        }));
+
+        onAddItem();
       } catch (error) {
         console.error("Error updating cart:", error);
       }

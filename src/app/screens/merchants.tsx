@@ -1,5 +1,4 @@
 import {
-  ActivityIndicator,
   FlatList,
   Pressable,
   StyleSheet,
@@ -13,7 +12,7 @@ import Search from "@/components/Search";
 import { useLocalSearchParams } from "expo-router";
 import { XCircle } from "phosphor-react-native";
 import { merchantFilters } from "@/utils/defaultData";
-import { scale, SCREEN_HEIGHT, verticalScale } from "@/utils/styling";
+import { scale, verticalScale } from "@/utils/styling";
 import { colors, spacingX } from "@/constants/theme";
 import Typo from "@/components/Typo";
 import MerchantCard from "@/components/universal/MerchantCard";
@@ -21,7 +20,7 @@ import { MerchantCardProps } from "@/types";
 import { getMerchants } from "@/service/universal";
 import { useSafeLocation } from "@/utils/helpers";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import SkeletonPlaceholder from "react-native-skeleton-placeholder";
+import MerchantCardLoader from "@/components/Loader/MerchantCardLoader";
 
 const Merchants = () => {
   const { businessCategory, businessCategoryId, productName, merchantId } =
@@ -53,8 +52,8 @@ const Merchants = () => {
           businessCategoryId?.toString() || "",
           selectedFilter,
           query,
-          productName,
-          merchantId,
+          productName?.toString(),
+          merchantId as string,
           pageParam,
           MERCHANT_LIMIT
         ),
@@ -158,208 +157,10 @@ const Merchants = () => {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           !isFetchingNextPage && merchants.length === 0 ? (
-            <View
-              style={{
-                flex: 1,
-                alignItems: "center",
-                justifyContent: "center",
-                height: SCREEN_HEIGHT - verticalScale(250),
-                gap: scale(20),
-              }}
-            >
-              {/* <View style={styles.shadowContainer}> */}
-              <SkeletonPlaceholder borderRadius={4}>
-                <SkeletonPlaceholder.Item
-                  flexDirection="column"
-                  alignItems="center"
-                >
-                  <SkeletonPlaceholder.Item
-                    width={320}
-                    height={160}
-                    borderRadius={10}
-                  />
-                  <SkeletonPlaceholder.Item
-                    flexDirection="row"
-                    justifyContent="space-between"
-                    gap={60}
-                  >
-                    <SkeletonPlaceholder.Item>
-                      <SkeletonPlaceholder.Item
-                        width={120}
-                        height={20}
-                        marginTop={10}
-                      />
-                      <SkeletonPlaceholder.Item
-                        marginTop={10}
-                        width={80}
-                        height={20}
-                      />
-                    </SkeletonPlaceholder.Item>
-                    <SkeletonPlaceholder.Item>
-                      <SkeletonPlaceholder.Item
-                        width={120}
-                        height={20}
-                        marginTop={10}
-                      />
-                      <SkeletonPlaceholder.Item
-                        marginTop={10}
-                        width={80}
-                        height={20}
-                      />
-                    </SkeletonPlaceholder.Item>
-                  </SkeletonPlaceholder.Item>
-                </SkeletonPlaceholder.Item>
-              </SkeletonPlaceholder>
-              {/* </View> */}
-
-              {/* <View style={styles.shadowContainer}> */}
-              <SkeletonPlaceholder borderRadius={4}>
-                <SkeletonPlaceholder.Item
-                  flexDirection="column"
-                  alignItems="center"
-                >
-                  <SkeletonPlaceholder.Item
-                    width={320}
-                    height={160}
-                    borderRadius={10}
-                  />
-                  <SkeletonPlaceholder.Item
-                    flexDirection="row"
-                    justifyContent="space-between"
-                    gap={60}
-                  >
-                    <SkeletonPlaceholder.Item>
-                      <SkeletonPlaceholder.Item
-                        width={120}
-                        height={20}
-                        marginTop={10}
-                      />
-                      <SkeletonPlaceholder.Item
-                        marginTop={10}
-                        width={80}
-                        height={20}
-                      />
-                    </SkeletonPlaceholder.Item>
-                    <SkeletonPlaceholder.Item>
-                      <SkeletonPlaceholder.Item
-                        width={120}
-                        height={20}
-                        marginTop={10}
-                      />
-                      <SkeletonPlaceholder.Item
-                        marginTop={10}
-                        width={80}
-                        height={20}
-                      />
-                    </SkeletonPlaceholder.Item>
-                  </SkeletonPlaceholder.Item>
-                </SkeletonPlaceholder.Item>
-              </SkeletonPlaceholder>
-              {/* </View> */}
-            </View>
+            <MerchantCardLoader />
           ) : null
         }
-        ListFooterComponent={
-          isFetchingNextPage ? (
-            <View
-              style={{
-                paddingVertical: 20,
-                alignItems: "center",
-                gap: scale(20),
-              }}
-            >
-              {/* <ActivityIndicator size="large" color={colors.PRIMARY} /> */}
-              <SkeletonPlaceholder borderRadius={4}>
-                <SkeletonPlaceholder.Item
-                  flexDirection="column"
-                  alignItems="center"
-                >
-                  <SkeletonPlaceholder.Item
-                    width={320}
-                    height={160}
-                    borderRadius={10}
-                  />
-                  <SkeletonPlaceholder.Item
-                    flexDirection="row"
-                    justifyContent="space-between"
-                    gap={60}
-                  >
-                    <SkeletonPlaceholder.Item>
-                      <SkeletonPlaceholder.Item
-                        width={120}
-                        height={20}
-                        marginTop={10}
-                      />
-                      <SkeletonPlaceholder.Item
-                        marginTop={10}
-                        width={80}
-                        height={20}
-                      />
-                    </SkeletonPlaceholder.Item>
-                    <SkeletonPlaceholder.Item>
-                      <SkeletonPlaceholder.Item
-                        width={120}
-                        height={20}
-                        marginTop={10}
-                      />
-                      <SkeletonPlaceholder.Item
-                        marginTop={10}
-                        width={80}
-                        height={20}
-                      />
-                    </SkeletonPlaceholder.Item>
-                  </SkeletonPlaceholder.Item>
-                </SkeletonPlaceholder.Item>
-              </SkeletonPlaceholder>
-              {/* </View> */}
-
-              {/* <View style={styles.shadowContainer}> */}
-              <SkeletonPlaceholder borderRadius={4}>
-                <SkeletonPlaceholder.Item
-                  flexDirection="column"
-                  alignItems="center"
-                >
-                  <SkeletonPlaceholder.Item
-                    width={320}
-                    height={160}
-                    borderRadius={10}
-                  />
-                  <SkeletonPlaceholder.Item
-                    flexDirection="row"
-                    justifyContent="space-between"
-                    gap={60}
-                  >
-                    <SkeletonPlaceholder.Item>
-                      <SkeletonPlaceholder.Item
-                        width={120}
-                        height={20}
-                        marginTop={10}
-                      />
-                      <SkeletonPlaceholder.Item
-                        marginTop={10}
-                        width={80}
-                        height={20}
-                      />
-                    </SkeletonPlaceholder.Item>
-                    <SkeletonPlaceholder.Item>
-                      <SkeletonPlaceholder.Item
-                        width={120}
-                        height={20}
-                        marginTop={10}
-                      />
-                      <SkeletonPlaceholder.Item
-                        marginTop={10}
-                        width={80}
-                        height={20}
-                      />
-                    </SkeletonPlaceholder.Item>
-                  </SkeletonPlaceholder.Item>
-                </SkeletonPlaceholder.Item>
-              </SkeletonPlaceholder>
-              {/* </View> */}
-            </View>
-          ) : null
-        }
+        ListFooterComponent={isFetchingNextPage ? <MerchantCardLoader /> : null}
         onEndReached={() => {
           if (hasNextPage && !isFetchingNextPage) {
             fetchNextPage();

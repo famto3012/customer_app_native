@@ -1,4 +1,9 @@
-import { StyleSheet, View, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+} from "react-native";
 import { FC, useState } from "react";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import Typo from "@/components/Typo";
@@ -43,6 +48,7 @@ const MerchantRatingSheet: FC<{
   });
 
   return (
+    // <KeyboardAvoidingView>
     <BottomSheetScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
         <Typo size={15} color={colors.PRIMARY} fontFamily="SemiBold">
@@ -96,6 +102,7 @@ const MerchantRatingSheet: FC<{
         style={{ marginTop: verticalScale(30) }}
       />
     </BottomSheetScrollView>
+    //  </KeyboardAvoidingView>
   );
 };
 

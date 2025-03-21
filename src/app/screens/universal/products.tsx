@@ -1,1008 +1,276 @@
-// // import {
-// //   ActivityIndicator,
-// //   Dimensions,
-// //   FlatList,
-// //   Platform,
-// //   Pressable,
-// //   StyleSheet,
-// //   View,
-// // } from "react-native";
-// // import { scale, verticalScale } from "@/utils/styling";
-// // import { colors, radius, spacingX } from "@/constants/theme";
-// // import Header from "@/components/Header";
-// // import { StatusBar } from "expo-status-bar";
-// // import Typo from "@/components/Typo";
-// // import { XCircle } from "phosphor-react-native";
-// // import SearchView from "@/components/SearchView";
-// // import { productFilters } from "@/utils/defaultData";
-// // import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-// // import { router, useLocalSearchParams } from "expo-router";
-// // import { useAuthStore } from "@/store/store";
-// // import { MerchantDataProps, ProductProps } from "@/types";
-// // import { getAllCategory, getMerchantData } from "@/service/universal";
-// // import { useSafeLocation } from "@/utils/helpers";
-// // import FloatingCart from "@/components/universal/FloatingCart";
-// // import BottomSheet, {
-// //   BottomSheetBackdrop,
-// //   BottomSheetBackdropProps,
-// //   SCREEN_WIDTH,
-// // } from "@gorhom/bottom-sheet";
-// // import { GestureHandlerRootView } from "react-native-gesture-handler";
-// // import VariantSheet from "@/components/BottomSheets/VariantSheet";
-// // import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-// // import MerchantData from "@/components/universal/MerchantData";
-// // import MerchantBanner from "@/components/universal/MerchantBanner";
-// // import { commonStyles } from "@/constants/commonStyles";
-// // import ProductFooter from "@/components/universal/ProductFooter";
-// // import CategoryItem from "@/components/universal/CategoryItem";
-// // import ClearCartSheet from "@/components/BottomSheets/universal/ClearCartSheet";
-// // import DuplicateVariantSheet from "@/components/BottomSheets/universal/DuplicateVariantSheet";
-// // import MerchantRatingSheet from "@/components/BottomSheets/universal/MerchantRatingSheet";
-// // import ProductDetailSheet from "@/components/BottomSheets/universal/ProductDetailSheet";
-// // import DistanceWarning from "@/components/BottomSheets/universal/DistanceWarning";
-
-// // const { height } = Dimensions.get("window");
-
-// // const Product = () => {
-// //   const [selectedFilter, setSelectedFilter] = useState<string>("");
-// //   const [product, setProduct] = useState<ProductProps | null>(null);
-// //   const [duplicateProduct, setDuplicateProductId] =
-// //     useState<ProductProps | null>(null);
-// //   const [trigger, setTrigger] = useState<string>(`${new Date()}`);
-// //   const [selectedDetailProduct, setSelectedDetailProduct] =
-// //     useState<ProductProps | null>(null);
-
-// //   const variantSheetRef = useRef<BottomSheet>(null);
-// //   const clearCartSheetRef = useRef<BottomSheet>(null);
-// //   const duplicateVariantSheetRef = useRef<BottomSheet>(null);
-// //   const ratingSheetRef = useRef<BottomSheet>(null);
-// //   const productDetailRef = useRef<BottomSheet>(null);
-// //   const distanceWarningSheetRef = useRef<BottomSheet>(null);
-
-// //   const variantSheetSnapPoints = useMemo(() => ["60%"], []);
-// //   const clearCartSheetSnapPoints = useMemo(() => ["28%"], []);
-// //   const duplicateSheetSnapPoints = useMemo(() => ["40%"], []);
-// //   const ratingSheetSnapPoints = useMemo(() => ["45%"], []);
-// //   const productDetailSnapPoints = useMemo(() => ["55%"], []);
-// //   const distanceWarningSheetSnapPoints = useMemo(() => ["50%"], []);
-
-// //   const { merchantId } = useLocalSearchParams();
-// //   const { selectedBusiness } = useAuthStore.getState();
-// //   const { latitude, longitude } = useSafeLocation();
-
-// //   const CATEGORY_LIMIT: number = 2;
-
-// //   const {
-// //     data: categoryData,
-// //     fetchNextPage: fetchNextCategoryPage,
-// //     hasNextPage: hasNextCategoryPage,
-// //     isFetchingNextPage: isFetchingNextCategoryPage,
-// //   } = useInfiniteQuery({
-// //     queryKey: ["category", merchantId, selectedBusiness],
-// //     queryFn: ({ pageParam = 1 }) =>
-// //       getAllCategory(
-// //         merchantId.toString(),
-// //         selectedBusiness || "",
-// //         pageParam,
-// //         CATEGORY_LIMIT
-// //       ),
-// //     initialPageParam: 1,
-// //     getNextPageParam: (lastPage) =>
-// //       lastPage.hasNextPage ? lastPage.page + 1 : undefined,
-// //     refetchOnMount: true,
-// //     refetchOnReconnect: true,
-// //     refetchOnWindowFocus: true,
-// //   });
-
-// //   const { data: merchantData } = useQuery<MerchantDataProps>({
-// //     queryKey: ["merchant-data", merchantId],
-// //     queryFn: () => getMerchantData(merchantId.toString(), latitude, longitude),
-// //   });
-
-// //   useEffect(() => {
-// //     if (merchantData?.distanceWarning) {
-// //       distanceWarningSheetRef.current?.snapToIndex(0);
-// //     }
-// //   }, [merchantData]);
-
-// //   const handleSelectFilter = (value: string) => {
-// //     if (value === selectedFilter) {
-// //       setSelectedFilter("");
-// //     } else {
-// //       setSelectedFilter(value);
-// //     }
-// //   };
-
-// //   const handleOpenProductDetails = (product: ProductProps) => {
-// //     setSelectedDetailProduct(product);
-
-// //     if (productDetailRef.current) {
-// //       productDetailRef.current.snapToIndex(0);
-// //     } else {
-// //       console.warn("ProductDetail BottomSheet ref is NULL");
-// //     }
-// //   };
-
-// //   const openVariantSheet = (product: ProductProps) => {
-// //     if (!product) return;
-
-// //     if (product.cartCount) {
-// //       setDuplicateProductId(product);
-// //       duplicateVariantSheetRef.current?.snapToIndex(0);
-// //     } else {
-// //       setProduct((prevProduct) => prevProduct || product);
-// //       variantSheetRef.current?.snapToIndex(0);
-// //     }
-// //   };
-
-// //   const handleNewCustomization = (product: ProductProps | null) => {
-// //     if (product?.productId) {
-// //       setProduct(product);
-// //       duplicateVariantSheetRef.current?.close();
-// //       variantSheetRef.current?.snapToIndex(0);
-// //     }
-// //   };
-
-// //   const handleBottomSheetClose = useCallback(() => {
-// //     setTrigger((prev) => `${prev}-${Date.now()}`);
-// //   }, []);
-
-// //   const renderBackdrop = useCallback(
-// //     (props: BottomSheetBackdropProps) => (
-// //       <BottomSheetBackdrop
-// //         {...props}
-// //         disappearsOnIndex={-1}
-// //         appearsOnIndex={0}
-// //         opacity={0.5}
-// //         style={[props.style, commonStyles.backdrop]}
-// //       />
-// //     ),
-// //     []
-// //   );
-
-// //   const renderItem = ({ item }: any) => {
-// //     return (
-// //       <Pressable
-// //         style={[
-// //           styles.filterItem,
-// //           selectedFilter === item.value && styles.selectedFilter,
-// //         ]}
-// //         onPress={() => handleSelectFilter(item.value)}
-// //       >
-// //         <Typo
-// //           size={13}
-// //           color={
-// //             selectedFilter === item.value ? colors.WHITE : colors.NEUTRAL900
-// //           }
-// //         >
-// //           {item.label}
-// //         </Typo>
-
-// //         {selectedFilter === item.value && <XCircle size={20} color="white" />}
-// //       </Pressable>
-// //     );
-// //   };
-
-// //   return (
-// //     <GestureHandlerRootView>
-// //       <View>
-// //         <StatusBar
-// //           backgroundColor={colors.NEUTRAL200}
-// //           style="dark"
-// //           translucent={false}
-// //         />
-
-// //         <FlatList
-// //           data={categoryData?.pages.flatMap((page) => page.data) || []}
-// //           renderItem={({ item }) => (
-// //             <CategoryItem
-// //               category={item}
-// //               openVariant={openVariantSheet}
-// //               onProductPress={handleOpenProductDetails}
-// //               trigger={trigger}
-// //             />
-// //           )}
-// //           keyExtractor={(item, index) => `category-${item.categoryId}-${index}`}
-// //           onEndReached={() => {
-// //             if (hasNextCategoryPage && !isFetchingNextCategoryPage) {
-// //               fetchNextCategoryPage();
-// //             }
-// //           }}
-// //           onEndReachedThreshold={0.5}
-// //           showsVerticalScrollIndicator={false}
-// //           ListHeaderComponent={
-// //             <>
-// //               <View style={styles.merchantOuter}>
-// //                 <Header title="Products" />
-
-// //                 <MerchantData
-// //                   merchantData={merchantData ? merchantData : null}
-// //                   openRating={() => ratingSheetRef.current?.snapToIndex(0)}
-// //                 />
-// //               </View>
-
-// //               <MerchantBanner merchantId={merchantId.toString()} />
-
-// //               <View style={{ paddingHorizontal: scale(20) }}>
-// //                 <SearchView
-// //                   placeholder="Search Dishes / Products"
-// //                   onPress={() =>
-// //                     router.push("/screens/universal/product-search")
-// //                   }
-// //                 />
-
-// //                 <FlatList
-// //                   data={productFilters}
-// //                   renderItem={renderItem}
-// //                   keyExtractor={(item) => item.value}
-// //                   horizontal
-// //                   nestedScrollEnabled
-// //                   showsHorizontalScrollIndicator={false}
-// //                   contentContainerStyle={{ marginVertical: verticalScale(15) }}
-// //                 />
-// //               </View>
-// //             </>
-// //           }
-// //           ListFooterComponent={
-// //             isFetchingNextCategoryPage ? (
-// //               <View
-// //                 style={{
-// //                   flex: 1,
-// //                   justifyContent: "center",
-// //                   alignItems: "center",
-// //                   width: SCREEN_WIDTH,
-// //                   height: 30,
-// //                 }}
-// //               >
-// //                 <ActivityIndicator size="small" />
-// //               </View>
-// //             ) : (
-// //               <ProductFooter
-// //                 merchantData={merchantData ? merchantData : null}
-// //               />
-// //             )
-// //           }
-// //           initialNumToRender={5} // Render only 5 items initially
-// //           maxToRenderPerBatch={5} // Render 5 items per batch
-// //           windowSize={10} // Reduce the window size for better performance
-// //           updateCellsBatchingPeriod={100} // Batch updates to reduce re-renders
-// //           removeClippedSubviews={true}
-// //         />
-
-// //         <FloatingCart onClearCart={() => clearCartSheetRef.current?.expand()} />
-
-// //         <BottomSheet
-// //           ref={variantSheetRef}
-// //           index={-1}
-// //           snapPoints={variantSheetSnapPoints}
-// //           enableDynamicSizing={false}
-// //           enablePanDownToClose
-// //           onClose={() => setProduct(null)}
-// //           backdropComponent={renderBackdrop}
-// //         >
-// //           <VariantSheet
-// //             product={product ? product : null}
-// //             onAddItem={() => {
-// //               setTrigger((prev) => `${prev}-${new Date().getTime()}`); // Ensure unique value
-// //               variantSheetRef.current?.close();
-// //             }}
-// //           />
-// //         </BottomSheet>
-
-// //         <BottomSheet
-// //           ref={clearCartSheetRef}
-// //           index={-1}
-// //           snapPoints={clearCartSheetSnapPoints}
-// //           enableDynamicSizing={false}
-// //           enablePanDownToClose
-// //           backdropComponent={renderBackdrop}
-// //         >
-// //           <ClearCartSheet
-// //             closeClearCartSheet={() => {
-// //               handleBottomSheetClose();
-// //               clearCartSheetRef.current?.close();
-// //             }}
-// //           />
-// //         </BottomSheet>
-
-// //         <BottomSheet
-// //           ref={duplicateVariantSheetRef}
-// //           index={-1}
-// //           snapPoints={duplicateSheetSnapPoints}
-// //           enableDynamicSizing={false}
-// //           enablePanDownToClose
-// //           backdropComponent={renderBackdrop}
-// //           onClose={handleBottomSheetClose}
-// //         >
-// //           <DuplicateVariantSheet
-// //             product={duplicateProduct}
-// //             onNewCustomization={handleNewCustomization}
-// //             closeSheet={() => {
-// //               setTrigger((prev) => `${prev}-${new Date().getTime()}`);
-// //               duplicateVariantSheetRef.current?.close();
-// //             }}
-// //           />
-// //         </BottomSheet>
-
-// //         <BottomSheet
-// //           ref={ratingSheetRef}
-// //           index={-1}
-// //           snapPoints={ratingSheetSnapPoints}
-// //           enableDynamicSizing={false}
-// //           enablePanDownToClose
-// //           backdropComponent={renderBackdrop}
-// //         >
-// //           <MerchantRatingSheet
-// //             merchantId={merchantId.toString()}
-// //             rating={merchantData?.rating || 0}
-// //             onPress={() => ratingSheetRef.current?.close()}
-// //           />
-// //         </BottomSheet>
-// //         <BottomSheet
-// //           ref={productDetailRef}
-// //           index={-1}
-// //           snapPoints={productDetailSnapPoints}
-// //           enableDynamicSizing={false}
-// //           enablePanDownToClose
-// //           backdropComponent={renderBackdrop}
-// //           onClose={() => {
-// //             handleBottomSheetClose();
-// //           }}
-// //         >
-// //           {selectedDetailProduct && (
-// //             <ProductDetailSheet
-// //               product={selectedDetailProduct}
-// //               onClose={() => {
-// //                 productDetailRef.current?.close();
-// //               }}
-// //             />
-// //           )}
-// //         </BottomSheet>
-
-// //         <BottomSheet
-// //           ref={distanceWarningSheetRef}
-// //           index={-1}
-// //           snapPoints={distanceWarningSheetSnapPoints}
-// //           enableDynamicSizing={false}
-// //           enablePanDownToClose
-// //           backdropComponent={renderBackdrop}
-// //         >
-// //           <DistanceWarning
-// //             closeDistanceWarningSheet={() => {
-// //               setTrigger((prev) => `${prev}-${Date.now()}`);
-// //               distanceWarningSheetRef.current?.close();
-// //             }}
-// //           />
-// //         </BottomSheet>
-// //       </View>
-// //     </GestureHandlerRootView>
-// //   );
-// // };
-
-// // export default Product;
-
-// // const styles = StyleSheet.create({
-// //   merchantOuter: {
-// //     backgroundColor: colors.NEUTRAL200,
-// //     paddingTop: Platform.OS === "ios" ? height * scale(0.06) : scale(20),
-// //     borderBottomLeftRadius: radius._30,
-// //     borderBottomRightRadius: radius._30,
-// //     paddingBottom: verticalScale(20),
-// //   },
-// //   filterItem: {
-// //     padding: 10,
-// //     paddingHorizontal: 15,
-// //     marginHorizontal: 2,
-// //     borderRadius: 5,
-// //     backgroundColor: colors.NEUTRAL200,
-// //     height: verticalScale(40),
-// //     flexDirection: "row",
-// //     gap: spacingX._5,
-// //     marginRight: scale(15),
-// //     alignItems: "center",
-// //   },
-// //   selectedFilter: {
-// //     backgroundColor: colors.PRIMARY,
-// //   },
-// //   categoryHeader: {
-// //     flexDirection: "row",
-// //     justifyContent: "space-between",
-// //     alignItems: "center",
-// //     paddingBottom: verticalScale(5),
-// //   },
-// //   productItem: {
-// //     paddingVertical: verticalScale(5),
-// //     borderBottomWidth: 0.5,
-// //     borderBottomColor: colors.NEUTRAL300,
-// //   },
-// //   icon: {
-// //     width: scale(24),
-// //     height: verticalScale(24),
-// //     resizeMode: "cover",
-// //     marginEnd: scale(10),
-// //   },
-// // });
-// // import {
-// //   ActivityIndicator,
-// //   Dimensions,
-// //   FlatList,
-// //   Platform,
-// //   Pressable,
-// //   ScrollView,
-// //   StyleSheet,
-// //   View,
-// // } from "react-native";
-// // import { scale, verticalScale } from "@/utils/styling";
-// // import { colors, radius, spacingX } from "@/constants/theme";
-// // import Header from "@/components/Header";
-// // import { StatusBar } from "expo-status-bar";
-// // import Typo from "@/components/Typo";
-// // import { XCircle } from "phosphor-react-native";
-// // import SearchView from "@/components/SearchView";
-// // import { productFilters } from "@/utils/defaultData";
-// // import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-// // import { router, useLocalSearchParams } from "expo-router";
-// // import { useAuthStore } from "@/store/store";
-// // import { MerchantDataProps, ProductProps } from "@/types";
-// // import { getAllCategory, getMerchantData } from "@/service/universal";
-// // import { useSafeLocation } from "@/utils/helpers";
-// // import FloatingCart from "@/components/universal/FloatingCart";
-// // import BottomSheet, {
-// //   BottomSheetBackdrop,
-// //   BottomSheetBackdropProps,
-// //   SCREEN_WIDTH,
-// // } from "@gorhom/bottom-sheet";
-// // import { GestureHandlerRootView } from "react-native-gesture-handler";
-// // import VariantSheet from "@/components/BottomSheets/VariantSheet";
-// // import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-// // import MerchantData from "@/components/universal/MerchantData";
-// // import MerchantBanner from "@/components/universal/MerchantBanner";
-// // import { commonStyles } from "@/constants/commonStyles";
-// // import ProductFooter from "@/components/universal/ProductFooter";
-// // import CategoryItem from "@/components/universal/CategoryItem";
-// // import ClearCartSheet from "@/components/BottomSheets/universal/ClearCartSheet";
-// // import DuplicateVariantSheet from "@/components/BottomSheets/universal/DuplicateVariantSheet";
-// // import MerchantRatingSheet from "@/components/BottomSheets/universal/MerchantRatingSheet";
-// // import ProductDetailSheet from "@/components/BottomSheets/universal/ProductDetailSheet";
-// // import DistanceWarning from "@/components/BottomSheets/universal/DistanceWarning";
-
-// // const { height } = Dimensions.get("window");
-
-// // const Product = () => {
-// //   const [selectedFilter, setSelectedFilter] = useState<string>("");
-// //   const [product, setProduct] = useState<ProductProps | null>(null);
-// //   const [duplicateProduct, setDuplicateProductId] =
-// //     useState<ProductProps | null>(null);
-// //   const [trigger, setTrigger] = useState<string>(`${new Date()}`);
-// //   const [selectedDetailProduct, setSelectedDetailProduct] =
-// //     useState<ProductProps | null>(null);
-
-// //   const variantSheetRef = useRef<BottomSheet>(null);
-// //   const clearCartSheetRef = useRef<BottomSheet>(null);
-// //   const duplicateVariantSheetRef = useRef<BottomSheet>(null);
-// //   const ratingSheetRef = useRef<BottomSheet>(null);
-// //   const productDetailRef = useRef<BottomSheet>(null);
-// //   const distanceWarningSheetRef = useRef<BottomSheet>(null);
-
-// //   const variantSheetSnapPoints = useMemo(() => ["60%"], []);
-// //   const clearCartSheetSnapPoints = useMemo(() => ["28%"], []);
-// //   const duplicateSheetSnapPoints = useMemo(() => ["40%"], []);
-// //   const ratingSheetSnapPoints = useMemo(() => ["45%"], []);
-// //   const productDetailSnapPoints = useMemo(() => ["55%"], []);
-// //   const distanceWarningSheetSnapPoints = useMemo(() => ["50%"], []);
-
-// //   const { merchantId } = useLocalSearchParams();
-// //   const { selectedBusiness } = useAuthStore.getState();
-// //   const { latitude, longitude } = useSafeLocation();
-
-// //   const CATEGORY_LIMIT: number = 1; // Increased limit to load more categories at once
-
-// //   const {
-// //     data: categoryData,
-// //     fetchNextPage: fetchNextCategoryPage,
-// //     hasNextPage: hasNextCategoryPage,
-// //     isFetchingNextPage: isFetchingNextCategoryPage,
-// //   } = useInfiniteQuery({
-// //     queryKey: ["category", merchantId, selectedBusiness],
-// //     queryFn: ({ pageParam = 1 }) =>
-// //       getAllCategory(
-// //         merchantId.toString(),
-// //         selectedBusiness || "",
-// //         pageParam,
-// //         CATEGORY_LIMIT
-// //       ),
-// //     initialPageParam: 1,
-// //     getNextPageParam: (lastPage) =>
-// //       lastPage.hasNextPage ? lastPage.page + 1 : undefined,
-// //     refetchOnMount: true,
-// //     refetchOnReconnect: true,
-// //     refetchOnWindowFocus: true,
-// //   });
-
-// //   const { data: merchantData } = useQuery<MerchantDataProps>({
-// //     queryKey: ["merchant-data", merchantId],
-// //     queryFn: () => getMerchantData(merchantId.toString(), latitude, longitude),
-// //   });
-
-// //   useEffect(() => {
-// //     if (merchantData?.distanceWarning) {
-// //       distanceWarningSheetRef.current?.snapToIndex(0);
-// //     }
-// //   }, [merchantData]);
-
-// //   const handleSelectFilter = (value: string) => {
-// //     if (value === selectedFilter) {
-// //       setSelectedFilter("");
-// //     } else {
-// //       setSelectedFilter(value);
-// //     }
-// //   };
-
-// //   const handleOpenProductDetails = (product: ProductProps) => {
-// //     setSelectedDetailProduct(product);
-
-// //     if (productDetailRef.current) {
-// //       productDetailRef.current.snapToIndex(0);
-// //     } else {
-// //       console.warn("ProductDetail BottomSheet ref is NULL");
-// //     }
-// //   };
-
-// //   const openVariantSheet = (product: ProductProps) => {
-// //     if (!product) return;
-
-// //     if (product.cartCount) {
-// //       setDuplicateProductId(product);
-// //       duplicateVariantSheetRef.current?.snapToIndex(0);
-// //     } else {
-// //       setProduct((prevProduct) => prevProduct || product);
-// //       variantSheetRef.current?.snapToIndex(0);
-// //     }
-// //   };
-
-// //   const handleNewCustomization = (product: ProductProps | null) => {
-// //     if (product?.productId) {
-// //       setProduct(product);
-// //       duplicateVariantSheetRef.current?.close();
-// //       variantSheetRef.current?.snapToIndex(0);
-// //     }
-// //   };
-
-// //   const handleBottomSheetClose = useCallback(() => {
-// //     setTrigger((prev) => `${prev}-${Date.now()}`);
-// //   }, []);
-
-// //   const renderBackdrop = useCallback(
-// //     (props: BottomSheetBackdropProps) => (
-// //       <BottomSheetBackdrop
-// //         {...props}
-// //         disappearsOnIndex={-1}
-// //         appearsOnIndex={0}
-// //         opacity={0.5}
-// //         style={[props.style, commonStyles.backdrop]}
-// //       />
-// //     ),
-// //     []
-// //   );
-
-// //   const renderItem = ({ item }: any) => {
-// //     return (
-// //       <Pressable
-// //         style={[
-// //           styles.filterItem,
-// //           selectedFilter === item.value && styles.selectedFilter,
-// //         ]}
-// //         onPress={() => handleSelectFilter(item.value)}
-// //       >
-// //         <Typo
-// //           size={13}
-// //           color={
-// //             selectedFilter === item.value ? colors.WHITE : colors.NEUTRAL900
-// //           }
-// //         >
-// //           {item.label}
-// //         </Typo>
-
-// //         {selectedFilter === item.value && <XCircle size={20} color="white" />}
-// //       </Pressable>
-// //     );
-// //   };
-
-// //   const categories = useMemo(() => {
-// //     return categoryData?.pages.flatMap((page) => page.data) || [];
-// //   }, [categoryData]);
-
-// //   const renderHeader = () => (
-// //     <>
-// //       <View style={styles.merchantOuter}>
-// //         <Header title="Products" />
-
-// //         <MerchantData
-// //           merchantData={merchantData ? merchantData : null}
-// //           openRating={() => ratingSheetRef.current?.snapToIndex(0)}
-// //         />
-// //       </View>
-
-// //       <MerchantBanner merchantId={merchantId.toString()} />
-
-// //       <View style={{ paddingHorizontal: scale(20) }}>
-// //         <SearchView
-// //           placeholder="Search Dishes / Products"
-// //           onPress={() => router.push("/screens/universal/product-search")}
-// //         />
-
-// //         <FlatList
-// //           data={productFilters}
-// //           renderItem={renderItem}
-// //           keyExtractor={(item) => item.value}
-// //           horizontal
-// //           nestedScrollEnabled
-// //           showsHorizontalScrollIndicator={false}
-// //           contentContainerStyle={{ marginVertical: verticalScale(15) }}
-// //         />
-// //       </View>
-// //     </>
-// //   );
-
-// //   const renderFooter = () => (
-// //     <>
-// //       {isFetchingNextCategoryPage ? (
-// //         <View style={styles.loadingContainer}>
-// //           <ActivityIndicator size="small" />
-// //         </View>
-// //       ) : (
-// //         <ProductFooter merchantData={merchantData ? merchantData : null} />
-// //       )}
-
-// //       {/* Load more categories button (optional) */}
-// //       {hasNextCategoryPage && (
-// //         <Pressable
-// //           style={styles.loadMoreButton}
-// //           onPress={() => fetchNextCategoryPage()}
-// //         >
-// //           <Typo size={14} color={colors.PRIMARY} fontFamily="Medium">
-// //             Load More Categories
-// //           </Typo>
-// //         </Pressable>
-// //       )}
-// //     </>
-// //   );
-
-// //   return (
-// //     <GestureHandlerRootView>
-// //       <View>
-// //         <StatusBar
-// //           backgroundColor={colors.NEUTRAL200}
-// //           style="dark"
-// //           translucent={false}
-// //         />
-
-// //         {/* Main container with ScrollView instead of FlatList */}
-// //         <ScrollView
-// //           showsVerticalScrollIndicator={false}
-// //           contentContainerStyle={{ paddingBottom: verticalScale(80) }}
-// //         >
-// //           {renderHeader()}
-
-// //           {/* Render each category with its own FlatList */}
-// //           {categories.map((category) => (
-// //             <CategoryItem
-// //               key={`category-${category.categoryId}`}
-// //               category={category}
-// //               openVariant={openVariantSheet}
-// //               onProductPress={handleOpenProductDetails}
-// //               trigger={trigger}
-// //             />
-// //           ))}
-
-// //           {renderFooter()}
-// //         </ScrollView>
-
-// //         <FloatingCart onClearCart={() => clearCartSheetRef.current?.expand()} />
-
-// //         <BottomSheet
-// //           ref={variantSheetRef}
-// //           index={-1}
-// //           snapPoints={variantSheetSnapPoints}
-// //           enableDynamicSizing={false}
-// //           enablePanDownToClose
-// //           onClose={() => setProduct(null)}
-// //           backdropComponent={renderBackdrop}
-// //         >
-// //           <VariantSheet
-// //             product={product ? product : null}
-// //             onAddItem={() => {
-// //               setTrigger((prev) => `${prev}-${new Date().getTime()}`);
-// //               variantSheetRef.current?.close();
-// //             }}
-// //           />
-// //         </BottomSheet>
-
-// //         <BottomSheet
-// //           ref={clearCartSheetRef}
-// //           index={-1}
-// //           snapPoints={clearCartSheetSnapPoints}
-// //           enableDynamicSizing={false}
-// //           enablePanDownToClose
-// //           backdropComponent={renderBackdrop}
-// //         >
-// //           <ClearCartSheet
-// //             closeClearCartSheet={() => {
-// //               handleBottomSheetClose();
-// //               clearCartSheetRef.current?.close();
-// //             }}
-// //           />
-// //         </BottomSheet>
-
-// //         <BottomSheet
-// //           ref={duplicateVariantSheetRef}
-// //           index={-1}
-// //           snapPoints={duplicateSheetSnapPoints}
-// //           enableDynamicSizing={false}
-// //           enablePanDownToClose
-// //           backdropComponent={renderBackdrop}
-// //           onClose={handleBottomSheetClose}
-// //         >
-// //           <DuplicateVariantSheet
-// //             product={duplicateProduct}
-// //             onNewCustomization={handleNewCustomization}
-// //             closeSheet={() => {
-// //               setTrigger((prev) => `${prev}-${new Date().getTime()}`);
-// //               duplicateVariantSheetRef.current?.close();
-// //             }}
-// //           />
-// //         </BottomSheet>
-
-// //         <BottomSheet
-// //           ref={ratingSheetRef}
-// //           index={-1}
-// //           snapPoints={ratingSheetSnapPoints}
-// //           enableDynamicSizing={false}
-// //           enablePanDownToClose
-// //           backdropComponent={renderBackdrop}
-// //         >
-// //           <MerchantRatingSheet
-// //             merchantId={merchantId.toString()}
-// //             rating={merchantData?.rating || 0}
-// //             onPress={() => ratingSheetRef.current?.close()}
-// //           />
-// //         </BottomSheet>
-// //         <BottomSheet
-// //           ref={productDetailRef}
-// //           index={-1}
-// //           snapPoints={productDetailSnapPoints}
-// //           enableDynamicSizing={false}
-// //           enablePanDownToClose
-// //           backdropComponent={renderBackdrop}
-// //           onClose={() => {
-// //             handleBottomSheetClose();
-// //           }}
-// //         >
-// //           {selectedDetailProduct && (
-// //             <ProductDetailSheet
-// //               product={selectedDetailProduct}
-// //               onClose={() => {
-// //                 productDetailRef.current?.close();
-// //               }}
-// //             />
-// //           )}
-// //         </BottomSheet>
-
-// //         <BottomSheet
-// //           ref={distanceWarningSheetRef}
-// //           index={-1}
-// //           snapPoints={distanceWarningSheetSnapPoints}
-// //           enableDynamicSizing={false}
-// //           enablePanDownToClose
-// //           backdropComponent={renderBackdrop}
-// //         >
-// //           <DistanceWarning
-// //             closeDistanceWarningSheet={() => {
-// //               setTrigger((prev) => `${prev}-${Date.now()}`);
-// //               distanceWarningSheetRef.current?.close();
-// //             }}
-// //           />
-// //         </BottomSheet>
-// //       </View>
-// //     </GestureHandlerRootView>
-// //   );
-// // };
-
-// // export default Product;
-
-// // const styles = StyleSheet.create({
-// //   merchantOuter: {
-// //     backgroundColor: colors.NEUTRAL200,
-// //     paddingTop: Platform.OS === "ios" ? height * scale(0.06) : scale(20),
-// //     borderBottomLeftRadius: radius._30,
-// //     borderBottomRightRadius: radius._30,
-// //     paddingBottom: verticalScale(20),
-// //   },
-// //   filterItem: {
-// //     padding: 10,
-// //     paddingHorizontal: 15,
-// //     marginHorizontal: 2,
-// //     borderRadius: 5,
-// //     backgroundColor: colors.NEUTRAL200,
-// //     height: verticalScale(40),
-// //     flexDirection: "row",
-// //     gap: spacingX._5,
-// //     marginRight: scale(15),
-// //     alignItems: "center",
-// //   },
-// //   selectedFilter: {
-// //     backgroundColor: colors.PRIMARY,
-// //   },
-// //   loadingContainer: {
-// //     flex: 1,
-// //     justifyContent: "center",
-// //     alignItems: "center",
-// //     width: SCREEN_WIDTH,
-// //     height: 30,
-// //     marginVertical: verticalScale(10),
-// //   },
-// //   loadMoreButton: {
-// //     alignItems: "center",
-// //     padding: 15,
-// //     marginHorizontal: scale(20),
-// //     marginBottom: verticalScale(20),
-// //   },
-// // });
-import {
-  ActivityIndicator,
-  Dimensions,
-  FlatList,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
-import { scale, verticalScale } from "@/utils/styling";
-import { colors, radius, spacingX } from "@/constants/theme";
-import Header from "@/components/Header";
-import { StatusBar } from "expo-status-bar";
-import Typo from "@/components/Typo";
-import { XCircle } from "phosphor-react-native";
-import SearchView from "@/components/SearchView";
-import { productFilters } from "@/utils/defaultData";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { router, useLocalSearchParams } from "expo-router";
+import { FlatList, View } from "react-native";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { CategoryProps, MerchantDataProps, ProductProps } from "@/types";
+import { useLocalSearchParams } from "expo-router";
 import { useAuthStore } from "@/store/store";
-import { MerchantDataProps, ProductProps } from "@/types";
-import { getAllCategory, getMerchantData } from "@/service/universal";
-import { useSafeLocation } from "@/utils/helpers";
+import { useQuery } from "@tanstack/react-query";
 import FloatingCart from "@/components/universal/FloatingCart";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
-  SCREEN_WIDTH,
 } from "@gorhom/bottom-sheet";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import VariantSheet from "@/components/BottomSheets/VariantSheet";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import MerchantData from "@/components/universal/MerchantData";
-import MerchantBanner from "@/components/universal/MerchantBanner";
-import { commonStyles } from "@/constants/commonStyles";
-import ProductFooter from "@/components/universal/ProductFooter";
-import CategoryItem from "@/components/universal/CategoryItem";
 import ClearCartSheet from "@/components/BottomSheets/universal/ClearCartSheet";
 import DuplicateVariantSheet from "@/components/BottomSheets/universal/DuplicateVariantSheet";
-import MerchantRatingSheet from "@/components/BottomSheets/universal/MerchantRatingSheet";
+import {
+  fetchCategory,
+  fetchProduct,
+  getMerchantData,
+} from "@/service/universal";
+import { useSafeLocation } from "@/utils/helpers";
+import HeaderComponent from "@/components/universal/ProductScreen/HeaderComponent";
+import CategoryContainer from "@/components/universal/ProductScreen/CategoryContainer";
+import EmptyComponent from "@/components/universal/ProductScreen/EmptyComponent";
+import { commonStyles } from "@/constants/commonStyles";
 import ProductDetailSheet from "@/components/BottomSheets/universal/ProductDetailSheet";
+import MerchantRatingSheet from "@/components/BottomSheets/universal/MerchantRatingSheet";
 import DistanceWarning from "@/components/BottomSheets/universal/DistanceWarning";
-import SkeletonPlaceholder from "react-native-skeleton-placeholder";
+import ProductCategoryLoader from "@/components/Loader/ProductCategoryLoader";
 
-const { height } = Dimensions.get("window");
+const Products = () => {
+  // Combined data structure for categories and their products
+  const [categories, setCategories] = useState<CategoryProps[]>([]);
+  const [categoryProducts, setCategoryProducts] = useState<{
+    [key: string]: ProductProps[];
+  }>({});
 
-const Product = () => {
-  const [selectedFilter, setSelectedFilter] = useState<string>("");
-  const [product, setProduct] = useState<ProductProps | null>(null);
-  const [duplicateProduct, setDuplicateProductId] =
-    useState<ProductProps | null>(null);
-  const [trigger, setTrigger] = useState<string>(`${new Date()}`);
-  const [selectedDetailProduct, setSelectedDetailProduct] =
-    useState<ProductProps | null>(null);
-
-  const scrollViewRef = useRef<ScrollView>(null);
+  // State for tracking various loading states
+  const [isLoading, setIsLoading] = useState(false);
+  const [categoryPage, setCategoryPage] = useState(1);
+  const [hasMoreCategories, setHasMoreCategories] = useState(true);
 
   const variantSheetRef = useRef<BottomSheet>(null);
   const clearCartSheetRef = useRef<BottomSheet>(null);
   const duplicateVariantSheetRef = useRef<BottomSheet>(null);
-  const ratingSheetRef = useRef<BottomSheet>(null);
   const productDetailRef = useRef<BottomSheet>(null);
+  const ratingSheetRef = useRef<BottomSheet>(null);
   const distanceWarningSheetRef = useRef<BottomSheet>(null);
 
   const variantSheetSnapPoints = useMemo(() => ["60%"], []);
   const clearCartSheetSnapPoints = useMemo(() => ["28%"], []);
   const duplicateSheetSnapPoints = useMemo(() => ["40%"], []);
-  const ratingSheetSnapPoints = useMemo(() => ["45%"], []);
   const productDetailSnapPoints = useMemo(() => ["55%"], []);
-  const distanceWarningSheetSnapPoints = useMemo(() => ["48%"], []);
+  const ratingSheetSnapPoints = useMemo(() => ["45%"], []);
+  const distanceWarningSheetSnapPoints = useMemo(() => ["50%"], []);
 
-  const { merchantId } = useLocalSearchParams();
+  // Refs for checking screen fill
+  const listRef = useRef<FlatList>(null);
+  const containerHeightRef = useRef(0);
+  const contentHeightRef = useRef(0);
+  const loadingTimestampRef = useRef<number | null>(null);
+
+  // Get params and state
+  const { merchantId } = useLocalSearchParams<{ merchantId: string }>();
   const { selectedBusiness } = useAuthStore.getState();
   const { latitude, longitude } = useSafeLocation();
 
-  const CATEGORY_LIMIT: number = 4; // Increased for better UX when paginating
-
-  const {
-    data: categoryData,
-    fetchNextPage: fetchNextCategoryPage,
-    hasNextPage: hasNextCategoryPage,
-    isFetchingNextPage: isFetchingNextCategoryPage,
-  } = useInfiniteQuery({
-    queryKey: ["category", merchantId, selectedBusiness],
-    queryFn: ({ pageParam = 1 }) =>
-      getAllCategory(
-        merchantId.toString(),
-        selectedBusiness || "",
-        pageParam,
-        CATEGORY_LIMIT
-      ),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
-      lastPage.hasNextPage ? lastPage.page + 1 : undefined,
-    refetchOnMount: true,
-    refetchOnReconnect: true,
-    refetchOnWindowFocus: true,
-  });
-
-  const { data: merchantData } = useQuery<MerchantDataProps>({
-    queryKey: ["merchant-data", merchantId],
-    queryFn: () => getMerchantData(merchantId.toString(), latitude, longitude),
-  });
+  const { data: merchantData, isLoading: merchantDataLoading } =
+    useQuery<MerchantDataProps>({
+      queryKey: ["merchant-data", merchantId],
+      queryFn: () => getMerchantData(merchantId as string, latitude, longitude),
+    });
 
   useEffect(() => {
-    // console.log("MerchantData", merchantData);
     if (merchantData?.distanceWarning) {
-      setTimeout(() => {
-        distanceWarningSheetRef.current?.snapToIndex(0);
-      }, 100);
+      distanceWarningSheetRef.current?.expand();
     }
   }, [merchantData]);
 
-  const handleSelectFilter = (value: string) => {
-    if (value === selectedFilter) {
-      setSelectedFilter("");
-    } else {
-      setSelectedFilter(value);
+  // Reset state when merchant or business changes
+  useEffect(() => {
+    setCategories([]);
+    setCategoryProducts({});
+    setCategoryPage(1);
+    setHasMoreCategories(true);
+    loadingTimestampRef.current = null;
+
+    // Start the fetch sequence if we have valid inputs
+    if (merchantId && selectedBusiness) {
+      fetchNextCategoryWithProducts();
+    }
+  }, [merchantId, selectedBusiness]);
+
+  // Function to fetch a category and all its products
+  const fetchNextCategoryWithProducts = async () => {
+    if (isLoading || !hasMoreCategories || !merchantId || !selectedBusiness)
+      return;
+
+    setIsLoading(true);
+
+    // Set a timestamp to identify this loading operation
+    loadingTimestampRef.current = Date.now();
+
+    try {
+      // Fetch the next category
+      const { data: category, hasNextPage } = await fetchCategory(
+        merchantId,
+        selectedBusiness as string,
+        categoryPage
+      );
+
+      if (category) {
+        // Update state for new category
+        setCategoryPage((prev) => prev + 1);
+        setHasMoreCategories(hasNextPage);
+        setCategories((prev) => {
+          const uniqueCategories = new Set(prev.map((cat) => cat.categoryId));
+          if (!uniqueCategories.has(category.categoryId)) {
+            return [...prev, category];
+          }
+          return prev;
+        });
+
+        // Keep fetching products until there are no more
+        let hasNext = true;
+        let currentPage = 0;
+        let allProducts: ProductProps[] = [];
+
+        while (hasNext) {
+          const nextPage = currentPage + 1;
+
+          const { data, hasNextPage } = await fetchProduct(
+            category.categoryId,
+            merchantId,
+            nextPage
+          );
+
+          // Filter out duplicates from new products
+          const existingProductIds = new Set(
+            allProducts.map((p) => p.productId)
+          );
+          const newProducts = data.filter(
+            (product: ProductProps) =>
+              !existingProductIds.has(product.productId)
+          );
+
+          // Add new products to our collection
+          allProducts = [...allProducts, ...newProducts];
+
+          hasNext = hasNextPage;
+          currentPage = nextPage;
+        }
+
+        // Update products state for this category
+        setCategoryProducts((prev) => ({
+          ...prev,
+          [category.categoryId]: allProducts,
+        }));
+
+        // Check if we need to fetch more categories to fill the screen
+        setTimeout(checkIfMoreCategoriesNeeded, 300);
+      } else {
+        setHasMoreCategories(false);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setIsLoading(false);
+      loadingTimestampRef.current = null;
     }
   };
 
-  const handleOpenProductDetails = (product: ProductProps) => {
-    setSelectedDetailProduct(product);
-
-    if (productDetailRef.current) {
-      productDetailRef.current.snapToIndex(0);
-    } else {
-      console.warn("ProductDetail BottomSheet ref is NULL");
+  // Function to check if we need to load more categories to fill the screen
+  const checkIfMoreCategoriesNeeded = useCallback(() => {
+    if (
+      containerHeightRef.current > contentHeightRef.current &&
+      hasMoreCategories &&
+      !isLoading
+    ) {
+      // If the container height is greater than the content height, we need more content
+      fetchNextCategoryWithProducts();
     }
-  };
+  }, [hasMoreCategories, isLoading]);
 
-  const openVariantSheet = (product: ProductProps) => {
-    if (!product) return;
+  // Track layout measurements to determine if screen is filled
+  const onContainerLayout = useCallback(
+    (event: any) => {
+      containerHeightRef.current = event.nativeEvent.layout.height;
+      checkIfMoreCategoriesNeeded();
+    },
+    [checkIfMoreCategoriesNeeded]
+  );
 
-    if (product.cartCount) {
-      setDuplicateProductId(product);
-      duplicateVariantSheetRef.current?.snapToIndex(0);
-    } else {
-      setProduct((prevProduct) => prevProduct || product);
-      variantSheetRef.current?.snapToIndex(0);
+  const onContentSizeChange = useCallback(
+    (width: number, height: number) => {
+      contentHeightRef.current = height;
+      checkIfMoreCategoriesNeeded();
+    },
+    [checkIfMoreCategoriesNeeded]
+  );
+
+  // Prepare data for the FlatList by combining categories and loading indicator
+  const getListData = useCallback(() => {
+    // Create items for categories with their products
+    const categoryItems = categories.map((category) => ({
+      type: "category" as const,
+      id: "category-" + category.categoryId,
+      category,
+      products: categoryProducts[category.categoryId] || [],
+    }));
+
+    // Add loading indicator at the end if needed
+    if (isLoading) {
+      return [
+        ...categoryItems,
+        {
+          type: "loading" as const,
+          id: "loading-" + (loadingTimestampRef.current || Date.now()),
+        },
+      ];
     }
-  };
 
-  const handleNewCustomization = (product: ProductProps | null) => {
-    if (product?.productId) {
-      setProduct(product);
-      duplicateVariantSheetRef.current?.close();
-      variantSheetRef.current?.snapToIndex(0);
+    return categoryItems;
+  }, [categories, categoryProducts, isLoading]);
+
+  // Optimized renderItem function that uses memoized components
+  const renderItem = useCallback(
+    ({
+      item,
+    }: {
+      item: {
+        type: string;
+        category?: CategoryProps;
+        products?: ProductProps[];
+      };
+    }) => {
+      if (item.type === "loading") {
+        return <ProductCategoryLoader />;
+      }
+
+      if (item.category && item.products) {
+        return (
+          <CategoryContainer
+            category={item.category}
+            products={item.products}
+            openVariant={(count?: number) => {
+              count && count > 0
+                ? duplicateVariantSheetRef.current?.expand()
+                : variantSheetRef.current?.expand();
+            }}
+            openDetail={() => productDetailRef.current?.expand()}
+          />
+        );
+      }
+
+      return null;
+    },
+    []
+  );
+
+  // Memoized key extractor that creates truly unique keys
+  const keyExtractor = useCallback((item: any, index: number) => item.id, []);
+
+  // Optimized empty component
+  const ListEmptyComponent = useCallback(() => {
+    return <EmptyComponent isLoading={isLoading} />;
+  }, [isLoading]);
+
+  // Memoized onEndReached handler
+  const handleEndReached = useCallback(() => {
+    if (!isLoading && hasMoreCategories) {
+      fetchNextCategoryWithProducts();
     }
-  };
-
-  const handleBottomSheetClose = useCallback(() => {
-    setTrigger((prev) => `${prev}-${Date.now()}`);
-  }, []);
+  }, [isLoading, hasMoreCategories]);
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
@@ -1017,389 +285,128 @@ const Product = () => {
     []
   );
 
-  const renderItem = ({ item }: any) => {
-    return (
-      <Pressable
-        style={[
-          styles.filterItem,
-          selectedFilter === item.value && styles.selectedFilter,
-        ]}
-        onPress={() => handleSelectFilter(item.value)}
-      >
-        <Typo
-          size={13}
-          color={
-            selectedFilter === item.value ? colors.WHITE : colors.NEUTRAL900
-          }
-        >
-          {item.label}
-        </Typo>
-
-        {selectedFilter === item.value && <XCircle size={20} color="white" />}
-      </Pressable>
-    );
-  };
-
-  const categories = useMemo(() => {
-    return categoryData?.pages.flatMap((page) => page.data) || [];
-  }, [categoryData]);
-
-  const renderHeader = () => (
-    <>
-      <View style={styles.merchantOuter}>
-        <Header title="Products" />
-
-        <MerchantData
-          merchantData={merchantData ? merchantData : null}
-          openRating={() => ratingSheetRef.current?.snapToIndex(0)}
-        />
-      </View>
-
-      <MerchantBanner merchantId={merchantId.toString()} />
-
-      <View style={{ paddingHorizontal: scale(20) }}>
-        <SearchView
-          placeholder="Search Dishes / Products"
-          onPress={() => router.push("/screens/universal/product-search")}
-        />
-
-        <FlatList
-          data={productFilters}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.value}
-          horizontal
-          nestedScrollEnabled
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ marginVertical: verticalScale(15) }}
-        />
-      </View>
-    </>
-  );
-
-  const renderFooter = () => (
-    <>
-      {isFetchingNextCategoryPage && (
-        <View style={styles.loadingContainer}>
-          <SkeletonPlaceholder borderRadius={4}>
-            <SkeletonPlaceholder.Item flexDirection="row" alignItems="center">
-              <SkeletonPlaceholder.Item
-                width={60}
-                height={60}
-                borderRadius={10}
-              />
-              <SkeletonPlaceholder.Item marginLeft={20}>
-                <SkeletonPlaceholder.Item width={120} height={20} />
-                <SkeletonPlaceholder.Item
-                  marginTop={6}
-                  width={80}
-                  height={20}
-                />
-              </SkeletonPlaceholder.Item>
-            </SkeletonPlaceholder.Item>
-          </SkeletonPlaceholder>
-        </View>
-      )}
-
-      <ProductFooter merchantData={merchantData ? merchantData : null} />
-
-      {/* Add a Load More button as a fallback */}
-      {/* {hasNextCategoryPage && !isFetchingNextCategoryPage && (
-        <Pressable
-          style={styles.loadMoreButton}
-          onPress={() => fetchNextCategoryPage()}
-        >
-          <Typo size={14} color={colors.WHITE}>
-            Load More Categories
-          </Typo>
-        </Pressable>
-      )} */}
-    </>
-  );
-
-  // Render each category with its own separate FlatList
-  const renderCategory = ({ item }) => (
-    <CategoryItem
-      key={`category-${item.categoryId}`}
-      category={item}
-      openVariant={openVariantSheet}
-      onProductPress={handleOpenProductDetails}
-      trigger={trigger}
-    />
-  );
-
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={{ flex: 1 }}>
-        <StatusBar
-          backgroundColor={colors.NEUTRAL200}
-          style="dark"
-          translucent={false}
-        />
-
-        {/* Main ScrollView that contains individual category FlatLists */}
-        <ScrollView
-          ref={scrollViewRef}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: verticalScale(80) }}
-          onScroll={({ nativeEvent }) => {
-            const { layoutMeasurement, contentOffset, contentSize } =
-              nativeEvent;
-            const paddingToBottom = 200;
-
-            // Check if scrolled near to bottom
-            if (
-              layoutMeasurement.height + contentOffset.y >=
-              contentSize.height - paddingToBottom
-            ) {
-              if (hasNextCategoryPage && !isFetchingNextCategoryPage) {
-                fetchNextCategoryPage();
-              }
-            }
-          }}
-          scrollEventThrottle={16}
-        >
-          {renderHeader()}
-
-          {/* Render each category independently */}
-          {categories.map((category) => (
-            <FlatList
-              key={`category-flatlist-${category.categoryId}`}
-              data={[category]} // Pass single category as an array
-              renderItem={renderCategory}
-              scrollEnabled={false} // Disable scrolling on nested FlatList
-              showsVerticalScrollIndicator={false}
-            />
-          ))}
-
-          {renderFooter()}
-        </ScrollView>
-
-        <FloatingCart onClearCart={() => clearCartSheetRef.current?.expand()} />
-
-        <BottomSheet
-          ref={variantSheetRef}
-          index={-1}
-          snapPoints={variantSheetSnapPoints}
-          enableDynamicSizing={false}
-          enablePanDownToClose
-          onClose={() => setProduct(null)}
-          backdropComponent={renderBackdrop}
-        >
-          <VariantSheet
-            product={product ? product : null}
-            onAddItem={() => {
-              setTrigger((prev) => `${prev}-${new Date().getTime()}`);
-              variantSheetRef.current?.close();
-            }}
-          />
-        </BottomSheet>
-
-        <BottomSheet
-          ref={clearCartSheetRef}
-          index={-1}
-          snapPoints={clearCartSheetSnapPoints}
-          enableDynamicSizing={false}
-          enablePanDownToClose
-          backdropComponent={renderBackdrop}
-        >
-          <ClearCartSheet
-            closeClearCartSheet={() => {
-              handleBottomSheetClose();
-              clearCartSheetRef.current?.close();
-            }}
-          />
-        </BottomSheet>
-
-        <BottomSheet
-          ref={duplicateVariantSheetRef}
-          index={-1}
-          snapPoints={duplicateSheetSnapPoints}
-          enableDynamicSizing={false}
-          enablePanDownToClose
-          backdropComponent={renderBackdrop}
-          onClose={handleBottomSheetClose}
-        >
-          <DuplicateVariantSheet
-            product={duplicateProduct}
-            onNewCustomization={handleNewCustomization}
-            closeSheet={() => {
-              setTrigger((prev) => `${prev}-${new Date().getTime()}`);
-              duplicateVariantSheetRef.current?.close();
-            }}
-          />
-        </BottomSheet>
-
-        <BottomSheet
-          ref={ratingSheetRef}
-          index={-1}
-          snapPoints={ratingSheetSnapPoints}
-          enableDynamicSizing={false}
-          enablePanDownToClose
-          backdropComponent={renderBackdrop}
-        >
-          <MerchantRatingSheet
-            merchantId={merchantId.toString()}
-            rating={merchantData?.rating || 0}
-            onPress={() => ratingSheetRef.current?.close()}
-          />
-        </BottomSheet>
-        <BottomSheet
-          ref={productDetailRef}
-          index={-1}
-          snapPoints={productDetailSnapPoints}
-          enableDynamicSizing={false}
-          enablePanDownToClose
-          backdropComponent={renderBackdrop}
-          onClose={() => {
-            handleBottomSheetClose();
-          }}
-        >
-          {selectedDetailProduct && (
-            <ProductDetailSheet
-              product={selectedDetailProduct}
-              onClose={() => {
-                productDetailRef.current?.close();
-              }}
+    <>
+      <View style={{ flex: 1 }} onLayout={onContainerLayout}>
+        <FlatList
+          ref={listRef}
+          data={getListData()}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          onContentSizeChange={onContentSizeChange}
+          ListEmptyComponent={ListEmptyComponent}
+          ListHeaderComponent={() => (
+            <HeaderComponent
+              merchantData={merchantData ? merchantData : null}
+              merchantDataLoading={merchantDataLoading}
+              merchantId={merchantId}
+              openRating={() => ratingSheetRef.current?.expand()}
             />
           )}
-        </BottomSheet>
-
-        <BottomSheet
-          ref={distanceWarningSheetRef}
-          index={-1}
-          snapPoints={distanceWarningSheetSnapPoints}
-          enableDynamicSizing={false}
-          enablePanDownToClose
-          backdropComponent={renderBackdrop}
-        >
-          <DistanceWarning
-            closeDistanceWarningSheet={() => {
-              setTrigger((prev) => `${prev}-${Date.now()}`);
-              distanceWarningSheetRef.current?.close();
-            }}
-          />
-        </BottomSheet>
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.3}
+          maxToRenderPerBatch={5}
+          updateCellsBatchingPeriod={50}
+          windowSize={5}
+          removeClippedSubviews={true}
+          initialNumToRender={3}
+          showsVerticalScrollIndicator={false}
+        />
       </View>
-    </GestureHandlerRootView>
+
+      <FloatingCart onClearCart={() => clearCartSheetRef.current?.expand()} />
+
+      <BottomSheet
+        ref={variantSheetRef}
+        index={-1}
+        snapPoints={variantSheetSnapPoints}
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+      >
+        <VariantSheet
+          onAddItem={() => {
+            variantSheetRef.current?.close();
+          }}
+        />
+      </BottomSheet>
+
+      <BottomSheet
+        ref={clearCartSheetRef}
+        index={-1}
+        snapPoints={clearCartSheetSnapPoints}
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+      >
+        <ClearCartSheet
+          closeClearCartSheet={() => {
+            clearCartSheetRef.current?.close();
+          }}
+        />
+      </BottomSheet>
+
+      <BottomSheet
+        ref={duplicateVariantSheetRef}
+        index={-1}
+        snapPoints={duplicateSheetSnapPoints}
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+      >
+        <DuplicateVariantSheet
+          onNewCustomization={() => {
+            duplicateVariantSheetRef.current?.close();
+            variantSheetRef.current?.expand();
+          }}
+          closeSheet={() => {
+            duplicateVariantSheetRef.current?.close();
+          }}
+        />
+      </BottomSheet>
+
+      <BottomSheet
+        ref={productDetailRef}
+        index={-1}
+        snapPoints={productDetailSnapPoints}
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+      >
+        <ProductDetailSheet />
+      </BottomSheet>
+
+      <BottomSheet
+        ref={ratingSheetRef}
+        index={-1}
+        snapPoints={ratingSheetSnapPoints}
+        enableDynamicSizing
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+      >
+        <MerchantRatingSheet
+          merchantId={merchantId as string}
+          rating={merchantData?.rating || 0}
+          onPress={() => ratingSheetRef.current?.close()}
+        />
+      </BottomSheet>
+
+      <BottomSheet
+        ref={distanceWarningSheetRef}
+        index={-1}
+        snapPoints={distanceWarningSheetSnapPoints}
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+      >
+        <DistanceWarning
+          closeDistanceWarningSheet={() => {
+            distanceWarningSheetRef.current?.close();
+          }}
+        />
+      </BottomSheet>
+    </>
   );
 };
 
-export default Product;
-
-const styles = StyleSheet.create({
-  merchantOuter: {
-    backgroundColor: colors.NEUTRAL200,
-    paddingTop: Platform.OS === "ios" ? height * scale(0.06) : scale(20),
-    borderBottomLeftRadius: radius._30,
-    borderBottomRightRadius: radius._30,
-    paddingBottom: verticalScale(20),
-  },
-  filterItem: {
-    padding: 10,
-    paddingHorizontal: 15,
-    marginHorizontal: 2,
-    borderRadius: 5,
-    backgroundColor: colors.NEUTRAL200,
-    height: verticalScale(40),
-    flexDirection: "row",
-    gap: spacingX._5,
-    marginRight: scale(15),
-    alignItems: "center",
-  },
-  selectedFilter: {
-    backgroundColor: colors.PRIMARY,
-  },
-  loadingContainer: {
-    justifyContent: "center",
-    alignItems: "flex-start",
-    width: "100%",
-    height: 100,
-    marginVertical: verticalScale(10),
-    paddingHorizontal: scale(20),
-    backgroundColor: colors.WHITE,
-  },
-  loadMoreButton: {
-    backgroundColor: colors.PRIMARY,
-    paddingVertical: verticalScale(12),
-    paddingHorizontal: scale(20),
-    borderRadius: radius._10,
-    alignItems: "center",
-    marginHorizontal: scale(20),
-    marginVertical: verticalScale(15),
-  },
-  container: {
-    marginBottom: 40,
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  imageContainer: {
-    position: "relative",
-    width: 120,
-    height: 120,
-  },
-  imagePressable: {
-    width: "100%",
-    height: "100%",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 10,
-  },
-  favoriteButton: {
-    position: "absolute",
-    right: 0,
-    top: 0,
-    padding: 7,
-    zIndex: 2,
-  },
-  addCartButtonContainer: {
-    position: "absolute",
-    width: "100%",
-    bottom: -15,
-    zIndex: 3,
-  },
-  contentContainer: {
-    flex: 1,
-    paddingTop: 10,
-  },
-  priceContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-
-  // Skeleton Styles
-  skeletonImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 10,
-  },
-  skeletonText: {
-    width: "80%",
-    height: 16,
-    borderRadius: 4,
-    marginBottom: 6,
-  },
-  skeletonPriceContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 6,
-  },
-  skeletonPrice: {
-    width: 50,
-    height: 14,
-    borderRadius: 4,
-  },
-  skeletonDiscountPrice: {
-    width: 40,
-    height: 14,
-    borderRadius: 4,
-  },
-  skeletonDescription: {
-    width: "90%",
-    height: 12,
-    borderRadius: 4,
-  },
-});
+export default Products;

@@ -9,6 +9,7 @@ import {
   MD3LightTheme as DefaultTheme,
 } from "react-native-paper";
 import { SocketProvider } from "@/service/socketProvider";
+import { DataProvider } from "@/context/DataContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,7 +38,7 @@ const Layout = () => {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen
-        name="(modals)/SelectAddress"
+        name="/(modals)/SelectAddress"
         options={{
           presentation: "modal",
           animation: "slide_from_bottom",
@@ -53,11 +54,13 @@ const RootLayout = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView>
-        <SocketProvider>
-          <PaperProvider theme={theme}>
-            <Layout />
-          </PaperProvider>
-        </SocketProvider>
+        <DataProvider>
+          <SocketProvider>
+            <PaperProvider theme={theme}>
+              <Layout />
+            </PaperProvider>
+          </SocketProvider>
+        </DataProvider>
       </GestureHandlerRootView>
     </QueryClientProvider>
   );

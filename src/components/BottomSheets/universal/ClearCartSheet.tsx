@@ -6,12 +6,16 @@ import { scale, verticalScale } from "@/utils/styling";
 import { colors, spacingX } from "@/constants/theme";
 import Button from "@/components/Button";
 import { clearCart } from "@/localDB/controller/cartController";
+import { useData } from "@/context/DataContext";
 
 const ClearCartSheet: FC<{ closeClearCartSheet: () => void }> = ({
   closeClearCartSheet,
 }) => {
+  const { setProductCounts } = useData();
+
   const handleClearCart = async () => {
     await clearCart();
+    setProductCounts({});
     closeClearCartSheet();
   };
 
