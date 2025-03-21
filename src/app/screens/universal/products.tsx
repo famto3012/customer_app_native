@@ -70,7 +70,7 @@ const Product = () => {
   const { selectedBusiness } = useAuthStore.getState();
   const { latitude, longitude } = useSafeLocation();
 
-  const CATEGORY_LIMIT: number = 5;
+  const CATEGORY_LIMIT: number = 2;
 
   const {
     data: categoryData,
@@ -87,8 +87,8 @@ const Product = () => {
         CATEGORY_LIMIT
       ),
     initialPageParam: 1,
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage.hasNextPage ? allPages.length + 1 : undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNextPage ? lastPage.page + 1 : undefined,
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchOnWindowFocus: true,
@@ -203,7 +203,11 @@ const Product = () => {
             />
           )}
           keyExtractor={(item, index) => `category-${item.categoryId}-${index}`}
-          onEndReached={() => hasNextCategoryPage && fetchNextCategoryPage()}
+          onEndReached={() => {
+            if (hasNextCategoryPage && !isFetchingNextCategoryPage) {
+              fetchNextCategoryPage();
+            }
+          }}
           onEndReachedThreshold={0.5}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
@@ -258,6 +262,11 @@ const Product = () => {
               />
             )
           }
+          initialNumToRender={5} // Render only 5 items initially
+          maxToRenderPerBatch={5} // Render 5 items per batch
+          windowSize={10} // Reduce the window size for better performance
+          updateCellsBatchingPeriod={100} // Batch updates to reduce re-renders
+          removeClippedSubviews={true}
         />
 
         <FloatingCart onClearCart={() => clearCartSheetRef.current?.expand()} />

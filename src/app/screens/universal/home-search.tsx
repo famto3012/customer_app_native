@@ -224,7 +224,7 @@ const HomeSearch = () => {
         onEndReachedThreshold={0.3}
         ListFooterComponent={renderFooter}
         ItemSeparatorComponent={() => (
-          <View style={{ height: verticalScale(15) }} />
+          <View style={{ height: verticalScale(5) }} />
         )}
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={

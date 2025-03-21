@@ -12,7 +12,7 @@ import Typo from "../Typo";
 import { colors, radius, spacingX } from "@/constants/theme";
 import { Clock } from "phosphor-react-native";
 import { scheduleDetails } from "@/utils/defaultData";
-import { FC, useState } from "react";
+import { FC, useState, useEffect, useCallback } from "react";
 
 import { DatePickerModal } from "react-native-paper-dates";
 import { TimePickerModal } from "react-native-paper-dates";
@@ -47,29 +47,73 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
   const [minutes, setMinutes] = useState<number>(0);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
+  const [minimumTime, setMinimumTime] = useState<{
+    hours: number;
+    minutes: number;
+  } | null>(null);
 
-  const getDefaultTime = () => {
+  // Check if a date is today
+  const isToday = useCallback((date: Date | null): boolean => {
+    if (!date) return false;
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  }, []);
+
+  // Calculate and set minimum time constraints
+  const updateTimeConstraints = useCallback(() => {
     const now = new Date();
-    let hours = now.getHours();
-    let minutes = now.getMinutes();
+    let currentHours = now.getHours();
+    let currentMinutes = now.getMinutes();
 
-    if (
-      selectedDates.startDate &&
-      selectedDates.endDate &&
-      selectedDates.startDate?.toDateString() ===
-        selectedDates.endDate?.toDateString()
-    ) {
-      hours += 1; // Set 1 hour after current time
-      if (hours >= 24) {
-        hours = 1;
+    if (isToday(selectedDates.startDate)) {
+      // Calculate minimum time (current time + 1.5 hours)
+      let minHours = currentHours;
+      let minMinutes = currentMinutes + 90; // Add 90 minutes (1.5 hours)
+
+      // Handle minute overflow
+      if (minMinutes >= 60) {
+        minHours += Math.floor(minMinutes / 60);
+        minMinutes = minMinutes % 60;
       }
+
+      // Handle hour overflow
+      if (minHours >= 24) {
+        minHours = minHours % 24;
+      }
+
+      setMinimumTime({ hours: minHours, minutes: minMinutes });
+
+      // Set default time to minimum allowed time
+      setHours(minHours);
+      setMinutes(minMinutes);
+
+      // Also update selectedTime to match the minimum
+      setSelectedTime({
+        hours: minHours,
+        minutes: minMinutes,
+      });
+    } else {
+      // If not today, no minimum time restriction
+      setMinimumTime(null);
+
+      // For future dates, default to noon
+      setHours(12);
+      setMinutes(0);
     }
+  }, [selectedDates.startDate, isToday]);
 
-    setHours(hours);
-    setMinutes(minutes);
-    // return { hours, minutes };
-  };
+  // Update time constraints when selected date changes
+  useEffect(() => {
+    if (selectedDates.startDate) {
+      updateTimeConstraints();
+    }
+  }, [selectedDates.startDate, updateTimeConstraints]);
 
+  // Handle date selection
   const onDateChange = (data: any) => {
     const startDate = new Date(data.startDate);
     let endDate = data.endDate ? new Date(data.endDate) : new Date(startDate);
@@ -79,7 +123,7 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
       endDate.setUTCDate(startDate.getUTCDate() + 1);
       endDate.setUTCHours(18, 29, 59, 999);
     } else {
-      // If startDate and endDate are different, set endDate to 18:29:59.999 UTC (which is 23:59:59.999 IST)
+      // If startDate and endDate are different, set endDate to 18:29:59.999 UTC
       endDate.setUTCDate(endDate.getUTCDate() + 1);
       endDate.setUTCHours(18, 29, 59, 999);
     }
@@ -89,11 +133,59 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
       endDate: endDate,
     });
 
+    // Reset selected time when date changes
+    setSelectedTime({
+      hours: null,
+      minutes: null,
+    });
+
     setShowDatePicker(false);
-    getDefaultTime();
   };
 
+  const isTimeValid = useCallback(
+    (hours: number, minutes: number): boolean => {
+      if (!isToday(selectedDates.startDate)) {
+        return true; // Allow any time if not today
+      }
+
+      const now = new Date();
+
+      // Calculate the minimum allowed time (current time + 1.5 hours)
+      const minimumSelectableTime = new Date(now.getTime() + 90 * 60000);
+      const minHours = minimumSelectableTime.getHours();
+      const minMinutes = minimumSelectableTime.getMinutes();
+
+      console.log(`Selected Time: ${hours}:${minutes}`);
+      console.log(`Minimum Allowed Time: ${minHours}:${minMinutes}`);
+
+      // Handle time comparison properly, including rollover past midnight
+      if (
+        (now.getHours() <= minHours &&
+          (hours < minHours || (hours === minHours && minutes < minMinutes))) ||
+        (now.getHours() > minHours && hours < minHours)
+      ) {
+        alert("Selected time must be at least 1 hour 30 minutes ahead.");
+        return false;
+      }
+
+      return true;
+    },
+    [selectedDates.startDate]
+  );
+
+  // Handle time selection
   const onTimeChange = (data: any) => {
+    if (!isTimeValid(data.hours, data.minutes)) {
+      Alert.alert(
+        "Invalid Time",
+        `Please select a time at least 1.5 hours from now (${formatTimeForDisplay(
+          minimumTime?.hours || 0,
+          minimumTime?.minutes || 0
+        )} or later).`
+      );
+      return; // Don't update the selected time
+    }
+
     setSelectedTime({
       hours: data.hours,
       minutes: data.minutes,
@@ -101,6 +193,7 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
     setShowTimePicker(false);
   };
 
+  // Handle schedule button press
   const handleSchedule = () => {
     if (!selectedDates.startDate || !selectedDates.endDate) {
       Alert.alert(
@@ -109,8 +202,21 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
       );
       return;
     }
+
     if (!selectedTime.hours || !selectedTime.minutes) {
       Alert.alert("Warning", "Please select a time for your order");
+      return;
+    }
+
+    // Double-check if selected time is valid
+    if (!isTimeValid(selectedTime.hours, selectedTime.minutes)) {
+      Alert.alert(
+        "Invalid Time",
+        `Please select a time at least 1.5 hours from now (${formatTimeForDisplay(
+          minimumTime?.hours || 0,
+          minimumTime?.minutes || 0
+        )} or later).`
+      );
       return;
     }
 
@@ -119,6 +225,27 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
     const time = formatTime(selectedTime.hours, selectedTime.minutes);
 
     onPress(start, end, time);
+  };
+
+  // Helper function to format time for display
+  const formatTimeForDisplay = (hours: number, minutes: number) => {
+    return `${hours == 0 ? "00" : hours}:${minutes < 10 ? "0" : ""}${minutes}`;
+  };
+
+  // Open time picker with validation
+  const openTimePicker = () => {
+    if (!selectedDates.startDate) {
+      Alert.alert("Warning", "Please select a date first");
+      return;
+    }
+
+    // Ensure default time is valid
+    if (isToday(selectedDates.startDate) && minimumTime) {
+      setHours(minimumTime.hours);
+      setMinutes(minimumTime.minutes);
+    }
+
+    setShowTimePicker(true);
   };
 
   return (
@@ -204,20 +331,24 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
           Select Time
         </Typo>
 
-        <Pressable
-          onPress={() => {
-            setShowTimePicker(true);
-          }}
-          style={styles.selectionContainer}
-        >
+        <Pressable onPress={openTimePicker} style={styles.selectionContainer}>
           <Typo size={14}>
-            {" "}
-            {selectedTime.hours !== null && selectedTime.hours !== undefined
-              ? `${selectedTime.hours} : ${selectedTime.minutes ?? "00"}`
+            {selectedTime.hours !== null && selectedTime.minutes !== null
+              ? formatTimeForDisplay(selectedTime.hours, selectedTime.minutes)
               : "Select Time"}
           </Typo>
           <Clock />
         </Pressable>
+
+        {isToday(selectedDates.startDate) && minimumTime && (
+          <Typo
+            size={12}
+            style={{ paddingTop: verticalScale(5), color: colors.RED }}
+          >
+            For today, you can only select times after{" "}
+            {formatTimeForDisplay(minimumTime.hours, minimumTime.minutes)}
+          </Typo>
+        )}
 
         <TimePickerModal
           visible={showTimePicker}
@@ -319,9 +450,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     height: SCREEN_HEIGHT * 0.4, // Adjust height if needed
-    // alignSelf: "center", // Ensures it's centered in modal
-    marginTop: 10, // Adds space from the top
-    // marginLeft: SCREEN_HEIGHT * 0.023, // Adds space from the left
     margin: "auto",
     justifyContent: "center",
     alignItems: "center",

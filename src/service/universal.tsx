@@ -117,8 +117,10 @@ export const getAllCategory = async (
     });
 
     if (res.status === 200) {
+      // console.log("res.data", res.data);
       return {
         data: res.data.data,
+        page: res.data.page,
         hasNextPage: res.data.hasNextPage,
       };
     } else {
@@ -153,6 +155,7 @@ export const getAllProducts = async (
     if (res.status === 200) {
       return {
         data: res.data.data,
+        page: res.data.page,
         hasNextPage: res.data.hasNextPage,
       };
     } else {
