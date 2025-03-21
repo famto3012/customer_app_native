@@ -1,49 +1,59 @@
 import { Pressable, StyleSheet, View } from "react-native";
 import { FC } from "react";
-import { scale, verticalScale } from "@/utils/styling";
+import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import { colors, radius, spacingX } from "@/constants/theme";
 import { MerchantDataProps } from "@/types";
 import Typo from "../Typo";
 import { Clock, Star } from "phosphor-react-native";
+import MerchantDataLoader from "../Loader/MerchantDataLoader";
 
 const MerchantData: FC<{
   merchantData: MerchantDataProps;
   openRating: () => void;
-}> = ({ merchantData, openRating }) => {
+  merchantDataLoading: boolean;
+}> = ({ merchantData, openRating, merchantDataLoading }) => {
   return (
-    <View style={styles.merchantData}>
-      <View style={{ gap: scale(10) }}>
-        <Typo size={20} color={colors.NEUTRAL900} fontWeight="bold">
-          {merchantData?.merchantName}
-        </Typo>
-        <Typo size={12} color={colors.NEUTRAL600} fontFamily="Medium">
-          {merchantData?.displayAddress}
-        </Typo>
-
-        <View style={styles.labels}>
-          <Clock size={scale(15)} />
-          <Typo size={12} color={colors.NEUTRAL600} fontFamily="Medium">
-            {merchantData?.deliveryTime} min •
-          </Typo>
-          <Typo size={12} color={colors.NEUTRAL600} fontFamily="Medium">
-            {merchantData?.distanceInKM} km
-          </Typo>
+    <>
+      {merchantDataLoading ? (
+        <View style={[styles.merchantData]}>
+          <MerchantDataLoader />
         </View>
+      ) : (
+        <View style={styles.merchantData}>
+          <View style={{ gap: scale(10) }}>
+            <Typo size={20} color={colors.NEUTRAL900} fontWeight="bold">
+              {merchantData?.merchantName}
+            </Typo>
+            <Typo size={12} color={colors.NEUTRAL600} fontFamily="Medium">
+              {merchantData?.displayAddress}
+            </Typo>
 
-        <Typo size={12} color={colors.NEUTRAL600}>
-          {merchantData?.description}
-        </Typo>
-      </View>
+            <View style={styles.labels}>
+              <Clock size={scale(15)} />
+              <Typo size={12} color={colors.NEUTRAL600} fontFamily="Medium">
+                {merchantData?.deliveryTime} min •
+              </Typo>
+              <Typo size={12} color={colors.NEUTRAL600} fontFamily="Medium">
+                {merchantData?.distanceInKM} km
+              </Typo>
+            </View>
 
-      <View>
-        <Pressable style={styles.rating} onPress={openRating}>
-          <Star size={scale(15)} color={colors.WHITE} weight="fill" />
-          <Typo size={14} color={colors.WHITE}>
-            {merchantData?.rating}
-          </Typo>
-        </Pressable>
-      </View>
-    </View>
+            <Typo size={12} color={colors.NEUTRAL600}>
+              {merchantData?.description}
+            </Typo>
+          </View>
+
+          <View>
+            <Pressable style={styles.rating} onPress={openRating}>
+              <Star size={scale(15)} color={colors.WHITE} weight="fill" />
+              <Typo size={14} color={colors.WHITE}>
+                {merchantData?.rating}
+              </Typo>
+            </Pressable>
+          </View>
+        </View>
+      )}
+    </>
   );
 };
 

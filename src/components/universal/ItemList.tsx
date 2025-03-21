@@ -9,12 +9,14 @@ import { addProductToCart } from "@/service/universal";
 import { CartProps } from "@/types";
 import { useAuthStore } from "@/store/store";
 import { updateCart } from "@/localDB/controller/cartController";
+import { useData } from "@/context/DataContext";
 
 const ItemList: FC<{ items: CartProps["items"] }> = ({ items }) => {
   const [cartItems, setCartItems] = useState<CartProps["items"]>([]);
   const queryClient = useQueryClient();
 
   const { selectedMerchant } = useAuthStore.getState();
+  const { setProductCounts } = useData();
 
   useEffect(() => {
     setCartItems(items);
@@ -59,6 +61,15 @@ const ItemList: FC<{ items: CartProps["items"] }> = ({ items }) => {
         variantTypeId,
         variantTypeName
       );
+
+      setProductCounts((prev) => ({
+        ...prev,
+        [productId]: {
+          count: quantity,
+          variantTypeId: variantTypeId && variantTypeId,
+        },
+      }));
+
       setCartItems((prev) => {
         const updatedItems = prev
           .map((item) => {
@@ -84,6 +95,9 @@ const ItemList: FC<{ items: CartProps["items"] }> = ({ items }) => {
               cartId: "",
             },
           });
+
+          setProductCounts({});
+
           router.back();
         }
 
@@ -100,7 +114,7 @@ const ItemList: FC<{ items: CartProps["items"] }> = ({ items }) => {
 
       {cartItems?.map((product, index) => (
         <View style={styles.itemContainer} key={index + 1}>
-          <View>
+          <View style={{ width: "60%" }}>
             <Typo size={13} color={colors.NEUTRAL900}>
               {product?.productId?.productName}
             </Typo>

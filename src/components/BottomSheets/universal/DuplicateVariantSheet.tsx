@@ -11,6 +11,8 @@ import {
   updateCart,
 } from "@/localDB/controller/cartController";
 import { useAuthStore } from "@/store/store";
+import { useQuery } from "@tanstack/react-query";
+import { useData } from "@/context/DataContext";
 
 interface DuplicateVariantProps {
   productId: string;
@@ -22,21 +24,24 @@ interface DuplicateVariantProps {
 }
 
 const DuplicateVariantSheet: FC<{
-  product: ProductProps | null;
-  onNewCustomization: (product: ProductProps | null) => void;
+  onNewCustomization: () => void;
   closeSheet: () => void;
-}> = ({ product, onNewCustomization, closeSheet }) => {
+}> = ({ onNewCustomization, closeSheet }) => {
   const [localData, setLocalData] = useState<DuplicateVariantProps[]>([]);
 
+  const { product, setProduct, setProductCounts } = useData();
+
+  const { data } = useQuery({
+    queryKey: ["duplicate-variants", product?.productId],
+    queryFn: () => getItemsWithVariants(product?.productId as string),
+    enabled: !!product?.productId,
+  });
+
   useEffect(() => {
-    fetchData();
-  }, [product?.productId]);
-
-  const fetchData = async () => {
-    const items = await getItemsWithVariants(product?.productId || "");
-
-    setLocalData(items);
-  };
+    if (data && data.length > 0) {
+      setLocalData(data);
+    }
+  }, [data]);
 
   const RenderItem = ({ item }: { item: DuplicateVariantProps }) => {
     return (
@@ -72,7 +77,7 @@ const DuplicateVariantSheet: FC<{
 
               updateCart(
                 useAuthStore.getState().selectedMerchant.merchantId || "",
-                item.productId,
+                item?.productId,
                 item.productName,
                 item.price,
                 newCount,
@@ -97,6 +102,14 @@ const DuplicateVariantSheet: FC<{
                 );
 
               setLocalData(updatedData);
+
+              setProductCounts((prev) => ({
+                ...prev,
+                [item.productId]: {
+                  count: newCount,
+                  variantTypeId: item.variantTypeId,
+                },
+              }));
 
               if (updatedData.length === 0) {
                 closeSheet();
@@ -133,6 +146,14 @@ const DuplicateVariantSheet: FC<{
               );
 
               setLocalData(updatedData);
+
+              setProductCounts((prev) => ({
+                ...prev,
+                [item.productId]: {
+                  count: newCount,
+                  variantTypeId: item.variantTypeId,
+                },
+              }));
             }}
             style={styles.btn}
           >
@@ -168,7 +189,10 @@ const DuplicateVariantSheet: FC<{
 
       <Button
         title="+ Add new Customization"
-        onPress={() => onNewCustomization(product)}
+        onPress={() => {
+          setProduct(product);
+          onNewCustomization();
+        }}
         style={{ marginTop: "auto", marginBottom: verticalScale(20) }}
       />
     </BottomSheetScrollView>

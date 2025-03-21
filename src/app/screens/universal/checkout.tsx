@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
@@ -73,12 +73,12 @@ const Checkout = () => {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const { selectedBusiness } = useAuthStore.getState();
+  const { selectedBusiness, userAddress } = useAuthStore.getState();
 
   const [formData, setFormData] = useState<formDataProps>({
     deliveryMode,
     businessCategoryId: selectedBusiness?.toString() ?? "",
-    deliveryAddressType: "home",
+    deliveryAddressType: "",
     deliveryAddressOtherAddressId: "",
     newDeliveryAddress: {
       type: "",
@@ -125,6 +125,14 @@ const Checkout = () => {
       businessCategoryId: selectedBusiness?.toString() ?? "",
     });
   }, [selectedBusiness]);
+
+  useEffect(() => {
+    setFormData({
+      ...formData,
+      deliveryAddressType: userAddress.type,
+      deliveryAddressOtherAddressId: userAddress.otherId,
+    });
+  }, [userAddress]);
 
   useEffect(() => {
     cartData && setCart(cartData);
@@ -256,6 +264,11 @@ const Checkout = () => {
   });
 
   const handleConfirm = (data: formDataProps) => {
+    if (!data.deliveryAddressType) {
+      Alert.alert("", "Please select a delivery address to continue ordering");
+      return;
+    }
+
     const formDataObject = new FormData();
 
     function appendFormData(value: any, key: string) {

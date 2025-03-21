@@ -100,73 +100,37 @@ export const toggleMerchantFavorite = async (
   }
 };
 
-export const getAllCategory = async (
+export const fetchCategory = async (
   merchantId: string,
   businessCategoryId: string,
-  page: number,
-  limit: number
+  page: number
 ) => {
   try {
     const res = await appAxios.get(`/customers/category`, {
-      params: {
-        merchantId,
-        businessCategoryId,
-        page,
-        limit,
-      },
+      params: { merchantId, businessCategoryId, page },
     });
 
-    if (res.status === 200) {
-      // console.log("res.data", res.data);
-      return {
-        data: res.data.data,
-        page: res.data.page,
-        hasNextPage: res.data.hasNextPage,
-      };
-    } else {
-      return {
-        data: [],
-        hasNextPage: false,
-      };
-    }
+    return {
+      data: res.data.data[0] || null,
+      hasNextPage: res.data.hasNextPage,
+    };
   } catch (err) {
-    console.error(`Error in getting merchant category:`, err);
-    Alert.alert("Error", "Something went wrong!");
-    return { data: [], hasNextPage: false };
+    return { data: null, hasNextPage: false };
   }
 };
 
-export const getAllProducts = async (
+export const fetchProduct = async (
   categoryId: string,
   customerId: string,
-  page: number,
-  limit: number
+  page: number
 ) => {
   try {
     const res = await appAxios.get(`/customers/products`, {
-      params: {
-        categoryId,
-        customerId,
-        page,
-        limit,
-      },
+      params: { categoryId, customerId, page },
     });
 
-    if (res.status === 200) {
-      return {
-        data: res.data.data,
-        page: res.data.page,
-        hasNextPage: res.data.hasNextPage,
-      };
-    } else {
-      return {
-        data: [],
-        hasNextPage: false,
-      };
-    }
+    return { data: res.data.data, hasNextPage: res.data.hasNextPage };
   } catch (err) {
-    console.error(`Error in getting merchant products:`, err);
-    Alert.alert("Error", "Something went wrong!");
     return { data: [], hasNextPage: false };
   }
 };

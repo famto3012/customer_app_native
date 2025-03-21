@@ -3,15 +3,14 @@ import { FC } from "react";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius, spacingX } from "@/constants/theme";
 import Typo from "@/components/Typo";
-import { ProductProps } from "@/types";
 import { Heart } from "phosphor-react-native";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import FastImage from "react-native-fast-image";
+import { useData } from "@/context/DataContext";
 
-const ProductDetailSheet: FC<{
-  product: ProductProps;
-  onClose: () => void;
-}> = ({ product, onClose }) => {
+const ProductDetailSheet: FC<{}> = () => {
+  const { product } = useData();
+
   return (
     <View style={styles.container}>
       <BottomSheetScrollView showsVerticalScrollIndicator={false}>
@@ -25,13 +24,13 @@ const ProductDetailSheet: FC<{
             resizeMode="cover"
           />
 
-          <View style={styles.favoriteButton}>
+          {/* <View style={styles.favoriteButton}>
             <Heart
               color={product?.isFavorite ? colors.RED : colors.WHITE}
               weight={product?.isFavorite ? "fill" : "regular"}
               size={24}
             />
-          </View>
+          </View> */}
         </View>
 
         <View style={styles.detailsContainer}>
