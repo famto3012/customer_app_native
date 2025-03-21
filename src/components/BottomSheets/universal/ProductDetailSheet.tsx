@@ -1,12 +1,11 @@
-import { StyleSheet, View, Image, ScrollView } from "react-native";
-import React, { FC } from "react";
-import Button from "@/components/Button";
+import { StyleSheet, View } from "react-native";
+import { FC } from "react";
 import { scale, verticalScale } from "@/utils/styling";
-import { colors, radius, spacingX, spacingY } from "@/constants/theme";
+import { colors, radius, spacingX } from "@/constants/theme";
 import Typo from "@/components/Typo";
 import { ProductProps } from "@/types";
 import { Heart } from "phosphor-react-native";
-import { BottomSheetScrollView, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import FastImage from "react-native-fast-image";
 
 const ProductDetailSheet: FC<{
@@ -101,10 +100,6 @@ const ProductDetailSheet: FC<{
           )}
         </View>
       </BottomSheetScrollView>
-
-      {/* <View style={styles.footer}>
-        <Button onPress={onClose} title="Close" />
-      </View> */}
     </View>
   );
 };
@@ -120,13 +115,12 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     position: "relative",
-    width: SCREEN_WIDTH,
+    marginHorizontal: scale(15),
   },
   image: {
-    width: SCREEN_WIDTH,
-    height: scale(180),
-    borderTopLeftRadius: radius._20,
-    borderTopRightRadius: radius._20,
+    height: verticalScale(180),
+    borderRadius: radius._20,
+    resizeMode: "cover",
   },
   favoriteButton: {
     position: "absolute",
@@ -153,7 +147,7 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(10),
   },
   outOfStockBadge: {
-    backgroundColor: colors.RED + "20", // 20% opacity
+    backgroundColor: colors.RED + "20",
     paddingHorizontal: scale(10),
     paddingVertical: scale(5),
     borderRadius: radius._15,

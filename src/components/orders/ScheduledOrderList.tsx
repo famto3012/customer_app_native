@@ -6,12 +6,13 @@ import { colors, radius } from "@/constants/theme";
 import { ScheduledOrderItemProps } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { getScheduledOrderList } from "@/service/orderService";
-import { SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import { RefreshControl } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAuthStore } from "@/store/store";
 import LottieView from "lottie-react-native";
 import { router } from "expo-router";
+import SkeletonPlaceholder from "react-native-skeleton-placeholder";
 
 const ScheduledOrderList = () => {
   const [scheduledOrderList, setScheduledOrderList] = useState<
@@ -267,13 +268,125 @@ const ScheduledOrderList = () => {
           <View
             style={{
               flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-
+              alignItems: "flex-start",
+              // justifyContent: "center",
+              gap: scale(30),
               height: SCREEN_HEIGHT - verticalScale(250),
+              marginTop: verticalScale(20),
+              paddingHorizontal: scale(30),
             }}
           >
-            <Typo>Loading...</Typo>
+            <SkeletonPlaceholder borderRadius={4}>
+              <View style={{ width: SCREEN_WIDTH * 0.8 }}>
+                <SkeletonPlaceholder.Item
+                  flexDirection="row"
+                  alignItems="center"
+                >
+                  <SkeletonPlaceholder.Item
+                    width={60}
+                    height={60}
+                    borderRadius={10}
+                  />
+                  <SkeletonPlaceholder.Item marginLeft={20}>
+                    <SkeletonPlaceholder.Item width={120} height={20} />
+                    <SkeletonPlaceholder.Item
+                      marginTop={6}
+                      width={80}
+                      height={20}
+                    />
+                  </SkeletonPlaceholder.Item>
+                </SkeletonPlaceholder.Item>
+                <SkeletonPlaceholder.Item
+                  marginLeft={20}
+                  marginTop={10}
+                  flexDirection="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  gap={20}
+                >
+                  <SkeletonPlaceholder.Item width={120} height={20} />
+                  <SkeletonPlaceholder.Item
+                    marginTop={6}
+                    width={80}
+                    height={20}
+                  />
+                </SkeletonPlaceholder.Item>
+              </View>
+            </SkeletonPlaceholder>
+            <SkeletonPlaceholder borderRadius={4}>
+              <View style={{ width: SCREEN_WIDTH * 0.8 }}>
+                <SkeletonPlaceholder.Item
+                  flexDirection="row"
+                  alignItems="center"
+                >
+                  <SkeletonPlaceholder.Item
+                    width={60}
+                    height={60}
+                    borderRadius={10}
+                  />
+                  <SkeletonPlaceholder.Item marginLeft={20}>
+                    <SkeletonPlaceholder.Item width={120} height={20} />
+                    <SkeletonPlaceholder.Item
+                      marginTop={6}
+                      width={80}
+                      height={20}
+                    />
+                  </SkeletonPlaceholder.Item>
+                </SkeletonPlaceholder.Item>
+                <SkeletonPlaceholder.Item
+                  marginLeft={20}
+                  marginTop={10}
+                  flexDirection="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  gap={20}
+                >
+                  <SkeletonPlaceholder.Item width={120} height={20} />
+                  <SkeletonPlaceholder.Item
+                    marginTop={6}
+                    width={80}
+                    height={20}
+                  />
+                </SkeletonPlaceholder.Item>
+              </View>
+            </SkeletonPlaceholder>
+            <SkeletonPlaceholder borderRadius={4}>
+              <View style={{ width: SCREEN_WIDTH * 0.8 }}>
+                <SkeletonPlaceholder.Item
+                  flexDirection="row"
+                  alignItems="center"
+                >
+                  <SkeletonPlaceholder.Item
+                    width={60}
+                    height={60}
+                    borderRadius={10}
+                  />
+                  <SkeletonPlaceholder.Item marginLeft={20}>
+                    <SkeletonPlaceholder.Item width={120} height={20} />
+                    <SkeletonPlaceholder.Item
+                      marginTop={6}
+                      width={80}
+                      height={20}
+                    />
+                  </SkeletonPlaceholder.Item>
+                </SkeletonPlaceholder.Item>
+                <SkeletonPlaceholder.Item
+                  marginLeft={20}
+                  marginTop={10}
+                  flexDirection="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  gap={20}
+                >
+                  <SkeletonPlaceholder.Item width={120} height={20} />
+                  <SkeletonPlaceholder.Item
+                    marginTop={6}
+                    width={80}
+                    height={20}
+                  />
+                </SkeletonPlaceholder.Item>
+              </View>
+            </SkeletonPlaceholder>
           </View>
         )
       }

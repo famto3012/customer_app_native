@@ -185,7 +185,7 @@ const PickAndDropDetail = () => {
                   <View style={styles.warning}>
                     <Warning color={colors.RED} />
 
-                    <Typo size={12} color={colors.RED} style={{ width: "95%" }}>
+                    <Typo size={12} color={colors.RED} style={{ width: "90%" }}>
                       Please enter the accurate weight and dimensions to avoid
                       additional charges.
                     </Typo>

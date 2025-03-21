@@ -36,26 +36,26 @@ const VerifyOTP = () => {
   }, [count]);
 
   const handleVerifyOTP = async (otp: string) => {
-    if (!verificationId) {
-      Alert.alert("Error", "Verification ID is missing. Please try again.");
-      return;
-    }
+    // if (!verificationId) {
+    //   Alert.alert("Error", "Verification ID is missing. Please try again.");
+    //   return;
+    // }
 
     setIsLoading(true);
     try {
-      const credential = auth.PhoneAuthProvider.credential(verificationId, otp);
-      const userCredential = await auth().signInWithCredential(credential);
+      // const credential = auth.PhoneAuthProvider.credential(verificationId, otp);
+      // const userCredential = await auth().signInWithCredential(credential);
 
-      if (userCredential.user) {
-        const payload = {
-          phoneNumber: phoneNumber.toString(),
-          latitude: latitude || 0,
-          longitude: longitude || 0,
-          platform: Platform.OS,
-        };
+      // if (userCredential.user) {
+      const payload = {
+        phoneNumber: phoneNumber.toString(),
+        latitude: latitude || 0,
+        longitude: longitude || 0,
+        platform: Platform.OS,
+      };
 
-        await signIn(payload);
-      }
+      await signIn(payload);
+      // }
     } catch (error: any) {
       Alert.alert(
         "Authentication Failed",

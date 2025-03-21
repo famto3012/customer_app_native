@@ -32,17 +32,18 @@ const Auth = () => {
 
       const fullPhoneNumber = `+91${phoneNumberRef.current}`;
 
-      const confirmation = await auth().signInWithPhoneNumber(fullPhoneNumber);
+      // const confirmation = await auth().signInWithPhoneNumber(fullPhoneNumber);
 
-      if (confirmation.verificationId) {
-        router.push({
-          pathname: "/verify-otp",
-          params: {
-            phoneNumber: phoneNumberRef.current,
-            verificationId: confirmation.verificationId,
-          },
-        });
-      }
+      // if (confirmation.verificationId) {
+      router.push({
+        pathname: "/verify-otp",
+        params: {
+          phoneNumber: phoneNumberRef.current,
+          // verificationId: confirmation.verificationId,
+          verificationId: "",
+        },
+      });
+      // }
     } catch (error: any) {
       Alert.alert("Error", error.message);
     } finally {

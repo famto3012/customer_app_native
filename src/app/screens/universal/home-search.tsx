@@ -20,6 +20,7 @@ import { useAuthStore } from "@/store/store";
 import { router } from "expo-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { searchMerchantAndProducts } from "@/service/userService";
+import SkeletonPlaceholder from "react-native-skeleton-placeholder";
 
 const useHomeSearch = (query: string) => {
   return useInfiniteQuery({
@@ -166,7 +167,57 @@ const HomeSearch = () => {
           />
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.PRIMARY} />
+          <SkeletonPlaceholder borderRadius={4}>
+            <SkeletonPlaceholder.Item flexDirection="row" alignItems="center">
+              <SkeletonPlaceholder.Item
+                width={60}
+                height={60}
+                borderRadius={10}
+              />
+              <SkeletonPlaceholder.Item marginLeft={20}>
+                <SkeletonPlaceholder.Item width={120} height={20} />
+                <SkeletonPlaceholder.Item
+                  marginTop={6}
+                  width={80}
+                  height={20}
+                />
+              </SkeletonPlaceholder.Item>
+            </SkeletonPlaceholder.Item>
+          </SkeletonPlaceholder>
+          <SkeletonPlaceholder borderRadius={4}>
+            <SkeletonPlaceholder.Item flexDirection="row" alignItems="center">
+              <SkeletonPlaceholder.Item
+                width={60}
+                height={60}
+                borderRadius={10}
+              />
+              <SkeletonPlaceholder.Item marginLeft={20}>
+                <SkeletonPlaceholder.Item width={120} height={20} />
+                <SkeletonPlaceholder.Item
+                  marginTop={6}
+                  width={80}
+                  height={20}
+                />
+              </SkeletonPlaceholder.Item>
+            </SkeletonPlaceholder.Item>
+          </SkeletonPlaceholder>
+          <SkeletonPlaceholder borderRadius={4}>
+            <SkeletonPlaceholder.Item flexDirection="row" alignItems="center">
+              <SkeletonPlaceholder.Item
+                width={60}
+                height={60}
+                borderRadius={10}
+              />
+              <SkeletonPlaceholder.Item marginLeft={20}>
+                <SkeletonPlaceholder.Item width={120} height={20} />
+                <SkeletonPlaceholder.Item
+                  marginTop={6}
+                  width={80}
+                  height={20}
+                />
+              </SkeletonPlaceholder.Item>
+            </SkeletonPlaceholder.Item>
+          </SkeletonPlaceholder>
         </View>
       </ScreenWrapper>
     );
@@ -197,7 +248,19 @@ const HomeSearch = () => {
     if (!isFetchingNextPage) return null;
     return (
       <View style={styles.footerLoading}>
-        <ActivityIndicator size="small" color={colors.PRIMARY} />
+        <SkeletonPlaceholder borderRadius={4}>
+          <SkeletonPlaceholder.Item flexDirection="row" alignItems="center">
+            <SkeletonPlaceholder.Item
+              width={60}
+              height={60}
+              borderRadius={10}
+            />
+            <SkeletonPlaceholder.Item marginLeft={20}>
+              <SkeletonPlaceholder.Item width={120} height={20} />
+              <SkeletonPlaceholder.Item marginTop={6} width={80} height={20} />
+            </SkeletonPlaceholder.Item>
+          </SkeletonPlaceholder.Item>
+        </SkeletonPlaceholder>
       </View>
     );
   };
@@ -287,9 +350,11 @@ const styles = StyleSheet.create({
     paddingBottom: scale(20),
   },
   loadingContainer: {
-    flex: 1,
+    paddingVertical: scale(20),
+    paddingHorizontal: scale(30),
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-start",
+    gap: scale(20),
   },
   errorContainer: {
     flex: 1,
@@ -305,7 +370,8 @@ const styles = StyleSheet.create({
   },
   footerLoading: {
     paddingVertical: scale(20),
+    paddingHorizontal: scale(30),
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-start",
   },
 });

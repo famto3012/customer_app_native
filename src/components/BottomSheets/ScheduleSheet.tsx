@@ -10,7 +10,7 @@ import { BottomSheetScrollView, SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
 import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
 import { colors, radius, spacingX } from "@/constants/theme";
-import { Clock } from "phosphor-react-native";
+import { Check, Clock } from "phosphor-react-native";
 import { scheduleDetails } from "@/utils/defaultData";
 import { FC, useState, useEffect, useCallback } from "react";
 
@@ -319,6 +319,7 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
           startDate={selectedDates.startDate || new Date()}
           endDate={selectedDates.endDate || new Date()}
           onConfirm={onDateChange}
+          saveLabel="Save"
         />
 
         {/* Time Picker */}
