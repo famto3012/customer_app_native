@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { FC, memo } from "react";
 import { Pressable, View, StyleSheet } from "react-native";
 import Typo from "@/components/Typo";
 import Animated from "react-native-reanimated";
@@ -7,18 +7,15 @@ import { colors } from "@/constants/theme";
 import ProductsList from "./ProductList";
 import { CategoryProps, ProductProps } from "@/types";
 
-const CategoryContainer = memo(
-  ({
-    category,
-    products,
-    openVariant,
-    openDetail,
-  }: {
-    category: CategoryProps;
-    products: ProductProps[];
-    openVariant: (count?: number) => void;
-    openDetail: () => void;
-  }) => {
+interface CategoryContainerProps {
+  category: CategoryProps;
+  products: ProductProps[];
+  openVariant: (count?: number) => void;
+  openDetail: () => void;
+}
+
+const CategoryContainer: FC<CategoryContainerProps> = memo(
+  ({ category, products, openVariant, openDetail }) => {
     return (
       <View style={styles.categoryContainer}>
         <Pressable style={styles.categoryBtn}>
@@ -48,11 +45,25 @@ const CategoryContainer = memo(
       </View>
     );
   },
+  // (prevProps, nextProps) => {
+  //   // Custom comparison function to determine if component should update
+  //   return (
+  //     prevProps.category.categoryId === nextProps.category.categoryId &&
+  //     prevProps.products.length === nextProps.products.length
+  //   );
+  // }
   (prevProps, nextProps) => {
-    // Custom comparison function to determine if component should update
-    return (
-      prevProps.category.categoryId === nextProps.category.categoryId &&
-      prevProps.products.length === nextProps.products.length
+    // First check if categories are the same
+    if (prevProps.category.categoryId !== nextProps.category.categoryId)
+      return false;
+
+    // Fast length check
+    if (prevProps.products.length !== nextProps.products.length) return false;
+
+    // Check if product IDs are the same (avoid comparing entire objects)
+    return prevProps.products.every(
+      (product, index) =>
+        product.productId === nextProps.products[index].productId
     );
   }
 );

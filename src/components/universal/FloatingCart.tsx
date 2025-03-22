@@ -20,7 +20,6 @@ import { addItemsToCart } from "@/service/universal";
 const FloatingCart: FC<{ onClearCart: () => void }> = ({ onClearCart }) => {
   const showCart = useAuthStore((state) => state.cart.showCart);
   const merchant = useAuthStore((state) => state.cart.merchant);
-  const cartId = useAuthStore((state) => state.cart.cartId);
 
   const { selectedMerchant } = useAuthStore.getState();
 

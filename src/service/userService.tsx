@@ -213,6 +213,8 @@ export const verifyWalletPayment = async (
       name: "Famto",
       description: "Wallet recharge",
       order_id: orderId,
+      image:
+        "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/DefaultImages%2FLogo.png?alt=media&token=f2605d05-662b-4a68-a1e6-6c89db579693",
       prefill: {
         name: "",
         email: "",
@@ -300,6 +302,8 @@ export const verifySubscription = async (
       name: "Famto",
       description: "Subscription payment",
       order_id: orderId,
+      image:
+        "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/DefaultImages%2FLogo.png?alt=media&token=f2605d05-662b-4a68-a1e6-6c89db579693",
       prefill: {
         name: "",
         email: "",
