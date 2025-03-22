@@ -26,6 +26,7 @@ import ProductDetailSheet from "@/components/BottomSheets/universal/ProductDetai
 import MerchantRatingSheet from "@/components/BottomSheets/universal/MerchantRatingSheet";
 import DistanceWarning from "@/components/BottomSheets/universal/DistanceWarning";
 import ProductCategoryLoader from "@/components/Loader/ProductCategoryLoader";
+import { verticalScale } from "@/utils/styling";
 
 const Products = () => {
   // Combined data structure for categories and their products
@@ -63,6 +64,7 @@ const Products = () => {
   const { merchantId } = useLocalSearchParams<{ merchantId: string }>();
   const { selectedBusiness } = useAuthStore.getState();
   const { latitude, longitude } = useSafeLocation();
+  const showCart = useAuthStore((state) => state.cart.showCart);
 
   const { data: merchantData, isLoading: merchantDataLoading } =
     useQuery<MerchantDataProps>({
@@ -260,6 +262,20 @@ const Products = () => {
   // Memoized key extractor that creates truly unique keys
   const keyExtractor = useCallback((item: any, index: number) => item.id, []);
 
+  const getItemLayout = useCallback((data: any, index: number) => {
+    const itemHeight = 180; // Approximate height of each category item
+    return {
+      length: itemHeight,
+      offset: itemHeight * index,
+      index,
+    };
+  }, []);
+
+  const listData = useMemo(
+    () => getListData(),
+    [categories, categoryProducts, isLoading]
+  );
+
   // Optimized empty component
   const ListEmptyComponent = useCallback(() => {
     return <EmptyComponent isLoading={isLoading} />;
@@ -290,7 +306,7 @@ const Products = () => {
       <View style={{ flex: 1 }} onLayout={onContainerLayout}>
         <FlatList
           ref={listRef}
-          data={getListData()}
+          data={listData}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           onContentSizeChange={onContentSizeChange}
@@ -303,14 +319,19 @@ const Products = () => {
               openRating={() => ratingSheetRef.current?.expand()}
             />
           )}
+          contentContainerStyle={{
+            paddingBottom: showCart ? verticalScale(60) : 0,
+          }}
           onEndReached={handleEndReached}
-          onEndReachedThreshold={0.3}
-          maxToRenderPerBatch={5}
-          updateCellsBatchingPeriod={50}
-          windowSize={5}
+          onEndReachedThreshold={0.5} // Increase this value
+          maxToRenderPerBatch={4} // Reduce this value
+          updateCellsBatchingPeriod={100} // Increase this value
+          windowSize={3} // Reduce window size
           removeClippedSubviews={true}
-          initialNumToRender={3}
+          initialNumToRender={3} // Reduce initial render count
           showsVerticalScrollIndicator={false}
+          legacyImplementation={true}
+          getItemLayout={getItemLayout}
         />
       </View>
 

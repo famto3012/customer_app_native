@@ -1,4 +1,4 @@
-import React, { FC, memo, useEffect, useState } from "react";
+import React, { FC, memo, useEffect, useMemo, useState } from "react";
 import { View, Pressable, StyleSheet } from "react-native";
 import FastImage from "react-native-fast-image";
 import { Heart } from "phosphor-react-native";
@@ -28,22 +28,15 @@ const ProductItem: FC<ProductItemProps> = memo(
     const { token, selectedMerchant } = useAuthStore.getState();
     const { productCounts, setProduct, setProductCounts } = useData();
 
-    const [count, setCount] = useState<number>(
-      productCounts[product.productId]?.count || 0
-    );
-
-    useEffect(() => {
+    // For example, in ProductItem.tsx
+    const count = useMemo(() => {
       if (product?.variantAvailable) {
-        // Sum up all counts where productId matches, regardless of `variantTypeId`
-        const totalCount = Object.entries(productCounts)
+        return Object.entries(productCounts)
           .filter(([id]) => id.split("-")[0] === product.productId)
           .reduce((sum, [, { count }]) => sum + (count || 0), 0);
-
-        setCount(totalCount);
-      } else {
-        setCount(productCounts[product.productId]?.count || 0);
       }
-    }, [productCounts, product?.productId]);
+      return productCounts[product.productId]?.count || 0;
+    }, [product.productId, productCounts]);
 
     const isUserAuthenticated = () => {
       if (!token) {
@@ -200,6 +193,14 @@ const ProductItem: FC<ProductItemProps> = memo(
           </Typo>
         </View>
       </View>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Compare only essential props that would affect rendering
+    return (
+      prevProps.product.productId === nextProps.product.productId &&
+      prevProps.product.isFavorite === nextProps.product.isFavorite &&
+      prevProps.product.inventory === nextProps.product.inventory
     );
   }
 );
