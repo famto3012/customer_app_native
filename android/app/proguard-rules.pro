@@ -28,3 +28,8 @@
 # Add these rules to your proguard-rules.pro file
 -keep class com.mappls.sdk.maps.** { *; }
 -keep class com.mappls.sdk.services.** { *; }
+-keep class com.mappls.** { *; }
+-keep class com.mmi.** { *; }
+-keep class okhttp3.** { *; }
+-keep class com.mappls.sdk.** { *; }
+-keep interface com.mappls.sdk.** { *; }
