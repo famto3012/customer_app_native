@@ -38,7 +38,6 @@ import {
 import Instructions from "@/components/common/Instructions";
 import { commonStyles } from "@/constants/commonStyles";
 import UserSelectedAddress from "@/components/common/UserSelectedAddress";
-import { Platform } from "react-native";
 
 const CustomOrderCheckout = () => {
   const [cartItem, setCartItem] = useState<CustomOrderItemsProps[]>([]);
