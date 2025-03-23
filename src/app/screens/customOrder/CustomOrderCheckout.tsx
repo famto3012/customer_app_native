@@ -3,6 +3,7 @@ import {
   Alert,
   FlatList,
   Platform,
+  KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
   ToastAndroid,
@@ -17,6 +18,7 @@ import { scale, verticalScale } from "@/utils/styling";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
+  BottomSheetScrollView,
   SCREEN_WIDTH,
 } from "@gorhom/bottom-sheet";
 import { router, useLocalSearchParams } from "expo-router";
@@ -36,6 +38,7 @@ import {
 import Instructions from "@/components/common/Instructions";
 import { commonStyles } from "@/constants/commonStyles";
 import UserSelectedAddress from "@/components/common/UserSelectedAddress";
+import { Platform } from "react-native";
 
 const CustomOrderCheckout = () => {
   const [cartItem, setCartItem] = useState<CustomOrderItemsProps[]>([]);
@@ -294,14 +297,21 @@ const CustomOrderCheckout = () => {
         ref={addItemSheetRef}
         index={-1}
         snapPoints={addItemSnapPoints}
-        enableDynamicSizing
+        enableDynamicSizing={true}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
       >
-        <AddItemBottomSheet
-          onAddingItem={handleAddingItem}
-          closeAddSheet={() => addItemSheetRef?.current?.close()}
-        />
+        <BottomSheetScrollView>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{ flex: 1 }}
+          >
+            <AddItemBottomSheet
+              onAddingItem={handleAddingItem}
+              closeAddSheet={() => addItemSheetRef?.current?.close()}
+            />
+          </KeyboardAvoidingView>
+        </BottomSheetScrollView>
       </BottomSheet>
 
       <BottomSheet

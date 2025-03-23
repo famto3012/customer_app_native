@@ -5,6 +5,7 @@ import {
   StyleSheet,
   View,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { FC, useEffect, useState } from "react";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
@@ -17,6 +18,7 @@ import { updateCart } from "@/localDB/controller/cartController";
 import { useAuthStore } from "@/store/store";
 import { useQuery } from "@tanstack/react-query";
 import { useData } from "@/context/DataContext";
+import VariantLoader from "../Loader/VariantLoader";
 
 interface SelectedVariantProps {
   variantTypeId: string;
@@ -25,7 +27,6 @@ interface SelectedVariantProps {
 }
 
 const VariantSheet: FC<{
-  // product: ProductProps | null;
   onAddItem: () => void;
 }> = ({ onAddItem }) => {
   const [selected, setSelected] = useState<SelectedVariantProps>({
@@ -37,7 +38,7 @@ const VariantSheet: FC<{
 
   const { product, setProductCounts } = useData();
 
-  const { data: variants } = useQuery<Variant[]>({
+  const { data: variants = [], isLoading } = useQuery<Variant[], Error>({
     queryKey: ["product-variants", product?.productId],
     queryFn: () => getVariants(product?.productId || ""),
     enabled: !!product?.productId,
@@ -50,7 +51,7 @@ const VariantSheet: FC<{
   useEffect(() => {
     if (variants && variants?.length > 0 && !selected.variantTypeId) {
       setSelected({
-        variantTypeId: variants[0]?.variantTypes[0]?._id || "",
+        variantTypeId: variants[0]?.variantTypes[0]?._id,
         price:
           variants[0]?.variantTypes[0]?.discountPrice ||
           variants[0]?.variantTypes[0]?.price ||
@@ -75,6 +76,11 @@ const VariantSheet: FC<{
   const handleIncrement = () => setCount(count + 1);
 
   const handleAddItem = async () => {
+    if (!selected.variantTypeId || !selected.variantTypeName) {
+      Alert.alert("", "Please select a variant type");
+      return;
+    }
+
     if (selected && count > 0 && product?.productId) {
       try {
         await updateCart(
@@ -87,13 +93,17 @@ const VariantSheet: FC<{
           selected.variantTypeName
         );
 
-        setProductCounts((prev) => ({
-          ...prev,
-          [product.productId]: {
-            count,
-            variantTypeId: selected.variantTypeId,
-          },
-        }));
+        setProductCounts((prev) => {
+          const updatedCounts = {
+            ...prev,
+            [`${product.productId}-${selected.variantTypeId}`]: {
+              count,
+              variantTypeId: selected.variantTypeId,
+            },
+          };
+
+          return updatedCounts;
+        });
 
         onAddItem();
       } catch (error) {
@@ -123,77 +133,81 @@ const VariantSheet: FC<{
           )}
         </View>
 
-        <FlatList
-          data={variants || []}
-          renderItem={({ item }) => (
-            <View style={{ marginTop: verticalScale(20) }}>
-              <Typo
-                size={14}
-                color={colors.NEUTRAL800}
-                fontFamily="Medium"
-                style={{ paddingBottom: verticalScale(15) }}
-              >
-                {item.variantName}
-              </Typo>
+        {isLoading ? (
+          <VariantLoader />
+        ) : (
+          <FlatList
+            data={variants ?? []}
+            renderItem={({ item }) => (
+              <View style={{ marginTop: verticalScale(20) }}>
+                <Typo
+                  size={14}
+                  color={colors.NEUTRAL800}
+                  fontFamily="Medium"
+                  style={{ paddingBottom: verticalScale(15) }}
+                >
+                  {item.variantName}
+                </Typo>
 
-              <FlatList
-                data={item.variantTypes}
-                renderItem={({ item }) => (
-                  <Pressable
-                    onPress={() =>
-                      handleSelectVariant(
-                        item._id,
-                        item?.discountPrice || item.price,
-                        item.typeName
-                      )
-                    }
-                    style={styles.variantRow}
-                  >
-                    <Typo
-                      size={13}
-                      fontFamily="Medium"
-                      color={colors.NEUTRAL800}
-                      style={{ flex: 1 }}
+                <FlatList
+                  data={item.variantTypes}
+                  renderItem={({ item }) => (
+                    <Pressable
+                      onPress={() =>
+                        handleSelectVariant(
+                          item._id,
+                          item?.discountPrice || item.price,
+                          item.typeName
+                        )
+                      }
+                      style={styles.variantRow}
                     >
-                      {item.typeName}
-                    </Typo>
-
-                    <View style={styles.priceContainer}>
                       <Typo
-                        size={14}
-                        color={colors.NEUTRAL400}
-                        style={{ textDecorationLine: "line-through" }}
-                      >
-                        ₹ {item.price}
-                      </Typo>
-                      <Typo
-                        size={16}
-                        color={colors.NEUTRAL800}
+                        size={13}
                         fontFamily="Medium"
+                        color={colors.NEUTRAL800}
+                        style={{ flex: 1 }}
                       >
-                        ₹ {item.discountPrice}
+                        {item.typeName}
                       </Typo>
 
-                      <View
-                        style={[
-                          styles.radio,
-                          selected.variantTypeId === item._id &&
-                            styles.radioSelected,
-                        ]}
-                      >
-                        {selected.variantTypeId === item._id && (
-                          <View style={styles.radioInner} />
-                        )}
+                      <View style={styles.priceContainer}>
+                        <Typo
+                          size={14}
+                          color={colors.NEUTRAL400}
+                          style={{ textDecorationLine: "line-through" }}
+                        >
+                          ₹ {item.price}
+                        </Typo>
+                        <Typo
+                          size={16}
+                          color={colors.NEUTRAL800}
+                          fontFamily="Medium"
+                        >
+                          ₹ {item.discountPrice}
+                        </Typo>
+
+                        <View
+                          style={[
+                            styles.radio,
+                            selected.variantTypeId === item._id &&
+                              styles.radioSelected,
+                          ]}
+                        >
+                          {selected.variantTypeId === item._id && (
+                            <View style={styles.radioInner} />
+                          )}
+                        </View>
                       </View>
-                    </View>
-                  </Pressable>
-                )}
-                scrollEnabled={false}
-              />
-            </View>
-          )}
-          scrollEnabled={false}
-        />
+                    </Pressable>
+                  )}
+                  scrollEnabled={false}
+                />
+              </View>
+            )}
+            scrollEnabled={false}
+          />
+        )}
       </BottomSheetScrollView>
 
       {/* ✅ Button Stays Fixed at Bottom */}

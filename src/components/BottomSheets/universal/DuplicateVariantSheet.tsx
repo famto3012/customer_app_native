@@ -26,7 +26,8 @@ interface DuplicateVariantProps {
 const DuplicateVariantSheet: FC<{
   onNewCustomization: () => void;
   closeSheet: () => void;
-}> = ({ onNewCustomization, closeSheet }) => {
+  openDuplicate: boolean;
+}> = ({ onNewCustomization, closeSheet, openDuplicate }) => {
   const [localData, setLocalData] = useState<DuplicateVariantProps[]>([]);
 
   const { product, setProduct, setProductCounts } = useData();
@@ -34,7 +35,7 @@ const DuplicateVariantSheet: FC<{
   const { data } = useQuery({
     queryKey: ["duplicate-variants", product?.productId],
     queryFn: () => getItemsWithVariants(product?.productId as string),
-    enabled: !!product?.productId,
+    enabled: !!product?.productId && openDuplicate,
   });
 
   useEffect(() => {
@@ -105,7 +106,7 @@ const DuplicateVariantSheet: FC<{
 
               setProductCounts((prev) => ({
                 ...prev,
-                [item.productId]: {
+                [`${item.productId}-${item.variantTypeId}`]: {
                   count: newCount,
                   variantTypeId: item.variantTypeId,
                 },
@@ -149,7 +150,7 @@ const DuplicateVariantSheet: FC<{
 
               setProductCounts((prev) => ({
                 ...prev,
-                [item.productId]: {
+                [`${item.productId}-${item.variantTypeId}`]: {
                   count: newCount,
                   variantTypeId: item.variantTypeId,
                 },

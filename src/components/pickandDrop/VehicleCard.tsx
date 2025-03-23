@@ -49,7 +49,14 @@ const VehicleCard: FC<VehicleCardProps> = ({
       </Typo>
 
       {data?.map((vehicle) => (
-        <View key={vehicle.vehicleType} style={styles.cardContainer}>
+        <Pressable
+          onPress={() => {
+            setSelected(vehicle.vehicleType);
+            onVehicleSelect(vehicle.vehicleType, vehicle.deliveryCharges);
+          }}
+          key={vehicle.vehicleType}
+          style={styles.cardContainer}
+        >
           <Image
             source={
               pickAndDropVehicleDetail.find(
@@ -77,12 +84,7 @@ const VehicleCard: FC<VehicleCardProps> = ({
             </Typo>
           </View>
 
-          <Pressable
-            onPress={() =>
-              onVehicleSelect(vehicle.vehicleType, vehicle.deliveryCharges)
-            }
-            style={commonStyles.flexRowGap}
-          >
+          <View style={commonStyles.flexRowGap}>
             <View>
               <Typo size={18} fontFamily="SemiBold" color={colors.NEUTRAL900}>
                 ₹{vehicle.deliveryCharges.toFixed(2)}
@@ -102,8 +104,8 @@ const VehicleCard: FC<VehicleCardProps> = ({
                 <View style={styles.radioInner} />
               )}
             </View>
-          </Pressable>
-        </View>
+          </View>
+        </Pressable>
       ))}
     </>
   );

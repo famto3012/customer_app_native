@@ -1,10 +1,4 @@
-import {
-  ActivityIndicator,
-  Image,
-  Pressable,
-  StyleSheet,
-  View,
-} from "react-native";
+import { Image, Pressable, StyleSheet, View } from "react-native";
 import { FC } from "react";
 import { PickAndDropItemProps } from "@/types";
 import Typo from "../Typo";
@@ -59,7 +53,7 @@ const ItemCard: FC<{
         <View>
           <Typo size={13}>Weight</Typo>
           <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
-            {item.weight} kg
+            {item?.weight || "-"} kg
           </Typo>
         </View>
 
@@ -68,7 +62,8 @@ const ItemCard: FC<{
         <View>
           <Typo size={13}>Package specification</Typo>
           <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
-            {item.length} * {item.width} * {item.height} cm
+            {item?.length || "-"} * {item?.width || "-"} * {item?.height || "-"}{" "}
+            cm
           </Typo>
         </View>
       </View>
@@ -113,23 +108,5 @@ const styles = StyleSheet.create({
   separator: {
     borderWidth: 0.6,
     borderColor: colors.NEUTRAL300,
-  },
-  galleryImage: {
-    height: verticalScale(24),
-    width: scale(24),
-    marginHorizontal: scale(10),
-  },
-  imageBtn: {
-    marginTop: verticalScale(20),
-    backgroundColor: colors.NEUTRAL200,
-    marginHorizontal: scale(15),
-    flexDirection: "row",
-    borderRadius: radius._10,
-    paddingVertical: verticalScale(15),
-  },
-  imageDetail: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
   },
 });

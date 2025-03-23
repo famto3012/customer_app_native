@@ -26,6 +26,7 @@ import CustomBillDetail from "@/components/customOrder/CustomBillDetail";
 import { CustomCartBill } from "@/types";
 import { useAuthStore } from "@/store/store";
 import AppliedPromoCode from "@/components/common/AppliedPromoCode";
+import { addOrder } from "@/localDB/controller/orderController";
 
 const CustomOrderBill = () => {
   const [promoCodeUsed, setPromoCodeUsed] = useState<string>("");
@@ -67,6 +68,8 @@ const CustomOrderBill = () => {
     mutationFn: () => confirmCustomOrder(cartId.toString()),
     onSuccess: (data) => {
       if (data.orderId) {
+        addOrder(data.orderId, data.createdAt, "Custom-order");
+
         useAuthStore.setState({
           promoCode: {
             ...useAuthStore.getState().promoCode,

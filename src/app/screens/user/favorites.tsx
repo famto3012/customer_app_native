@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
@@ -11,8 +11,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { colors } from "@/constants/theme";
-import FavoriteProductList from "@/components/BottomSheets/user/FavoriteProductList";
-import FavoriteMerchantList from "@/components/BottomSheets/user/FavoriteMerchantList";
+import FavoriteMerchantList from "@/components/user/FavoriteMerchantList";
+import FavoriteProductList from "@/components/user/FavoriteProductList";
 
 const TAB_WIDTH = (SCREEN_WIDTH - scale(40)) / 2;
 
@@ -79,6 +79,7 @@ const Favorites = () => {
           <Animated.View style={[styles.indicator, animatedIndicator]} />
         </View>
       </View>
+
       {favoriteType === "Product" ? (
         <FavoriteProductList />
       ) : (

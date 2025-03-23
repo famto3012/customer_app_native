@@ -21,7 +21,9 @@ const VerifyOTP = () => {
   const {
     verificationId,
     phoneNumber,
-  }: { verificationId: string; phoneNumber: string } = useLocalSearchParams();
+    referralCode,
+  }: { verificationId: string; phoneNumber: string; referralCode?: string } =
+    useLocalSearchParams();
 
   const { latitude, longitude } = useSafeLocation();
 
@@ -58,6 +60,7 @@ const VerifyOTP = () => {
         latitude: latitude || 0,
         longitude: longitude || 0,
         platform: Platform.OS,
+        referralCode,
       };
 
       await signIn(payload);

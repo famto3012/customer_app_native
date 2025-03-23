@@ -1,12 +1,12 @@
 import { Image, StyleSheet, View } from "react-native";
 import { FC } from "react";
-import Typo from "../Typo";
 import { Phone } from "phosphor-react-native";
 import { colors, spacingX, spacingY } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
 import { MerchantDataProps } from "@/types";
+import Typo from "@/components/Typo";
 
-const ProductFooter: FC<{ merchantData: MerchantDataProps }> = ({
+const CategoryFooter: FC<{ merchantData: MerchantDataProps }> = ({
   merchantData,
 }) => {
   return (
@@ -30,7 +30,7 @@ const ProductFooter: FC<{ merchantData: MerchantDataProps }> = ({
   );
 };
 
-export default ProductFooter;
+export default CategoryFooter;
 
 const styles = StyleSheet.create({
   container: {

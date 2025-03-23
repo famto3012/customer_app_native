@@ -20,6 +20,8 @@ import auth from "@react-native-firebase/auth";
 
 const Auth = () => {
   const phoneNumberRef = useRef<string>("");
+  const [referral, setReferral] = useState<string>("");
+  const [showReferral, setShowReferral] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isGeneratingOTP, setIsGeneratingOTP] = useState<boolean>(false);
   const { showSkip } = useLocalSearchParams();
@@ -54,6 +56,7 @@ const Auth = () => {
         pathname: "/verify-otp",
         params: {
           phoneNumber: phoneNumberRef.current,
+          referralCode: referral,
           // verificationId: confirmation.verificationId,
           verificationId: "",
         },
@@ -164,6 +167,29 @@ const Auth = () => {
             onChangeText={(value) => (phoneNumberRef.current = value)}
           />
         </View>
+
+        {showReferral ? (
+          <View style={{ flexDirection: "row", marginTop: verticalScale(20) }}>
+            <Input
+              placeholder="Referral code"
+              onChangeText={(value: string) => setReferral(value)}
+            />
+          </View>
+        ) : (
+          <Pressable
+            onPress={() => setShowReferral(true)}
+            style={{ marginTop: verticalScale(20) }}
+          >
+            <Typo
+              size={16}
+              color={colors.PRIMARY}
+              fontFamily="SemiBold"
+              style={{ textDecorationLine: "underline" }}
+            >
+              Have a referral code?
+            </Typo>
+          </Pressable>
+        )}
       </View>
 
       <View

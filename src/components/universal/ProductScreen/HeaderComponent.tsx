@@ -6,7 +6,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { router } from "expo-router";
 import { scale, verticalScale } from "@/utils/styling";
 import { MerchantDataProps } from "@/types";
@@ -18,6 +18,7 @@ import MerchantData from "../MerchantData";
 import MerchantBanner from "../MerchantBanner";
 import SearchView from "@/components/SearchView";
 import Typo from "@/components/Typo";
+import { useData } from "@/context/DataContext";
 
 const { height } = Dimensions.get("window");
 
@@ -35,6 +36,12 @@ const HeaderComponent: FC<ListHeaderProps> = ({
   merchantDataLoading,
 }) => {
   const [selectedFilter, setSelectedFilter] = useState<string>("");
+
+  const { setProductFilter } = useData();
+
+  useEffect(() => {
+    setProductFilter(selectedFilter);
+  }, [selectedFilter]);
 
   const renderItem = ({ item }: any) => {
     return (
