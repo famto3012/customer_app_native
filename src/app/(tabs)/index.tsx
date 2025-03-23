@@ -36,8 +36,6 @@ import BottomSheet, {
 import { commonStyles } from "@/constants/commonStyles";
 import TemporaryOrderSheet from "@/components/BottomSheets/universal/TemporaryOrderSheet";
 import FastImage from "react-native-fast-image";
-// import SelectAddress from "@/components/BottomSheets/user/SelectAddress";
-import SelectAddress from "../(modal)/SelectAddress";
 
 const Home = () => {
   const temporaryOrderSheet = useRef<BottomSheet>(null);
@@ -52,7 +50,7 @@ const Home = () => {
 
   useEffect(() => {
     if (outsideGeofence) {
-      router.push("/(modal)/SelectAddress");
+      router.push("/(modals)/SelectAddress");
     }
   }, [outsideGeofence]);
 

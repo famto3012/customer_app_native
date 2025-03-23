@@ -62,13 +62,29 @@ const ItemList: FC<{ items: CartProps["items"] }> = ({ items }) => {
         variantTypeName
       );
 
-      setProductCounts((prev) => ({
-        ...prev,
-        [productId]: {
-          count: quantity,
-          variantTypeId: variantTypeId && variantTypeId,
-        },
-      }));
+      setProductCounts((prev) => {
+        let updatedCounts;
+
+        if (productId && variantTypeId) {
+          updatedCounts = {
+            ...prev,
+            [`${productId}-${variantTypeId}`]: {
+              count: quantity,
+              variantTypeId: variantTypeId && variantTypeId,
+            },
+          };
+        } else {
+          updatedCounts = {
+            ...prev,
+            [productId]: {
+              count: quantity,
+              variantTypeId: "",
+            },
+          };
+        }
+
+        return updatedCounts;
+      });
 
       setCartItems((prev) => {
         const updatedItems = prev

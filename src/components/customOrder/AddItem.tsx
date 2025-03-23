@@ -2,7 +2,6 @@ import {
   Alert,
   Image,
   Platform,
-  KeyboardAvoidingView,
   Pressable,
   StyleSheet,
   ToastAndroid,
@@ -22,7 +21,6 @@ import { useMutation } from "@tanstack/react-query";
 import { addItemDetail } from "@/service/customOrderService";
 import { Dropdown } from "react-native-element-dropdown";
 import { unitData } from "@/utils/defaultData";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 
 const AddItem: FC<{
   openAddSheet?: () => void;

@@ -1,11 +1,4 @@
-import {
-  StyleSheet,
-  View,
-  Platform,
-  ActivityIndicator,
-  Image,
-  Text,
-} from "react-native";
+import { StyleSheet, View, ActivityIndicator } from "react-native";
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import MapplsGL from "mappls-map-react-native";
 import {

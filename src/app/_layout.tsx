@@ -38,7 +38,7 @@ const Layout = () => {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen
-        name="/(modals)/SelectAddress"
+        name="(modals)/SelectAddress"
         options={{
           presentation: "modal",
           animation: "slide_from_bottom",

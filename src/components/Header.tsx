@@ -43,11 +43,13 @@ const Header = ({
           <Pressable onPress={onPress} style={styles.rightIcon}>
             <Image
               source={icon}
-              style={{
-                width: scale(24),
-                height: verticalScale(24),
-                ...(iconStyle || {}),
-              }}
+              style={[
+                {
+                  width: scale(24),
+                  height: verticalScale(24),
+                },
+                iconStyle,
+              ]}
             />
           </Pressable>
         )}

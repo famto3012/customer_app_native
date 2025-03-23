@@ -1,5 +1,6 @@
 import {
   ImageSourcePropType,
+  ImageStyle,
   TextInput,
   TextInputProps,
   TextProps,
@@ -29,7 +30,7 @@ export type HeaderProps = {
   showRightIcon?: boolean;
   iconSize?: number;
   onPress?: () => void;
-  iconStyle?: ViewStyle;
+  iconStyle?: ImageStyle;
 };
 
 export type ButtonProps = {
