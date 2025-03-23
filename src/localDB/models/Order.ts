@@ -6,5 +6,6 @@ export default class Order extends Model {
 
   @text("orderId") orderId!: string;
   @text("createdAt") createdAt!: string;
+  @text("deliveryMode") deliveryMode!: string;
   @text("merchantName") merchantName!: string;
 }

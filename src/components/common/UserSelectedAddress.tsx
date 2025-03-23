@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius } from "@/constants/theme";
 import { CaretRight, House } from "phosphor-react-native";
@@ -28,10 +28,11 @@ const UserSelectedAddress = () => {
       <View style={{ flex: 1, marginLeft: scale(10) }}>
         <Typo size={14} color={colors.NEUTRAL800} fontFamily="Medium">
           Delivery at{" "}
-          {userAddress.type.charAt(0).toUpperCase() + userAddress.type.slice(1)}
+          {userAddress?.type?.charAt(0)?.toUpperCase() +
+            userAddress?.type?.slice(1)}
         </Typo>
         <Typo size={11} color={colors.NEUTRAL500}>
-          {userAddress.address}
+          {userAddress?.address}
         </Typo>
       </View>
 
@@ -41,5 +42,3 @@ const UserSelectedAddress = () => {
 };
 
 export default UserSelectedAddress;
-
-const styles = StyleSheet.create({});

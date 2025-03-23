@@ -12,7 +12,7 @@ import Search from "@/components/Search";
 import { useLocalSearchParams } from "expo-router";
 import { XCircle } from "phosphor-react-native";
 import { merchantFilters } from "@/utils/defaultData";
-import { scale, verticalScale } from "@/utils/styling";
+import { scale, SCREEN_HEIGHT, verticalScale } from "@/utils/styling";
 import { colors, spacingX } from "@/constants/theme";
 import Typo from "@/components/Typo";
 import MerchantCard from "@/components/universal/MerchantCard";
@@ -35,35 +35,41 @@ const Merchants = () => {
 
   const MERCHANT_LIMIT = 10;
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
-    useInfiniteQuery({
-      queryKey: [
-        "merchants",
-        businessCategory,
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: [
+      "merchants",
+      businessCategory,
+      selectedFilter,
+      query,
+      productName,
+      merchantId,
+    ],
+    queryFn: ({ pageParam = 1 }) =>
+      getMerchants(
+        latitude,
+        longitude,
+        businessCategoryId?.toString() || "",
         selectedFilter,
         query,
-        productName,
-        merchantId,
-      ],
-      queryFn: ({ pageParam = 1 }) =>
-        getMerchants(
-          latitude,
-          longitude,
-          businessCategoryId?.toString() || "",
-          selectedFilter,
-          query,
-          productName?.toString(),
-          merchantId as string,
-          pageParam,
-          MERCHANT_LIMIT
-        ),
-      initialPageParam: 1,
-      getNextPageParam: (lastPage, allPages) =>
-        lastPage?.hasNextPage ? allPages.length + 1 : undefined,
-      refetchOnMount: true,
-      refetchOnReconnect: true,
-      refetchOnWindowFocus: true,
-    });
+        productName?.toString(),
+        merchantId as string,
+        pageParam,
+        MERCHANT_LIMIT
+      ),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage?.hasNextPage ? allPages.length + 1 : undefined,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
+  });
 
   useEffect(() => {
     if (data?.pages) {
@@ -121,25 +127,29 @@ const Merchants = () => {
     <ScreenWrapper>
       <Header title={businessCategory?.toString() || "Merchants"} />
 
-      <Search
-        placeHolder="Search Restaurants/Dishes/Products"
-        onChangeText={(value) => setDebounceQuery(value)}
-      />
+      {merchants.length > 0 && (
+        <>
+          <Search
+            placeHolder="Search Restaurants/Dishes/Products"
+            onChangeText={(value) => setDebounceQuery(value)}
+          />
 
-      <View
-        style={{
-          paddingHorizontal: scale(20),
-          marginVertical: verticalScale(16),
-        }}
-      >
-        <FlatList
-          data={merchantFilters}
-          renderItem={renderFilterItem}
-          keyExtractor={(item) => item.value}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-        />
-      </View>
+          <View
+            style={{
+              paddingHorizontal: scale(20),
+              marginVertical: verticalScale(16),
+            }}
+          >
+            <FlatList
+              data={merchantFilters}
+              renderItem={renderFilterItem}
+              keyExtractor={(item) => item.value}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+            />
+          </View>
+        </>
+      )}
 
       <FlatList
         data={merchants}
@@ -156,8 +166,21 @@ const Merchants = () => {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          !isFetchingNextPage && merchants.length === 0 ? (
+          isLoading ? (
             <MerchantCardLoader />
+          ) : merchants.length === 0 ? (
+            <View
+              style={{
+                flex: 1,
+                height: SCREEN_HEIGHT - verticalScale(100),
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Typo size={16} color={colors.NEUTRAL800} fontFamily="SemiBold">
+                Coming soon...!
+              </Typo>
+            </View>
           ) : null
         }
         ListFooterComponent={isFetchingNextPage ? <MerchantCardLoader /> : null}
