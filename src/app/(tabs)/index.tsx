@@ -120,8 +120,7 @@ const Home = () => {
           >
             <View style={styles.overlayContainer}>
               <HomeHeader
-                // onPress={() => addressSheet.current?.snapToIndex(0)}
-                onPress={() => router.push("/(modal)/SelectAddress")}
+                onPress={() => router.push("/(modals)/SelectAddress")}
               />
               <SearchView
                 placeholder="Search for dishes, restaurants & groceries"
