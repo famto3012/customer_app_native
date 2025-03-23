@@ -3,9 +3,11 @@ import {
   FlatList,
   Image,
   Linking,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -214,11 +216,27 @@ const OrderDetail = () => {
                   onPress={() => {
                     if (data?.agentId) {
                       const dialerUrl = `tel:${data?.agentPhone}`;
-                      Linking.openURL(dialerUrl).catch((err) =>
-                        Alert.alert("Error", "Unable to open dialer")
-                      );
+                      Linking.openURL(dialerUrl).catch((err) => {
+                        if (Platform.OS === "android") {
+                          ToastAndroid.showWithGravity(
+                            "Unable to open dialer",
+                            ToastAndroid.SHORT,
+                            ToastAndroid.CENTER
+                          );
+                        } else {
+                          Alert.alert("Error", "Unable to open dialer");
+                        }
+                      });
                     } else {
-                      Alert.alert("No agent assigned for this order");
+                      if (Platform.OS === "android") {
+                        ToastAndroid.showWithGravity(
+                          "No agent assigned for this order",
+                          ToastAndroid.SHORT,
+                          ToastAndroid.CENTER
+                        );
+                      } else {
+                        Alert.alert("", "No agent assigned for this order");
+                      }
                     }
                   }}
                 >
@@ -237,7 +255,15 @@ const OrderDetail = () => {
                         },
                       });
                     } else {
-                      Alert.alert("No agent assigned for this order");
+                      if (Platform.OS === "android") {
+                        ToastAndroid.showWithGravity(
+                          "No agent assigned for this order",
+                          ToastAndroid.SHORT,
+                          ToastAndroid.CENTER
+                        );
+                      } else {
+                        Alert.alert("", "No agent assigned for this order");
+                      }
                     }
                   }}
                 >

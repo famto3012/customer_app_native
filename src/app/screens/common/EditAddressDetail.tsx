@@ -4,6 +4,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -156,7 +157,16 @@ const EditAddressDetail = ({
             title="Save"
             onPress={() => {
               if (!addressDetail.coordinates?.length) {
-                Alert.alert("Error", "Please select a location");
+                if (Platform.OS === "android") {
+                  ToastAndroid.showWithGravity(
+                    "Please select a location",
+                    ToastAndroid.SHORT,
+                    ToastAndroid.CENTER
+                  );
+                } else {
+                  Alert.alert("Error", "Please select a location");
+                }
+
                 return;
               }
               if (
@@ -166,7 +176,16 @@ const EditAddressDetail = ({
                 !addressDetail.area ||
                 !addressDetail.type
               ) {
-                Alert.alert("Error", "Please fill all details");
+                if (Platform.OS === "android") {
+                  ToastAndroid.showWithGravity(
+                    "Please fill all details",
+                    ToastAndroid.SHORT,
+                    ToastAndroid.CENTER
+                  );
+                } else {
+                  Alert.alert("Error", "Please fill all details");
+                }
+
                 return;
               }
               handleAddAddressMutation.mutate(addressDetail);

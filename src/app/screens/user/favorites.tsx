@@ -14,7 +14,7 @@ import { colors } from "@/constants/theme";
 import FavoriteProductList from "@/components/BottomSheets/user/FavoriteProductList";
 import FavoriteMerchantList from "@/components/BottomSheets/user/FavoriteMerchantList";
 
-const TAB_WIDTH = scale((SCREEN_WIDTH - 40) / 2);
+const TAB_WIDTH = (SCREEN_WIDTH - scale(40)) / 2;
 
 const Favorites = () => {
   const [favoriteType, setFavoriteType] = useState("Product");

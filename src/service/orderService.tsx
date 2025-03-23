@@ -1,5 +1,5 @@
 import { appAxios } from "@/config/apiInterceptor";
-import { Alert } from "react-native";
+import { Alert, Platform, ToastAndroid } from "react-native";
 
 export const getOrderList = async () => {
   try {
@@ -12,7 +12,15 @@ export const getOrderList = async () => {
     }
   } catch (err) {
     console.error(`Error in getting orders:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return [];
   }
 };
@@ -28,7 +36,15 @@ export const getScheduledOrderList = async () => {
     }
   } catch (err) {
     console.error(`Error in getting scheduled orders:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return [];
   }
 };
@@ -44,7 +60,15 @@ export const getOngoingOrder = async () => {
     }
   } catch (err) {
     console.error(`Error in getting current ongoing orders:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return [];
   }
 };
@@ -60,7 +84,15 @@ export const getOrderDetail = async (orderId: string) => {
     }
   } catch (err) {
     console.error(`Error in getting order detail:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return [];
   }
 };
@@ -83,7 +115,15 @@ export const getScheduledOrderDetail = async (
     }
   } catch (err) {
     console.error(`Error in getting order detail:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return [];
   }
 };
@@ -99,7 +139,15 @@ export const getChatMessages = async (agentId: string) => {
     }
   } catch (err) {
     console.error(`Error in getting messages:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return [];
   }
 };
@@ -119,7 +167,15 @@ export const sendChatMessages = async (formData: FormData) => {
     }
   } catch (err) {
     console.error(`Error in sending message:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return [];
   }
 };

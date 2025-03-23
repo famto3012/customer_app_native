@@ -1,4 +1,4 @@
-import { View, Pressable, Alert, Platform } from "react-native";
+import { View, Pressable, Alert, Platform, ToastAndroid } from "react-native";
 import React, { useEffect, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { CaretLeft } from "phosphor-react-native";
@@ -37,9 +37,15 @@ const VerifyOTP = () => {
 
   const handleVerifyOTP = async (otp: string) => {
     // if (!verificationId) {
-    //   Alert.alert("Error", "Verification ID is missing. Please try again.");
-    //   return;
-    // }
+    // if (Platform.OS === "android") {
+    //         ToastAndroid.showWithGravity(
+    //           "Verification ID is missing. Please try again.",
+    //           ToastAndroid.SHORT,
+    //           ToastAndroid.CENTER
+    //         );
+    //       } else {
+    //         Alert.alert("Error", "Verification ID is missing. Please try again.");
+    //       }
 
     setIsLoading(true);
     try {
@@ -57,10 +63,18 @@ const VerifyOTP = () => {
       await signIn(payload);
       // }
     } catch (error: any) {
-      Alert.alert(
-        "Authentication Failed",
-        error.message || "Something went wrong. Please try again."
-      );
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Something went wrong. Please try again.",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert(
+          "Authentication Failed",
+          "Something went wrong. Please try again."
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -70,9 +84,17 @@ const VerifyOTP = () => {
     try {
       await auth().signInWithPhoneNumber(phoneNumber);
       setCount(30);
-      Alert.alert("Success", "OTP sent again!");
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "OTP sent again!",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert("Success", "OTP sent again!");
+      }
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      // Alert.alert("Error", error.message);
     }
   };
 

@@ -1,8 +1,10 @@
 import {
   Alert,
   Image,
+  Platform,
   Pressable,
   StyleSheet,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -176,13 +178,25 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
   // Handle time selection
   const onTimeChange = (data: any) => {
     if (!isTimeValid(data.hours, data.minutes)) {
-      Alert.alert(
-        "Invalid Time",
-        `Please select a time at least 1.5 hours from now (${formatTimeForDisplay(
-          minimumTime?.hours || 0,
-          minimumTime?.minutes || 0
-        )} or later).`
-      );
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          `Please select a time at least 1.5 hours from now (${formatTimeForDisplay(
+            minimumTime?.hours || 0,
+            minimumTime?.minutes || 0
+          )} or later).`,
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert(
+          "Invalid Time",
+          `Please select a time at least 1.5 hours from now (${formatTimeForDisplay(
+            minimumTime?.hours || 0,
+            minimumTime?.minutes || 0
+          )} or later).`
+        );
+      }
+
       return; // Don't update the selected time
     }
 
@@ -196,27 +210,56 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
   // Handle schedule button press
   const handleSchedule = () => {
     if (!selectedDates.startDate || !selectedDates.endDate) {
-      Alert.alert(
-        "Warning",
-        "Please select a date / date range for your order"
-      );
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Please select a date / date range for your order",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert(
+          "Warning",
+          "Please select a date / date range for your order"
+        );
+      }
+
       return;
     }
 
     if (!selectedTime.hours || !selectedTime.minutes) {
-      Alert.alert("Warning", "Please select a time for your order");
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Please select a time for your order",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert("Warning", "Please select a time for your order");
+      }
+
       return;
     }
 
     // Double-check if selected time is valid
     if (!isTimeValid(selectedTime.hours, selectedTime.minutes)) {
-      Alert.alert(
-        "Invalid Time",
-        `Please select a time at least 1.5 hours from now (${formatTimeForDisplay(
-          minimumTime?.hours || 0,
-          minimumTime?.minutes || 0
-        )} or later).`
-      );
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          `Please select a time at least 1.5 hours from now (${formatTimeForDisplay(
+            minimumTime?.hours || 0,
+            minimumTime?.minutes || 0
+          )} or later).`,
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert(
+          "Invalid Time",
+          `Please select a time at least 1.5 hours from now (${formatTimeForDisplay(
+            minimumTime?.hours || 0,
+            minimumTime?.minutes || 0
+          )} or later).`
+        );
+      }
       return;
     }
 
@@ -235,7 +278,16 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
   // Open time picker with validation
   const openTimePicker = () => {
     if (!selectedDates.startDate) {
-      Alert.alert("Warning", "Please select a date first");
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Please select a date first",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert("Warning", "Please select a date first");
+      }
+
       return;
     }
 
@@ -319,7 +371,7 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
           startDate={selectedDates.startDate || new Date()}
           endDate={selectedDates.endDate || new Date()}
           onConfirm={onDateChange}
-          saveLabel="Save"
+          saveLabel="Ok"
         />
 
         {/* Time Picker */}

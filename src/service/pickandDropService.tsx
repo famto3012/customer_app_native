@@ -1,6 +1,6 @@
 import { appAxios } from "@/config/apiInterceptor";
 import { PickAndDropItemProps } from "@/types";
-import { Alert } from "react-native";
+import { Alert, Platform, ToastAndroid } from "react-native";
 import RazorpayCheckout from "react-native-razorpay";
 
 export const initializePickAndDrop = async () => {
@@ -10,7 +10,15 @@ export const initializePickAndDrop = async () => {
     return res.status === 200 ? true : false;
   } catch (err) {
     console.error(`Error in initializing P&D:`, JSON.stringify(err));
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return false;
   }
 };
@@ -30,7 +38,15 @@ export const addPickAndDropAddress = async (data: FormData) => {
     return res.status === 200 ? res.data.cartId : null;
   } catch (err) {
     console.error(`Error in adding addresses:`, JSON.stringify(err));
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -46,7 +62,15 @@ export const getVehicleDetails = async (cartId: string) => {
     return res.status === 200 ? res.data : null;
   } catch (err) {
     console.error(`Error in getting vehicle details:`, JSON.stringify(err));
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -66,7 +90,15 @@ export const addPickAndDropItems = async (
     return res.status === 200 ? res.data : null;
   } catch (err) {
     console.error(`Error in adding P&D items:`, JSON.stringify(err));
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -104,7 +136,15 @@ export const getPickAndDropBill = async (cartId: string) => {
     return res.status === 200 ? res.data : null;
   } catch (err) {
     console.error(`Error in getting cart bill:`, JSON.stringify(err));
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -127,7 +167,15 @@ export const confirmPickAndDropOrder = async (
     return res.status === 200 ? res.data : { success: false, orderId: "" };
   } catch (err) {
     console.error(`Error in confirming P&D:`, JSON.stringify(err));
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return { success: false, orderId: "" };
   }
 };
