@@ -7,7 +7,11 @@ import { TouchableOpacity } from "react-native";
 import Button from "@/components/Button";
 import { scale } from "@/utils/styling";
 
-const CustomOrderBottomSheet: FC<{ onPress: () => void }> = ({ onPress }) => {
+const CustomOrderBottomSheet: FC<{
+  closeSheet: () => void;
+  playSound: () => void;
+  isPlaying: boolean;
+}> = ({ closeSheet, playSound, isPlaying }) => {
   return (
     <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
       <View style={styles.headerContainer}>
@@ -15,9 +19,13 @@ const CustomOrderBottomSheet: FC<{ onPress: () => void }> = ({ onPress }) => {
           Custom Order?
         </Typo>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={playSound}>
           <Image
-            source={require("@/assets/icons/volume-high.webp")}
+            source={
+              isPlaying
+                ? require("@/assets/icons/volume-slash.webp")
+                : require("@/assets/icons/volume-high.webp")
+            }
             style={styles.volumeIcon}
             resizeMode="cover"
           />
@@ -27,7 +35,7 @@ const CustomOrderBottomSheet: FC<{ onPress: () => void }> = ({ onPress }) => {
       <View style={styles.divider} />
 
       <Typo size={13} color={colors.NEUTRAL400} style={styles.text}>
-        Order anything from any nearby Store. the Delivery boy will shop for you
+        Order anything from any nearby Store. The delivery boy will shop for you
         and deliver to your door steps.
       </Typo>
 
@@ -45,8 +53,12 @@ const CustomOrderBottomSheet: FC<{ onPress: () => void }> = ({ onPress }) => {
         in real time on map while he is bringing items to your home.
       </Typo>
 
-      <View style={{ marginTop: "auto" }}>
-        <Button title="Ok, got it!" onPress={onPress} style={styles.button} />
+      <View style={{ marginTop: scale(8) }}>
+        <Button
+          title="Ok, got it!"
+          onPress={closeSheet}
+          style={styles.button}
+        />
       </View>
     </BottomSheetScrollView>
   );
@@ -78,7 +90,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   text: {
-    lineHeight: 28,
+    lineHeight: 20,
   },
   button: {
     marginTop: scale(20),

@@ -2,9 +2,11 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Platform,
   KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
+  ToastAndroid,
   View,
 } from "react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -117,7 +119,16 @@ const CustomOrderCheckout = () => {
 
   const handleProceed = () => {
     if (!addressData.deliveryAddressType) {
-      Alert.alert("Error", "Please select a delivery address");
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Please select a delivery address",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert("Error", "Please select a delivery address");
+      }
+
       return;
     }
 

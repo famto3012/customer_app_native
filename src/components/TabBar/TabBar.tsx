@@ -10,6 +10,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { verticalScale } from "@/utils/styling";
+import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const [dimensions, setDimensions] = useState({ height: 20, width: 100 });
@@ -121,7 +122,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: verticalScale(75),
-    width: "100%",
+    width: SCREEN_WIDTH,
     backgroundColor: "transparent",
     zIndex: 10,
     elevation: 10,

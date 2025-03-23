@@ -1,9 +1,11 @@
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   Pressable,
   StyleSheet,
   TextInput,
+  ToastAndroid,
   View,
 } from "react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -33,6 +35,7 @@ import { verifyCustomerAddressLocation } from "@/service/userService";
 import EditAddressDetail from "./EditAddressDetail";
 import { useLocalSearchParams } from "expo-router";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
+import MapDetailLoader from "@/components/Loader/MapDetailLoader";
 
 const { MapView, Camera, RestApi, UserLocation } = MapplsGL;
 
@@ -54,28 +57,40 @@ const EditAddress = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [zoomLevel, setZoomLevel] = useState<number>(15);
   const [addressData, setAddressData] = useState<UserAddressProps>({
-    area: parsedAddress.area || "",
-    flat: parsedAddress.flat || "",
-    phoneNumber: parsedAddress.phoneNumber || "",
-    landmark: parsedAddress.landmark || "",
-    fullName: parsedAddress.fullName || "",
-    id: parsedAddress.id || "",
+    area: parsedAddress?.area || "",
+    flat: parsedAddress?.flat || "",
+    phoneNumber: parsedAddress?.phoneNumber || "",
+    landmark: parsedAddress?.landmark || "",
+    fullName: parsedAddress?.fullName || "",
+    id: parsedAddress?.id || "",
     type: addressType,
-    coordinates: [],
+    coordinates: parsedAddress?.coordinates || [],
   });
+  const [mapReady, setMapReady] = useState(false);
   const cameraRef = useRef<any>(null);
   const mapRef = useRef<any>(null);
+  const initialCameraSetRef = useRef<boolean>(false);
   const editAddressSheetRef = useRef<BottomSheetMethods | null>(null);
 
   const editAddressSnapPoints = useMemo(() => ["58%"], []);
 
-  // In EditAddress component
+  // Initialize MapplsGL
+  useEffect(() => {
+    MapplsGL.setMapSDKKey(MAPPLS_REST_API_KEY);
+    MapplsGL.setRestAPIKey(MAPPLS_REST_API_KEY);
+    MapplsGL.setAtlasClientId(MAPPLS_CLIENT_ID);
+    MapplsGL.setAtlasClientSecret(MAPPLS_CLIENT_SECRET_KEY);
+  }, []);
+
+  // Parse address and set initial marker coordinates
   useEffect(() => {
     if (parsedAddress?.coordinates?.length === 2) {
-      setMarkerCoordinates([
+      // Set longitude, latitude format for the map
+      const coordinates = [
         parsedAddress.coordinates[1],
         parsedAddress.coordinates[0],
-      ]);
+      ];
+      setMarkerCoordinates(coordinates);
 
       setAddressData((prev: UserAddressProps) => ({
         ...prev,
@@ -89,16 +104,36 @@ const EditAddress = () => {
         coordinates: parsedAddress.coordinates,
       }));
 
-      setIsAddressParsed(true); // ✅ Mark as parsed
+      setIsAddressParsed(true);
+
+      // Reverse geocode the initial coordinates to get address details
+      if (coordinates[0] !== 0 && coordinates[1] !== 0) {
+        reverseGeocode(coordinates);
+      }
     }
   }, [address, addressType]);
 
+  // Set camera position when map is ready and coordinates are available
   useEffect(() => {
-    MapplsGL.setMapSDKKey(MAPPLS_REST_API_KEY);
-    MapplsGL.setRestAPIKey(MAPPLS_REST_API_KEY);
-    MapplsGL.setAtlasClientId(MAPPLS_CLIENT_ID);
-    MapplsGL.setAtlasClientSecret(MAPPLS_CLIENT_SECRET_KEY);
-  }, []);
+    if (
+      mapReady &&
+      isAddressParsed &&
+      !initialCameraSetRef.current &&
+      cameraRef.current
+    ) {
+      // Only set camera position once
+      initialCameraSetRef.current = true;
+
+      // Ensure we have valid coordinates
+      if (markerCoordinates[0] !== 0 && markerCoordinates[1] !== 0) {
+        cameraRef.current.setCamera({
+          centerCoordinate: markerCoordinates,
+          zoomLevel: zoomLevel,
+          animationDuration: 500,
+        });
+      }
+    }
+  }, [mapReady, isAddressParsed, markerCoordinates, zoomLevel]);
 
   const reverseGeocode = async (coordinates: number[]) => {
     try {
@@ -248,14 +283,30 @@ const EditAddress = () => {
       if (data) {
         editAddressSheetRef.current?.expand();
       } else {
-        Alert.alert(
-          "",
-          "Sorry, we're not currently delivering to this location"
-        );
+        if (Platform.OS === "android") {
+          ToastAndroid.showWithGravity(
+            "Sorry, we're not currently delivering to this location",
+            ToastAndroid.SHORT,
+            ToastAndroid.CENTER
+          );
+        } else {
+          Alert.alert(
+            "",
+            "Sorry, we're not currently delivering to this location"
+          );
+        }
       }
     },
     onError: (error) => {
-      Alert.alert("", "An error occurred while verifying the location.");
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "An error occurred while verifying the location.",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert("", "An error occurred while verifying the location.");
+      }
     },
   });
 
@@ -272,6 +323,10 @@ const EditAddress = () => {
     []
   );
 
+  const handleMapReady = () => {
+    setMapReady(true);
+  };
+
   return (
     <>
       <ScreenWrapper>
@@ -286,10 +341,12 @@ const EditAddress = () => {
               rotateEnabled={true}
               compassEnabled={true}
               attributionEnabled={true}
+              onDidFinishRenderingMapFully={handleMapReady}
               onRegionDidChange={(event) => {
+                if (!mapReady) return;
                 const { geometry, properties } = event;
                 if (properties && properties.zoomLevel) {
-                  setZoomLevel(16);
+                  setZoomLevel(properties.zoomLevel);
                 }
                 if (geometry && geometry.coordinates) {
                   const [longitude, latitude] = geometry.coordinates;
@@ -302,7 +359,7 @@ const EditAddress = () => {
             >
               <Camera
                 ref={cameraRef}
-                zoomLevel={zoomLevel || 15}
+                zoomLevel={zoomLevel}
                 centerCoordinate={markerCoordinates}
                 animationMode="easeTo"
                 minZoomLevel={4}
@@ -361,7 +418,7 @@ const EditAddress = () => {
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "space-between",
-                paddingRight: scale(10),
+                paddingRight: scale(35),
               }}
             >
               <TextInput
@@ -397,7 +454,7 @@ const EditAddress = () => {
 
             <View style={styles.detailsContainerInside}>
               {loading ? (
-                <ActivityIndicator size="small" color={colors.PRIMARY} />
+                <MapDetailLoader />
               ) : locationDetails ? (
                 <>
                   <Typo
@@ -437,9 +494,7 @@ const EditAddress = () => {
                   />
                 </>
               ) : (
-                <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
-                  Loading location details...
-                </Typo>
+                <MapDetailLoader />
               )}
             </View>
           </View>

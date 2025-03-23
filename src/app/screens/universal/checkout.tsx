@@ -1,4 +1,14 @@
-import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  AppState,
+  BackHandler,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  ToastAndroid,
+  View,
+} from "react-native";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
@@ -32,8 +42,12 @@ import { useAuthStore } from "@/store/store";
 import Button from "@/components/Button";
 import { commonStyles } from "@/constants/commonStyles";
 import { Audio, AVPlaybackStatusSuccess } from "expo-av";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
-const TAB_WIDTH = scale((SCREEN_WIDTH - 40) / 2);
+// Global audio reference - will ensure we only have one audio instance
+let GLOBAL_SOUND: Audio.Sound | null = null;
+
+const TAB_WIDTH = (SCREEN_WIDTH - scale(40)) / 2;
 
 interface formDataProps {
   deliveryMode: string;
@@ -104,8 +118,11 @@ const Checkout = () => {
   const indicatorPosition = useSharedValue(0);
 
   const scheduleSheetRef = useRef<BottomSheet>(null);
+  const isNavigatingRef = useRef(false);
 
-  const scheduleSheetSnapPoints = useMemo(() => ["80%"], []);
+  const navigation = useNavigation();
+
+  const scheduleSheetSnapPoints = useMemo(() => ["85%"], []);
 
   const { data: cartData } = useQuery({
     queryKey: ["customer-cart"],
@@ -160,43 +177,155 @@ const Checkout = () => {
     transform: [{ translateX: indicatorPosition.value }],
   }));
 
+  const forceAudioCleanup = async () => {
+    console.log("🔴 FORCE AUDIO CLEANUP");
+
+    try {
+      // Force set our state regardless of what happens with the actual cleanup
+      setIsPlaying(false);
+
+      // If we have a reference to the global sound
+      if (GLOBAL_SOUND) {
+        try {
+          console.log("Attempting force pause");
+          await GLOBAL_SOUND.pauseAsync().catch(() => {});
+
+          console.log("Attempting force stop");
+          await GLOBAL_SOUND.stopAsync().catch(() => {});
+
+          console.log("Attempting force unload");
+          await GLOBAL_SOUND.unloadAsync().catch(() => {});
+        } catch (e) {
+          console.log("Caught error during force cleanup:", e);
+        }
+
+        // Clear the global reference
+        GLOBAL_SOUND = null;
+      }
+
+      // Try to set volume to 0 on the Audio module directly (as a last resort)
+      try {
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: false,
+          staysActiveInBackground: false,
+          shouldDuckAndroid: false,
+        });
+      } catch (e) {
+        console.log("Error setting audio mode:", e);
+      }
+
+      console.log("Force audio cleanup complete");
+    } catch (e) {
+      console.error("Critical error in force cleanup:", e);
+    }
+  };
+
+  const prepareForNavigation = async () => {
+    console.log("🚨 NAVIGATION PREPARATION STARTED");
+    isNavigatingRef.current = true;
+
+    // Force cleanup audio first
+    await forceAudioCleanup();
+
+    // Proceed with navigation
+    console.log("Navigation can proceed now");
+    return true;
+  };
+
   const playOrStopSound = async () => {
     try {
-      if (sound && isPlaying) {
-        await stopSound();
+      if (isPlaying) {
+        await forceAudioCleanup();
       } else {
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          {
-            uri: "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FScheduled%20Order.mp3?alt=media&token=da59e122-08f8-4964-8b6f-bfebc8c32fbe",
-          },
-          { shouldPlay: true }
-        );
+        // Force cleanup first in case there's a lingering instance
+        await forceAudioCleanup();
 
-        setSound(newSound);
-        setIsPlaying(true);
+        // Create new sound
+        try {
+          const { sound: newSound } = await Audio.Sound.createAsync(
+            {
+              uri: "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FScheduled%20Order.mp3?alt=media&token=da59e122-08f8-4964-8b6f-bfebc8c32fbe",
+            },
+            { shouldPlay: true }
+          );
 
-        newSound.setOnPlaybackStatusUpdate((status) => {
-          if (
-            status.isLoaded &&
-            (status as AVPlaybackStatusSuccess).didJustFinish
-          ) {
-            stopSound();
-          }
-        });
+          // Set our global reference
+          GLOBAL_SOUND = newSound;
+          setIsPlaying(true);
+
+          newSound.setOnPlaybackStatusUpdate((status) => {
+            if (
+              status.isLoaded &&
+              (status as AVPlaybackStatusSuccess).didJustFinish
+            ) {
+              forceAudioCleanup();
+            }
+          });
+        } catch (soundError) {
+          console.error("Error creating sound:", soundError);
+          forceAudioCleanup();
+        }
       }
     } catch (error) {
-      console.error("Error playing/stopping sound:", error);
+      console.error("Critical error in playOrStopSound:", error);
+      forceAudioCleanup();
     }
   };
 
-  const stopSound = async () => {
-    if (sound) {
-      await sound.stopAsync();
-      await sound.unloadAsync();
-      setSound(null);
-      setIsPlaying(false);
-    }
-  };
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState !== "active") {
+        console.log("App going to background");
+        forceAudioCleanup();
+      }
+    });
+
+    return () => subscription.remove();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        forceAudioCleanup();
+        return false;
+      };
+
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
+      return () => backHandler.remove();
+    }, [])
+  );
+
+  // On navigation gestures
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", () => {
+      forceAudioCleanup();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  // On component unmount
+  useEffect(() => {
+    return () => {
+      forceAudioCleanup();
+    };
+  }, []);
+
+  // On screen focus change
+  useFocusEffect(
+    useCallback(() => {
+      // Cleanup when losing focus
+      return () => {
+        if (!isNavigatingRef.current) {
+          forceAudioCleanup();
+        }
+      };
+    }, [])
+  );
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
@@ -265,7 +394,19 @@ const Checkout = () => {
 
   const handleConfirm = (data: formDataProps) => {
     if (!data.deliveryAddressType) {
-      Alert.alert("", "Please select a delivery address to continue ordering");
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Please select a delivery address to continue ordering",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert(
+          "",
+          "Please select a delivery address to continue ordering"
+        );
+      }
+
       return;
     }
 
@@ -411,11 +552,12 @@ const Checkout = () => {
         enableDynamicSizing={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
-        onClose={stopSound}
+        onClose={() => forceAudioCleanup()}
       >
         <ScheduleSheet
           onPress={(startDate: string, endDate: string, time: string) => {
-            stopSound();
+            forceAudioCleanup();
+            scheduleSheetRef?.current?.close();
             handleSchedule(startDate, endDate, time);
           }}
           playSound={playOrStopSound}

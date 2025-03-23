@@ -1,8 +1,10 @@
 import {
   Alert,
   Image,
+  Platform,
   Pressable,
   StyleSheet,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -44,10 +46,19 @@ const EditItem: FC<{
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (status !== "granted") {
-      Alert.alert(
-        "Error",
-        "Sorry, we need media library permissions to make this work!"
-      );
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Sorry, we need media library permissions to make this work!",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert(
+          "Error",
+          "Sorry, we need media library permissions to make this work!"
+        );
+      }
+
       return;
     }
 
@@ -75,7 +86,16 @@ const EditItem: FC<{
 
   const handleSave = (data: CustomOrderItemsProps) => {
     if (!itemData.itemName || !itemData.quantity || !itemData.unit) {
-      Alert.alert("Error", "Please add item details");
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Please add item details",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert("Error", "Please add item details");
+      }
+
       return;
     }
 

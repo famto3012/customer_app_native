@@ -34,6 +34,7 @@ import { colors } from "@/constants/theme";
 import * as Location from "expo-location";
 import Typo from "@/components/Typo";
 import { useSafeLocation } from "@/utils/helpers";
+import MapDetailLoader from "@/components/Loader/MapDetailLoader";
 
 const { MapView, Camera, RestApi, UserLocation } = MapplsGL;
 
@@ -43,26 +44,53 @@ const CustomOrderMap = () => {
   const addStoreSnapPoints = useMemo(() => ["38%"], []);
 
   const { latitude, longitude } = useSafeLocation();
-  const [markerCoordinates, setMarkerCoordinates] = useState<number[]>([
-    longitude,
-    latitude,
-  ]);
+  const [markerCoordinates, setMarkerCoordinates] = useState<number[]>([0, 0]);
   const [mapplsPin, setMapplsPin] = useState("");
   const [locationDetails, setLocationDetails] =
     useState<LocationAddressProps>();
   const [shopData, setShopData] = useState<any>();
   const [loading, setLoading] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(15);
+  const [mapReady, setMapReady] = useState(false);
+  const [locationInitialized, setLocationInitialized] = useState(false);
 
   const cameraRef = useRef<any>(null);
   const mapRef = useRef<any>(null);
 
   useEffect(() => {
-    MapplsGL.setMapSDKKey(MAPPLS_REST_API_KEY);
-    MapplsGL.setRestAPIKey(MAPPLS_REST_API_KEY);
-    MapplsGL.setAtlasClientId(MAPPLS_CLIENT_ID);
-    MapplsGL.setAtlasClientSecret(MAPPLS_CLIENT_SECRET_KEY);
+    const initMapSDK = async () => {
+      await MapplsGL.setMapSDKKey(MAPPLS_REST_API_KEY);
+      await MapplsGL.setRestAPIKey(MAPPLS_REST_API_KEY);
+      await MapplsGL.setAtlasClientId(MAPPLS_CLIENT_ID);
+      await MapplsGL.setAtlasClientSecret(MAPPLS_CLIENT_SECRET_KEY);
+    };
+    initMapSDK();
   }, []);
+
+  useEffect(() => {
+    if (latitude && longitude && !locationInitialized) {
+      setMarkerCoordinates([longitude, latitude]);
+      setLocationInitialized(true);
+    }
+  }, [latitude, longitude, locationInitialized]);
+
+  useEffect(() => {
+    if (
+      mapReady &&
+      locationInitialized &&
+      markerCoordinates[0] !== 0 &&
+      markerCoordinates[1] !== 0
+    ) {
+      if (cameraRef.current) {
+        cameraRef.current.setCamera({
+          centerCoordinate: markerCoordinates,
+          zoomLevel: 15,
+          animationDuration: 1000,
+        });
+      }
+      reverseGeocode(markerCoordinates);
+    }
+  }, [mapReady, locationInitialized, markerCoordinates]);
 
   const reverseGeocode = async (coordinates: number[]) => {
     try {
@@ -181,7 +209,7 @@ const CustomOrderMap = () => {
       const { latitude, longitude } = location.coords;
       const newCoords = [longitude, latitude];
       setMarkerCoordinates(newCoords);
-      // setMarkerVisible(true);
+      setLocationInitialized(true);
 
       // When getting current location, update camera position
       if (cameraRef.current) {
@@ -218,6 +246,10 @@ const CustomOrderMap = () => {
     []
   );
 
+  const handleMapReady = () => {
+    setMapReady(true);
+  };
+
   return (
     <>
       <ScreenWrapper>
@@ -231,7 +263,9 @@ const CustomOrderMap = () => {
             rotateEnabled={true}
             compassEnabled={true}
             attributionEnabled={true}
+            onDidFinishRenderingMapFully={handleMapReady}
             onRegionDidChange={(event) => {
+              if (!mapReady) return;
               const { geometry, properties } = event;
               if (properties && properties.zoomLevel) {
                 setZoomLevel(properties.zoomLevel);
@@ -248,7 +282,7 @@ const CustomOrderMap = () => {
             {/* Camera Position */}
             <Camera
               ref={cameraRef}
-              zoomLevel={zoomLevel | 15}
+              zoomLevel={zoomLevel}
               centerCoordinate={markerCoordinates}
               centerMapplsPin={mapplsPin}
               animationMode="flyTo"
@@ -301,7 +335,7 @@ const CustomOrderMap = () => {
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "space-between",
-                paddingRight: scale(10),
+                paddingRight: scale(35),
               }}
             >
               <TextInput
@@ -337,7 +371,7 @@ const CustomOrderMap = () => {
 
             <View style={styles.detailsContainerInside}>
               {loading ? (
-                <ActivityIndicator size="small" color={colors.PRIMARY} />
+                <MapDetailLoader />
               ) : locationDetails ? (
                 <>
                   <Typo
@@ -376,9 +410,7 @@ const CustomOrderMap = () => {
                   />
                 </>
               ) : (
-                <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
-                  Loading location details...
-                </Typo>
+                <MapDetailLoader />
               )}
             </View>
           </View>
@@ -411,7 +443,7 @@ const styles = StyleSheet.create({
   },
   button: {
     width: SCREEN_WIDTH * 0.9,
-    marginVertical: verticalScale(20),
+    marginVertical: verticalScale(10),
   },
   container: {
     flex: 1,

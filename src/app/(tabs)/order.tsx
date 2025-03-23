@@ -14,7 +14,7 @@ import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import OrderList from "@/components/orders/OrderList";
 import ScheduledOrderList from "@/components/orders/ScheduledOrderList";
 
-const TAB_WIDTH = scale((SCREEN_WIDTH - 40) / 2);
+const TAB_WIDTH = (SCREEN_WIDTH - scale(40)) / 2;
 
 const order = () => {
   const [orderType, setOrderType] = useState("Order");

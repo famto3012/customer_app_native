@@ -1,4 +1,11 @@
-import { ActivityIndicator, Alert, Pressable, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Platform,
+  Pressable,
+  ToastAndroid,
+  View,
+} from "react-native";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import Button from "@/components/Button";
@@ -25,7 +32,15 @@ const Auth = () => {
 
   const sendOTP = async () => {
     if (phoneNumberRef.current.length !== 10) {
-      Alert.alert("Error", "Please enter a valid phone number");
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Please enter a valid phone number",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert("Error", "Please enter a valid phone number");
+      }
       return;
     }
 
@@ -48,7 +63,15 @@ const Auth = () => {
       });
       // }
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          error.message,
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert("Error", error.message);
+      }
     } finally {
       setIsGeneratingOTP(false);
     }

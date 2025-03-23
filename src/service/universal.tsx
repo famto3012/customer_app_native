@@ -1,5 +1,5 @@
 import { appAxios } from "@/config/apiInterceptor";
-import { Alert } from "react-native";
+import { Alert, Platform, ToastAndroid } from "react-native";
 import RazorpayCheckout from "react-native-razorpay";
 
 export const getBusinessCategories = async (
@@ -24,7 +24,15 @@ export const getBusinessCategories = async (
     }
   } catch (err) {
     console.error(`Error in getting business categories:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return [];
   }
 };
@@ -68,7 +76,15 @@ export const getMerchants = async (
     }
   } catch (err) {
     console.error(`Error in getting merchants:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
 
     // Ensure function always returns an object
     return {
@@ -93,6 +109,15 @@ export const toggleMerchantFavorite = async (
       : { success: false, message: "Failed" };
   } catch (err) {
     console.error(`Error in toggle merchant favorite:`, err);
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
 
     return { success: false, message: "Failed" };
   }
@@ -151,7 +176,15 @@ export const getMerchantData = async (
     return res.status === 200 ? res.data : {};
   } catch (err) {
     console.error(`Error in getting merchant data:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -169,7 +202,15 @@ export const getVariants = async (productId: string) => {
     }
   } catch (err) {
     console.error(`Error in getting variants:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return [];
   }
 };
@@ -188,6 +229,15 @@ export const toggleProductFavorite = async (
       : { success: false, message: "Failed" };
   } catch (err) {
     console.error(`Error in toggling product favorite:`, err);
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return { success: false, message: "Failed" };
   }
 };
@@ -210,7 +260,15 @@ export const addRatingsToMerchant = async (
     }
   } catch (err) {
     console.error(`Error in rating merchant:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return false;
   }
 };
@@ -222,7 +280,15 @@ export const getMerchantBanners = async (merchantId: string) => {
     return res.status === 200 ? res.data : [];
   } catch (err) {
     console.error(`Error in getting merchant banners:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return [];
   }
 };
@@ -242,7 +308,15 @@ export const addProductToCart = async (
     return res.status === 200 ? true : false;
   } catch (err) {
     console.error(`Error in updating cart item:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return false;
   }
 };
@@ -256,7 +330,15 @@ export const haveValidCart = async () => {
       : { haveCart: false, merchant: "", cartId: "" };
   } catch (err) {
     console.error(`Error in checking valid cart existence:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return { haveCart: false, merchant: "", cartId: "" };
   }
 };
@@ -268,7 +350,15 @@ export const clearCart = async (cartId: string) => {
     return res.status === 200 ? true : false;
   } catch (err) {
     console.error(`Error in clearing cart:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return false;
   }
 };
@@ -280,7 +370,15 @@ export const getCustomerCart = async () => {
     return res.status === 200 ? res.data.data : null;
   } catch (err) {
     console.error(`Error in getting cart:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -298,7 +396,15 @@ export const getMerchantDeliveryOption = async (merchantId: string) => {
     return true; // Default to true if status is not 200
   } catch (err) {
     console.error(`Error in getting merchant delivery option:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return false; // Ensure a boolean is returned
   }
 };
@@ -314,7 +420,15 @@ export const confirmOrder = async (cartDetail: any) => {
     return res.status === 200 ? res.data : null;
   } catch (err) {
     console.error(`Error in clearing cart:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -330,7 +444,15 @@ export const getCartBill = async (cartId: string) => {
     return res.status === 200 ? res.data.billDetail : null;
   } catch (err) {
     console.error(`Error in getting cart bill:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -344,7 +466,15 @@ export const addUniversalTip = async (tip: number) => {
     return res.status === 200 ? true : false;
   } catch (err) {
     console.error(`Error in adding tip:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return false;
   }
 };
@@ -358,7 +488,15 @@ export const placeUniversalOrder = async (paymentMode: string) => {
     return res.data.success ? res.data : null;
   } catch (err) {
     console.error(`Error in placing order:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -372,7 +510,15 @@ export const applyUniversalPromoCode = async (promoCode: string) => {
     return res.status === 200 ? res.data : null;
   } catch (err) {
     console.error(`Error in applying promo code:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -388,7 +534,15 @@ export const getProductsWithVariantsInCart = async (productId: string) => {
     return res.status === 200 ? res.data : [];
   } catch (err) {
     console.error(`Error in fetching products with variants in cart:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return [];
   }
 };
@@ -469,7 +623,15 @@ export const rateMerchant = async (data: {
     return res.status === 200 ? res.data : null;
   } catch (err) {
     console.error(`Error in rating merchant:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -492,7 +654,15 @@ export const addItemsToCart = async (
     return res.status === 200 ? res.data.cartId : null;
   } catch (err) {
     console.error(`Error in adding items:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -516,7 +686,15 @@ export const filterAndSearchProducts = async (
     return res.status === 200 ? res.data : [];
   } catch (err) {
     console.error(`Error in searching products:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return [];
   }
 };
@@ -541,8 +719,17 @@ export const cancelOrder = async (
       ? res.data
       : { success: false, message: "Order not found or already confirmed" };
   } catch (err) {
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Order already confirmed or not found",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("Error", "Order already confirmed or not found");
+    }
+
     console.error(`Error in cancelling order:`, JSON.stringify(err));
-    Alert.alert("Error", "Order already confirmed or not found");
     return { success: false, message: "Error while cancelling order" };
   }
 };

@@ -3,7 +3,7 @@ import { useAuthStore } from "@/store/store";
 import { AuthPayload } from "@/types";
 import { resetAndNavigate } from "@/utils/navigation";
 import axios from "axios";
-import { Alert } from "react-native";
+import { Alert, Platform, ToastAndroid } from "react-native";
 
 export const signIn = async (payload: AuthPayload) => {
   try {
@@ -28,7 +28,15 @@ export const signIn = async (payload: AuthPayload) => {
     } else {
       console.error("Error:", err.message);
     }
-    Alert.alert("Something went wrong");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
   }
 };
 
@@ -40,6 +48,14 @@ export const logout = async (disconnect?: () => void) => {
     resetAndNavigate("/auth");
   } catch (err) {
     console.log(`Error while logging out: ${err}`);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
   }
 };

@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
+  ToastAndroid,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
@@ -54,10 +55,19 @@ const EditProfile = () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (status !== "granted") {
-      Alert.alert(
-        "Error",
-        "Sorry, we need media library permissions to make this work!"
-      );
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Sorry, we need media library permissions to make this work!",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert(
+          "Error",
+          "Sorry, we need media library permissions to make this work!"
+        );
+      }
+
       return;
     }
 

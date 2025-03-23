@@ -1,6 +1,6 @@
 import { appAxios } from "@/config/apiInterceptor";
 import { AddCustomStoreProps } from "@/types";
-import { Alert } from "react-native";
+import { Alert, Platform, ToastAndroid } from "react-native";
 
 export const addStoreDetail = async (data: AddCustomStoreProps) => {
   try {
@@ -9,7 +9,15 @@ export const addStoreDetail = async (data: AddCustomStoreProps) => {
     return res.status === 200 ? res.data : null;
   } catch (err) {
     console.error(`Error in adding store detail:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -23,7 +31,15 @@ export const fetchCustomOrderItems = async (cartId: string) => {
     return res.status === 200 ? res.data : [];
   } catch (err) {
     console.error(`Error in fetching cart items:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return [];
   }
 };
@@ -39,7 +55,15 @@ export const addItemDetail = async (data: FormData) => {
     return res.status === 200 ? res.data : null;
   } catch (err) {
     console.error(`Error in adding item detail:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -55,7 +79,15 @@ export const editItemDetail = async (itemId: string, data: FormData) => {
     return res.status === 200 ? res.data : [];
   } catch (err) {
     console.error(`Error in editing item detail:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return [];
   }
 };
@@ -67,7 +99,15 @@ export const deleteItem = async (itemId: string) => {
     return res.status === 200 ? res.data.message : null;
   } catch (err) {
     console.error(`Error in deleting item detail:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -83,7 +123,15 @@ export const addDeliveryAddress = async (data: FormData) => {
     return res.status === 200 ? res.data.cartId : "";
   } catch (err) {
     console.error(`Error in adding delivery address:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return "";
   }
 };
@@ -97,7 +145,15 @@ export const fetchCustomCartBill = async (cartId: string) => {
     return res.status === 200 ? res.data : null;
   } catch (err) {
     console.error(`Error in getting custom order bill:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -115,7 +171,15 @@ export const applyCustomOrderTipAndPromoCode = async (
     return res.status === 200 ? res.data : null;
   } catch (err) {
     console.error(`Error in getting custom order bill:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };
@@ -129,7 +193,15 @@ export const confirmCustomOrder = async (cartId: string) => {
     return res.status === 200 ? res.data : null;
   } catch (err) {
     console.error(`Error in confirming custom order:`, err);
-    Alert.alert("Error", "Something went wrong!");
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
     return null;
   }
 };

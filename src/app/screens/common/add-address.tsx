@@ -1,9 +1,11 @@
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   Pressable,
   StyleSheet,
   TextInput,
+  ToastAndroid,
   View,
 } from "react-native";
 import React, {
@@ -41,21 +43,21 @@ import { commonStyles } from "@/constants/commonStyles";
 import { useMutation } from "@tanstack/react-query";
 import { verifyCustomerAddressLocation } from "@/service/userService";
 import { useSafeLocation } from "@/utils/helpers";
+import MapDetailLoader from "@/components/Loader/MapDetailLoader";
 
 const { MapView, Camera, RestApi, UserLocation } = MapplsGL;
 
 const AddAddress = () => {
   const { latitude, longitude } = useSafeLocation();
-  const [markerCoordinates, setMarkerCoordinates] = useState<number[]>([
-    longitude,
-    latitude,
-  ]);
+  const [markerCoordinates, setMarkerCoordinates] = useState<number[]>([0, 0]);
   const [mapplsPin, setMapplsPin] = useState("");
   const [locationDetails, setLocationDetails] =
     useState<LocationAddressProps>();
   const [loading, setLoading] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(15);
   const [addressData, setAddressData] = useState<any>(null);
+  const [mapReady, setMapReady] = useState(false);
+  const [locationInitialized, setLocationInitialized] = useState(false);
 
   const cameraRef = useRef<any>(null);
   const mapRef = useRef<any>(null);
@@ -63,12 +65,43 @@ const AddAddress = () => {
 
   const addAddressSnapPoints = useMemo(() => ["58%"], []);
 
+  // Initialize MapplsGL SDK only once
   useEffect(() => {
-    MapplsGL.setMapSDKKey(MAPPLS_REST_API_KEY);
-    MapplsGL.setRestAPIKey(MAPPLS_REST_API_KEY);
-    MapplsGL.setAtlasClientId(MAPPLS_CLIENT_ID);
-    MapplsGL.setAtlasClientSecret(MAPPLS_CLIENT_SECRET_KEY);
+    const initMapSDK = async () => {
+      await MapplsGL.setMapSDKKey(MAPPLS_REST_API_KEY);
+      await MapplsGL.setRestAPIKey(MAPPLS_REST_API_KEY);
+      await MapplsGL.setAtlasClientId(MAPPLS_CLIENT_ID);
+      await MapplsGL.setAtlasClientSecret(MAPPLS_CLIENT_SECRET_KEY);
+    };
+    initMapSDK();
   }, []);
+
+  // Update marker coordinates only after we have valid location
+  useEffect(() => {
+    if (latitude && longitude && !locationInitialized) {
+      setMarkerCoordinates([longitude, latitude]);
+      setLocationInitialized(true);
+    }
+  }, [latitude, longitude, locationInitialized]);
+
+  // Ensure map camera updates once both map is ready and we have coordinates
+  useEffect(() => {
+    if (
+      mapReady &&
+      locationInitialized &&
+      markerCoordinates[0] !== 0 &&
+      markerCoordinates[1] !== 0
+    ) {
+      if (cameraRef.current) {
+        cameraRef.current.setCamera({
+          centerCoordinate: markerCoordinates,
+          zoomLevel: 15,
+          animationDuration: 1000,
+        });
+      }
+      reverseGeocode(markerCoordinates);
+    }
+  }, [mapReady, locationInitialized, markerCoordinates]);
 
   const reverseGeocode = async (coordinates: number[]) => {
     try {
@@ -185,7 +218,7 @@ const AddAddress = () => {
       const { latitude, longitude } = location.coords;
       const newCoords = [longitude, latitude];
       setMarkerCoordinates(newCoords);
-      // setMarkerVisible(true);
+      setLocationInitialized(true);
 
       // When getting current location, update camera position
       if (cameraRef.current) {
@@ -205,6 +238,7 @@ const AddAddress = () => {
     }
   };
 
+  // Request location permission on mount
   useEffect(() => {
     requestLocationPermission();
   }, []);
@@ -217,10 +251,18 @@ const AddAddress = () => {
       if (data) {
         addAddressSheetRef.current?.expand();
       } else {
-        Alert.alert(
-          "",
-          "Sorry we're not currently delivering to this location"
-        );
+        if (Platform.OS === "android") {
+          ToastAndroid.showWithGravity(
+            "Sorry we're not currently delivering to this location",
+            ToastAndroid.SHORT,
+            ToastAndroid.CENTER
+          );
+        } else {
+          Alert.alert(
+            "",
+            "Sorry we're not currently delivering to this location"
+          );
+        }
       }
     },
   });
@@ -238,6 +280,10 @@ const AddAddress = () => {
     []
   );
 
+  const handleMapReady = () => {
+    setMapReady(true);
+  };
+
   return (
     <>
       <ScreenWrapper>
@@ -251,14 +297,15 @@ const AddAddress = () => {
             rotateEnabled={true}
             compassEnabled={true}
             attributionEnabled={true}
+            onDidFinishRenderingMapFully={handleMapReady}
             onRegionDidChange={(event) => {
+              if (!mapReady) return;
               const { geometry, properties } = event;
               if (properties && properties.zoomLevel) {
                 setZoomLevel(properties.zoomLevel);
               }
               if (geometry && geometry.coordinates) {
                 const [longitude, latitude] = geometry.coordinates;
-                // console.log("Map moved to:", latitude, longitude);
                 const newCoords = [longitude, latitude];
                 setMarkerCoordinates(newCoords);
                 reverseGeocode(newCoords);
@@ -268,7 +315,7 @@ const AddAddress = () => {
             {/* Camera Position */}
             <Camera
               ref={cameraRef}
-              zoomLevel={zoomLevel | 15}
+              zoomLevel={zoomLevel}
               centerCoordinate={markerCoordinates}
               centerMapplsPin={mapplsPin}
               animationMode="flyTo"
@@ -323,7 +370,7 @@ const AddAddress = () => {
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "space-between",
-                paddingRight: scale(10),
+                paddingRight: scale(35),
               }}
             >
               <TextInput
@@ -359,7 +406,7 @@ const AddAddress = () => {
 
             <View style={styles.detailsContainerInside}>
               {loading ? (
-                <ActivityIndicator size="small" color={colors.PRIMARY} />
+                <MapDetailLoader />
               ) : locationDetails ? (
                 <>
                   <Typo
@@ -399,9 +446,7 @@ const AddAddress = () => {
                   />
                 </>
               ) : (
-                <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
-                  Loading location details...
-                </Typo>
+                <MapDetailLoader />
               )}
             </View>
           </View>

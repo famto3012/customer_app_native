@@ -4,6 +4,7 @@ import {
   Linking,
   Platform,
   StyleSheet,
+  ToastAndroid,
   View,
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
@@ -110,9 +111,17 @@ const chatPage = () => {
         }}
         onPress={() => {
           const dialerUrl = `tel:${agentPhone}`;
-          Linking.openURL(dialerUrl).catch((err) =>
-            Alert.alert("Error", "Unable to open dialer")
-          );
+          Linking.openURL(dialerUrl).catch((err) => {
+            if (Platform.OS === "android") {
+              ToastAndroid.showWithGravity(
+                "Unable to open dialer",
+                ToastAndroid.SHORT,
+                ToastAndroid.CENTER
+              );
+            } else {
+              Alert.alert("Error", "Unable to open dialer");
+            }
+          });
         }}
       />
       <View style={styles.agentDetailHeader}>

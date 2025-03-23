@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Alert, Switch, StyleSheet } from "react-native";
+import {
+  View,
+  Alert,
+  Switch,
+  StyleSheet,
+  Platform,
+  ToastAndroid,
+} from "react-native";
 import * as LocalAuthentication from "expo-local-authentication";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
@@ -45,7 +52,16 @@ const Settings = () => {
 
       return result.success;
     } catch (error) {
-      Alert.alert("Error", "Biometric authentication failed.");
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Biometric authentication failed.",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert("Error", "Biometric authentication failed.");
+      }
+
       return false;
     }
   };
@@ -53,19 +69,37 @@ const Settings = () => {
   // Handle Fingerprint Toggle
   const handleFingerprintToggle = async (enabled: boolean) => {
     if (!hasBiometric) {
-      Alert.alert(
-        "Error",
-        "Your device does not support fingerprint authentication."
-      );
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Your device does not support fingerprint authentication.",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert(
+          "Error",
+          "Your device does not support fingerprint authentication."
+        );
+      }
+
       return;
     }
 
     if (!haveBiometric && enabled) {
-      Alert.alert(
-        "Set up Fingerprint",
-        "You need to add a fingerprint in your device settings to use this feature.",
-        [{ text: "OK", onPress: () => {} }]
-      );
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "You need to add a fingerprint in your device settings to use this feature.",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert(
+          "Set up Fingerprint",
+          "You need to add a fingerprint in your device settings to use this feature.",
+          [{ text: "OK", onPress: () => {} }]
+        );
+      }
+
       return;
     }
 
@@ -74,7 +108,15 @@ const Settings = () => {
       useAuthStore.getState().setBiometricAuth(enabled);
       setFingerprintEnabled(enabled);
     } else {
-      Alert.alert("Failed", "Authentication not successful.");
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Authentication not successful.",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert("Failed", "Authentication not successful.");
+      }
     }
   };
 

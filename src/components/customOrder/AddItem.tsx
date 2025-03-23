@@ -1,9 +1,11 @@
 import {
   Alert,
   Image,
+  Platform,
   KeyboardAvoidingView,
   Pressable,
   StyleSheet,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -41,10 +43,19 @@ const AddItem: FC<{
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (status !== "granted") {
-      Alert.alert(
-        "Error",
-        "Sorry, we need media library permissions to make this work!"
-      );
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Sorry, we need media library permissions to make this work!",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert(
+          "Error",
+          "Sorry, we need media library permissions to make this work!"
+        );
+      }
+
       return;
     }
 
@@ -86,8 +97,16 @@ const AddItem: FC<{
   });
 
   const handleSave = (data: CustomOrderItemsProps) => {
-    if (!item.itemName || (item.quantity && !item.unit)) {
-      Alert.alert("Error", "Please add item details");
+    if (!item.itemName || !item.quantity || !item.unit) {
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Please add item details",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert("Error", "Please add item details");
+      }
       return;
     }
 

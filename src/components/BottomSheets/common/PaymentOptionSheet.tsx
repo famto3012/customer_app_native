@@ -1,4 +1,11 @@
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  Platform,
+  Pressable,
+  StyleSheet,
+  ToastAndroid,
+  View,
+} from "react-native";
 import Typo from "@/components/Typo";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors } from "@/constants/theme";
@@ -41,10 +48,18 @@ const PaymentOptionSheet: FC<{
       <Pressable
         onPress={() => {
           if (data?.walletBalance < grandTotal) {
-            Alert.alert(
-              "Low Balance",
-              "Your Famto Cash balance is insufficient to make the current payment"
-            );
+            if (Platform.OS === "android") {
+              ToastAndroid.showWithGravity(
+                "Your Famto Cash balance is insufficient to make the current payment",
+                ToastAndroid.SHORT,
+                ToastAndroid.CENTER
+              );
+            } else {
+              Alert.alert(
+                "Low Balance",
+                "Your Famto Cash balance is insufficient to make the current payment"
+              );
+            }
 
             return;
           }
