@@ -3,7 +3,6 @@ import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { colors, radius, spacingY } from "@/constants/theme";
 import { verticalScale } from "@/utils/styling";
 import * as Icon from "phosphor-react-native";
-import Typo from "./Typo";
 
 export default function CustomTabBar({
   state,

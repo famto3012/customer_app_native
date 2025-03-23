@@ -86,8 +86,6 @@ const PickDropScreen = () => {
   };
 
   const forceAudioCleanup = async () => {
-    console.log("🔴 FORCE AUDIO CLEANUP");
-
     try {
       // Force set our state regardless of what happens with the actual cleanup
       setIsPlaying(false);
@@ -95,13 +93,10 @@ const PickDropScreen = () => {
       // If we have a reference to the global sound
       if (GLOBAL_SOUND) {
         try {
-          console.log("Attempting force pause");
           await GLOBAL_SOUND.pauseAsync().catch(() => {});
 
-          console.log("Attempting force stop");
           await GLOBAL_SOUND.stopAsync().catch(() => {});
 
-          console.log("Attempting force unload");
           await GLOBAL_SOUND.unloadAsync().catch(() => {});
         } catch (e) {
           console.log("Caught error during force cleanup:", e);
@@ -121,23 +116,9 @@ const PickDropScreen = () => {
       } catch (e) {
         console.log("Error setting audio mode:", e);
       }
-
-      console.log("Force audio cleanup complete");
     } catch (e) {
       console.error("Critical error in force cleanup:", e);
     }
-  };
-
-  const prepareForNavigation = async () => {
-    console.log("🚨 NAVIGATION PREPARATION STARTED");
-    isNavigatingRef.current = true;
-
-    // Force cleanup audio first
-    await forceAudioCleanup();
-
-    // Proceed with navigation
-    console.log("Navigation can proceed now");
-    return true;
   };
 
   const playOrStopSound = async () => {

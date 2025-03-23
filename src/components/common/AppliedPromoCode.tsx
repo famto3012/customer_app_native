@@ -32,7 +32,9 @@ const AppliedPromoCode: FC<AppliedPromoCodeProps> = ({
     mutationFn: () => removeAppliedPromoCode(cartId, deliveryMode),
     onSuccess: () => {
       onRemove();
-      useAuthStore.setState({ promoCode: null });
+      useAuthStore.setState({
+        promoCode: { customOrder: "", pickAndDrop: "", universal: "" },
+      });
       queryClient.clear();
     },
   });
