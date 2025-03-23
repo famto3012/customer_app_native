@@ -21,6 +21,7 @@ import dayjs from "dayjs";
 interface TemporaryOrderProps {
   orderId: string;
   createdAt: string;
+  deliveryMode: string;
   merchantName: string;
 }
 
@@ -39,13 +40,21 @@ const TemporaryOrderSheet = () => {
 
   const handleCancelOrderMutation = useMutation({
     mutationKey: ["cancel-order"],
-    mutationFn: () => cancelOrder(selected),
-    onSuccess: () => {
-      removeOrderById(selected);
-      setTempOrders((prev) =>
-        prev.filter((order) => order.orderId !== selected)
-      );
-      setSelected("");
+    mutationFn: ({
+      orderId,
+      deliveryMode,
+    }: {
+      orderId: string;
+      deliveryMode: string;
+    }) => cancelOrder(orderId, deliveryMode),
+    onSuccess: (data) => {
+      if (data.success) {
+        removeOrderById(selected);
+        setTempOrders((prev) =>
+          prev.filter((order) => order.orderId !== selected)
+        );
+        setSelected("");
+      }
     },
   });
 
@@ -53,11 +62,13 @@ const TemporaryOrderSheet = () => {
     return (
       <View style={styles.orderContainer}>
         <View style={{ gap: spacingY._5 }}>
-          <Typo size={13} color={colors.NEUTRAL900}>
-            Order from
-          </Typo>
+          {item.deliveryMode === "Universal" && (
+            <Typo size={13} color={colors.NEUTRAL900}>
+              Order from
+            </Typo>
+          )}
           <Typo size={16} color={colors.NEUTRAL900} fontFamily="SemiBold">
-            {item.merchantName}
+            {item.merchantName ? item.merchantName : item.deliveryMode}
           </Typo>
           <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
             {dayjs(new Date(item.createdAt)).format("DD/MM/YYYY | hh:mm A")}
@@ -67,7 +78,10 @@ const TemporaryOrderSheet = () => {
         <Pressable
           onPress={() => {
             setSelected(item.orderId);
-            handleCancelOrderMutation.mutate();
+            handleCancelOrderMutation.mutate({
+              orderId: item.orderId,
+              deliveryMode: item.deliveryMode,
+            });
           }}
           style={styles.cancelBtn}
         >

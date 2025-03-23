@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { spacingX } from "./theme";
+import { scale } from "@/utils/styling";
 
 export const commonStyles = StyleSheet.create({
   // For background overlay of Bottom Sheet
@@ -28,5 +29,10 @@ export const commonStyles = StyleSheet.create({
   center: {
     alignItems: "center",
     justifyContent: "center",
+  },
+  emptyFavoriteListImage: {
+    width: scale(340),
+    height: scale(340),
+    resizeMode: "cover",
   },
 });

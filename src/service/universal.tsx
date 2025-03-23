@@ -81,22 +81,20 @@ export const getMerchants = async (
 export const toggleMerchantFavorite = async (
   merchantId: string,
   businessCategoryId: string | null
-) => {
+): Promise<{ success: boolean; message: string }> => {
   try {
     const res = await appAxios.patch(
       `/customers/toggle-merchant-favorite/${merchantId}/${businessCategoryId}`,
       {}
     );
 
-    if (res.status === 200) {
-      return true;
-    } else {
-      throw new Error("Failed to fetch categories");
-    }
+    return res.status === 200
+      ? res.data
+      : { success: false, message: "Failed" };
   } catch (err) {
     console.error(`Error in toggle merchant favorite:`, err);
-    Alert.alert("Error", "Something went wrong!");
-    return false;
+
+    return { success: false, message: "Failed" };
   }
 };
 
@@ -122,11 +120,12 @@ export const fetchCategory = async (
 export const fetchProduct = async (
   categoryId: string,
   customerId: string,
-  page: number
+  page: number,
+  filter?: string
 ) => {
   try {
     const res = await appAxios.get(`/customers/products`, {
-      params: { categoryId, customerId, page },
+      params: { categoryId, customerId, page, filter },
     });
 
     return { data: res.data.data, hasNextPage: res.data.hasNextPage };
@@ -175,22 +174,21 @@ export const getVariants = async (productId: string) => {
   }
 };
 
-export const toggleProductFavorite = async (productId: string) => {
+export const toggleProductFavorite = async (
+  productId: string
+): Promise<{ success: boolean; message: string }> => {
   try {
     const res = await appAxios.patch(
       `/customers/toggle-product-favorite/${productId}`,
       {}
     );
 
-    if (res.status === 200) {
-      return true;
-    } else {
-      throw new Error("Failed to fetch variants");
-    }
+    return res.status === 200
+      ? res.data
+      : { success: false, message: "Failed" };
   } catch (err) {
     console.error(`Error in toggling product favorite:`, err);
-    Alert.alert("Error", "Something went wrong!");
-    return false;
+    return { success: false, message: "Failed" };
   }
 };
 
@@ -523,17 +521,28 @@ export const filterAndSearchProducts = async (
   }
 };
 
-export const cancelOrder = async (orderId: string) => {
+export const cancelOrder = async (
+  orderId: string,
+  deliveryMode: string
+): Promise<{ success: boolean; message: string }> => {
   try {
-    const res = await appAxios.post(
-      `/customers/cancel-universal-order/${orderId}`,
-      {}
-    );
+    const endPoint =
+      deliveryMode === "Universal"
+        ? `/customers/cancel-universal-order`
+        : deliveryMode === "Pick-and-drop"
+        ? `/customers/cancel-pick-and-drop-order`
+        : `/customers/cancel-custom-order`;
 
-    return res.status === 200 ? res.data : null;
+    const res = await appAxios.post(endPoint, {
+      orderId,
+    });
+
+    return res.status === 200
+      ? res.data
+      : { success: false, message: "Order not found or already confirmed" };
   } catch (err) {
-    console.error(`Error in cancelling order:`, err);
+    console.error(`Error in cancelling order:`, JSON.stringify(err));
     Alert.alert("Error", "Order already confirmed or not found");
-    return null;
+    return { success: false, message: "Error while cancelling order" };
   }
 };

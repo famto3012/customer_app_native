@@ -5,8 +5,9 @@ import {
   StyleSheet,
   View,
   ToastAndroid,
+  Share,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import { scale, verticalScale } from "@/utils/styling";
@@ -14,7 +15,10 @@ import Typo from "@/components/Typo";
 import { colors, radius, spacingX } from "@/constants/theme";
 import { referralDetails } from "@/utils/defaultData";
 import Button from "@/components/Button";
-import { Clipboard as ClipBoardIcon } from "phosphor-react-native";
+import {
+  Clipboard as ClipBoardIcon,
+  ShareNetwork,
+} from "phosphor-react-native";
 import { useQuery } from "@tanstack/react-query";
 import { getReferralCode } from "@/service/userService";
 import * as Clipboard from "expo-clipboard";
@@ -26,6 +30,7 @@ interface ReferralProps {
 
 const Referral = () => {
   const [enabled, setEnabled] = useState<boolean>(false);
+  const [referralCode, setReferralCode] = useState<string>("");
 
   const { data, isLoading } = useQuery<ReferralProps>({
     queryKey: ["referral", enabled],
@@ -33,16 +38,38 @@ const Referral = () => {
     enabled,
   });
 
-  const copyToClipboard = async () => {
-    const link =
-      "Your referral code is: " + data?.referralCode + "\n" + data?.appLink;
+  useEffect(() => {
+    if (data?.referralCode) {
+      setReferralCode(data.referralCode);
+    }
+  }, [data]);
 
+  const link =
+    "Your referral code is: " + data?.referralCode + "\n" + data?.appLink;
+
+  const copyToClipboard = async () => {
     await Clipboard.setStringAsync(link);
     ToastAndroid.showWithGravity(
       "Link copied",
       ToastAndroid.LONG,
       ToastAndroid.CENTER
     );
+  };
+
+  const shareReferral = async () => {
+    try {
+      await Share.share({
+        message: link,
+        title: "Invite Friends & Earn Rewards!",
+      });
+    } catch (error) {
+      console.error("Error sharing referral link:", error);
+      ToastAndroid.showWithGravity(
+        "Unable to share link",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    }
   };
 
   return (
@@ -102,8 +129,7 @@ const Referral = () => {
           ))}
         </View>
 
-        <Pressable
-          onPress={copyToClipboard}
+        <View
           style={[
             styles.codeContainer,
             { display: data?.referralCode ? "flex" : "none" },
@@ -112,16 +138,33 @@ const Referral = () => {
           <Typo size={13} style={{ flex: 1 }}>
             Your code is: {data?.referralCode}
           </Typo>
-          <ClipBoardIcon weight="fill" color={colors.NEUTRAL500} />
-        </Pressable>
+
+          <View style={{ flexDirection: "row", gap: spacingX._15 }}>
+            <Pressable onPress={shareReferral} style={styles.actionBtn}>
+              <ShareNetwork size={scale(24)} weight="fill" />
+            </Pressable>
+
+            <Pressable onPress={copyToClipboard} style={styles.actionBtn}>
+              <ClipBoardIcon
+                size={scale(24)}
+                weight="fill"
+                color={colors.NEUTRAL500}
+              />
+            </Pressable>
+          </View>
+        </View>
       </ScrollView>
 
       <View style={styles.btnContainer}>
-        <Button
-          title="Get the link"
-          onPress={() => setEnabled(true)}
-          isLoading={isLoading}
-        />
+        {referralCode ? (
+          <Button title="Invite friends" onPress={shareReferral} />
+        ) : (
+          <Button
+            title="Get the link"
+            onPress={() => setEnabled(true)}
+            isLoading={isLoading}
+          />
+        )}
       </View>
     </ScreenWrapper>
   );
@@ -173,7 +216,7 @@ const styles = StyleSheet.create({
   },
   btnContainer: {
     marginTop: "auto",
-    paddingVertical: verticalScale(30),
+    paddingVertical: verticalScale(20),
     paddingHorizontal: scale(20),
   },
   codeContainer: {
@@ -184,5 +227,10 @@ const styles = StyleSheet.create({
     borderRadius: radius._10,
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: verticalScale(10),
+  },
+  actionBtn: {
+    paddingHorizontal: scale(5),
+    paddingVertical: verticalScale(4),
   },
 });

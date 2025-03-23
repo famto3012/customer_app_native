@@ -1,9 +1,13 @@
-import React, { FC, memo } from "react";
+import React, { FC, memo, useState } from "react";
 import { Pressable, View, StyleSheet } from "react-native";
 import Typo from "@/components/Typo";
-import Animated from "react-native-reanimated";
+import Animated, {
+  FadeInUp,
+  FadeOut,
+  LinearTransition,
+} from "react-native-reanimated";
 import { verticalScale, scale } from "@/utils/styling";
-import { colors } from "@/constants/theme";
+import { colors, radius } from "@/constants/theme";
 import ProductsList from "./ProductList";
 import { CategoryProps, ProductProps } from "@/types";
 
@@ -16,9 +20,20 @@ interface CategoryContainerProps {
 
 const CategoryContainer: FC<CategoryContainerProps> = memo(
   ({ category, products, openVariant, openDetail }) => {
+    const [isExpanded, setIsExpanded] = useState<boolean>(category.status);
+
     return (
-      <View style={styles.categoryContainer}>
-        <Pressable style={styles.categoryBtn}>
+      <Animated.View
+        style={[
+          styles.categoryContainer,
+          { paddingBottom: isExpanded ? verticalScale(10) : verticalScale(0) },
+        ]}
+        layout={LinearTransition.damping(10)}
+      >
+        <Pressable
+          onPress={() => setIsExpanded((prev) => !prev)}
+          style={styles.categoryBtn}
+        >
           <Typo size={16} color={colors.NEUTRAL900} fontFamily="SemiBold">
             {category.categoryName}
           </Typo>
@@ -30,28 +45,26 @@ const CategoryContainer: FC<CategoryContainerProps> = memo(
               width: scale(24),
               resizeMode: "cover",
               marginRight: scale(10),
-              // transform: [{ rotate: isExpanded ? "180deg" : "0deg" }],
+              transform: [{ rotate: isExpanded ? "180deg" : "0deg" }],
             }}
           />
         </Pressable>
 
-        <View>
-          <ProductsList
-            products={products}
-            openVariant={openVariant}
-            openDetail={openDetail}
-          />
-        </View>
-      </View>
+        {isExpanded && (
+          <Animated.View
+            entering={FadeInUp.springify().damping(12).stiffness(100)}
+            exiting={FadeOut.springify().damping(10).stiffness(80)}
+          >
+            <ProductsList
+              products={products}
+              openVariant={openVariant}
+              openDetail={openDetail}
+            />
+          </Animated.View>
+        )}
+      </Animated.View>
     );
   },
-  // (prevProps, nextProps) => {
-  //   // Custom comparison function to determine if component should update
-  //   return (
-  //     prevProps.category.categoryId === nextProps.category.categoryId &&
-  //     prevProps.products.length === nextProps.products.length
-  //   );
-  // }
   (prevProps, nextProps) => {
     // First check if categories are the same
     if (prevProps.category.categoryId !== nextProps.category.categoryId)
@@ -72,15 +85,14 @@ export default CategoryContainer;
 
 const styles = StyleSheet.create({
   categoryContainer: {
-    marginBottom: 20,
-    padding: 10,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 10,
-    marginHorizontal: scale(15),
+    marginVertical: verticalScale(10),
+    paddingHorizontal: scale(7),
+    backgroundColor: colors.WHITE,
+    borderRadius: radius._10,
+    marginHorizontal: scale(10),
   },
   categoryBtn: {
-    paddingTop: verticalScale(15),
-    paddingBottom: verticalScale(24),
+    paddingVertical: verticalScale(15),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

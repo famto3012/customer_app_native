@@ -375,6 +375,7 @@
 //   },
 // });
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   Pressable,
@@ -388,9 +389,9 @@ import { colors } from "@/constants/theme";
 import { FC, useEffect, useState } from "react";
 import { MapPinPlus } from "phosphor-react-native";
 import { router } from "expo-router";
-import { AddressProps } from "@/types";
-import { fetchUserAddress } from "@/service/userService";
-import { useQuery } from "@tanstack/react-query";
+import { UserAddressProps } from "@/types";
+import { fetchUserAddress, updateUserAddress } from "@/service/userService";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/store";
 import { commonStyles } from "@/constants/commonStyles";
 
@@ -418,12 +419,17 @@ const Address: FC<{
   const [selected, setSelected] = useState<string>("");
   const [selectedOtherId, setSelectedOtherId] = useState<string>("");
   const [selectionValid, setSelectionValid] = useState<boolean>(true);
+  const [addressToDelete, setAddressToDelete] = useState<{
+    type: string;
+    otherId: string;
+  }>({ type: "", otherId: "" });
 
-  const [home, setHome] = useState<AddressProps | null>(null);
-  const [work, setWork] = useState<AddressProps | null>(null);
-  const [other, setOther] = useState<AddressProps[]>([]);
+  const [home, setHome] = useState<UserAddressProps | null>(null);
+  const [work, setWork] = useState<UserAddressProps | null>(null);
+  const [other, setOther] = useState<UserAddressProps[]>([]);
 
   const { token, userAddress } = useAuthStore.getState();
+  const queryClient = useQueryClient();
 
   const { data } = useQuery({
     queryKey: ["customer-address"],
@@ -494,7 +500,61 @@ const Address: FC<{
     }
   };
 
-  const renderAddress = (address: AddressProps | null) => {
+  const handleDeleteAddressMutation = useMutation({
+    mutationKey: ["update-address"],
+    mutationFn: (data: UserAddressProps) => updateUserAddress(data),
+    onSuccess: (data) => {
+      if (data.success && !data.address) {
+        if (
+          addressToDelete.type === useAuthStore.getState().userAddress.type &&
+          !addressToDelete.otherId
+        ) {
+          useAuthStore.setState({
+            userAddress: {
+              type: "",
+              otherId: "",
+              address: "",
+            },
+          });
+
+          setAddressToDelete({ type: "", otherId: "" });
+        } else if (
+          addressToDelete.otherId ===
+          useAuthStore.getState().userAddress.otherId
+        ) {
+          useAuthStore.setState({
+            userAddress: {
+              type: "",
+              otherId: "",
+              address: "",
+            },
+          });
+
+          setAddressToDelete({ type: "", otherId: "" });
+        }
+
+        queryClient.invalidateQueries({ queryKey: ["customer-address"] });
+      }
+    },
+  });
+
+  const handleDelete = (type: string, id?: string) => {
+    const address = {
+      id: id ?? "",
+      type,
+      fullName: null,
+      phoneNumber: null,
+      flat: null,
+      area: null,
+      coordinates: null,
+    };
+
+    setAddressToDelete({ type, otherId: id || "" });
+
+    handleDeleteAddressMutation.mutate(address);
+  };
+
+  const renderAddress = (address: UserAddressProps | null) => {
     return (
       <View
         style={{
@@ -508,50 +568,79 @@ const Address: FC<{
           alignItems: "center",
         }}
       >
-        <View style={{ width: "90%" }}>
-          <Typo
-            size={14}
-            color={colors.NEUTRAL900}
-            fontFamily="Medium"
-            style={{ paddingBottom: verticalScale(3) }}
-          >
-            {address?.fullName}
-          </Typo>
-          <Typo
-            size={13}
-            color={colors.NEUTRAL900}
-            style={{ paddingBottom: verticalScale(5) }}
-          >
-            {address?.phoneNumber}
-          </Typo>
-          <Typo size={12} color={colors.NEUTRAL500} style={{ width: "70%" }}>
-            {address?.flat}, {address?.area}, {address?.landmark}
-          </Typo>
-        </View>
+        <View style={{ width: "100%" }}>
+          <View style={[commonStyles.flexRowBetween]}>
+            <View>
+              <Typo
+                size={14}
+                color={colors.NEUTRAL900}
+                fontFamily="Medium"
+                style={{ paddingBottom: verticalScale(3) }}
+              >
+                {address?.fullName}
+              </Typo>
+              <Typo
+                size={13}
+                color={colors.NEUTRAL900}
+                style={{ paddingBottom: verticalScale(5) }}
+              >
+                {address?.phoneNumber}
+              </Typo>
+            </View>
 
-        {showActionButton && (
-          <Pressable
-            style={{ padding: scale(3) }}
-            onPress={() => {
-              router.push({
-                pathname: "/screens/common/EditAddress",
-                params: {
-                  address: JSON.stringify(address),
-                  addressType: selected,
-                },
-              });
-            }}
-          >
-            <Image
-              source={require("@/assets/icons/edit.webp")}
-              style={{
-                width: scale(24),
-                height: verticalScale(24),
-                resizeMode: "cover",
-              }}
-            />
-          </Pressable>
-        )}
+            {showActionButton && (
+              <View style={[commonStyles.flexRowGap]}>
+                <Pressable
+                  style={{ padding: scale(3) }}
+                  onPress={() => {
+                    router.push({
+                      pathname: "/screens/common/EditAddress",
+                      params: {
+                        address: JSON.stringify(address),
+                        addressType: selected,
+                      },
+                    });
+                  }}
+                >
+                  <Image
+                    source={require("@/assets/icons/edit.webp")}
+                    style={{
+                      width: scale(24),
+                      height: verticalScale(24),
+                      resizeMode: "cover",
+                    }}
+                  />
+                </Pressable>
+
+                {handleDeleteAddressMutation.isPending &&
+                addressToDelete.type === address?.type &&
+                addressToDelete.type !== "other" ? (
+                  <ActivityIndicator size="small" color={colors.RED} />
+                ) : (
+                  <Pressable
+                    style={{ padding: scale(3) }}
+                    onPress={() => handleDelete(address?.type || "")}
+                  >
+                    <Image
+                      source={require("@/assets/icons/trash.webp")}
+                      style={{
+                        width: scale(24),
+                        height: verticalScale(24),
+                        resizeMode: "cover",
+                      }}
+                    />
+                  </Pressable>
+                )}
+              </View>
+            )}
+          </View>
+
+          <View>
+            <Typo size={12} color={colors.NEUTRAL500} style={{ width: "90%" }}>
+              {address?.flat}, {address?.area}, {address?.landmark}
+            </Typo>
+          </View>
+        </View>
       </View>
     );
   };
@@ -701,53 +790,90 @@ const Address: FC<{
                 },
               ]}
             >
-              <View style={{ width: "90%" }}>
-                <Typo
-                  size={14}
-                  color={colors.NEUTRAL900}
-                  fontFamily="Medium"
-                  style={{ paddingBottom: verticalScale(3) }}
-                >
-                  {item?.fullName}
-                </Typo>
-                <Typo
-                  size={13}
-                  color={colors.NEUTRAL900}
-                  style={{ paddingBottom: verticalScale(5) }}
-                >
-                  {item?.phoneNumber}
-                </Typo>
-                <Typo size={12} color={colors.NEUTRAL500}>
-                  {item?.flat}, {item?.area}, {item?.landmark}
-                </Typo>
-              </View>
+              <View style={{ width: "100%" }}>
+                <View style={[commonStyles.flexRowBetween]}>
+                  <View>
+                    <Typo
+                      size={14}
+                      color={colors.NEUTRAL900}
+                      fontFamily="Medium"
+                      style={{ paddingBottom: verticalScale(3) }}
+                    >
+                      {item?.fullName}
+                    </Typo>
+                    <Typo
+                      size={13}
+                      color={colors.NEUTRAL900}
+                      style={{ paddingBottom: verticalScale(5) }}
+                    >
+                      {item?.phoneNumber}
+                    </Typo>
+                  </View>
 
-              {showActionButton && (
-                <Pressable
-                  style={{ padding: scale(3) }}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/screens/common/EditAddress",
-                      params: {
-                        address: JSON.stringify(item),
-                        addressType: "other",
-                      },
-                    })
-                  }
-                >
-                  <Image
-                    source={require("@/assets/icons/edit.webp")}
-                    style={{
-                      width: scale(24),
-                      height: verticalScale(24),
-                      resizeMode: "cover",
-                    }}
-                  />
-                </Pressable>
-              )}
+                  {showActionButton && (
+                    <View style={[commonStyles.flexRowGap]}>
+                      <Pressable
+                        style={{ padding: scale(3) }}
+                        onPress={() => {
+                          router.push({
+                            pathname: "/screens/common/EditAddress",
+                            params: {
+                              address: JSON.stringify(item),
+                              addressType: "other",
+                            },
+                          });
+                        }}
+                      >
+                        <Image
+                          source={require("@/assets/icons/edit.webp")}
+                          style={{
+                            width: scale(24),
+                            height: verticalScale(24),
+                            resizeMode: "cover",
+                          }}
+                        />
+                      </Pressable>
+
+                      {handleDeleteAddressMutation.isPending &&
+                      addressToDelete.type === "other" &&
+                      addressToDelete.otherId === item.id ? (
+                        <ActivityIndicator size="small" color={colors.RED} />
+                      ) : (
+                        <Pressable
+                          style={{ padding: scale(3) }}
+                          onPress={() =>
+                            handleDelete(item?.type || "", item.id)
+                          }
+                        >
+                          <Image
+                            source={require("@/assets/icons/trash.webp")}
+                            style={{
+                              width: scale(24),
+                              height: verticalScale(24),
+                              resizeMode: "cover",
+                            }}
+                          />
+                        </Pressable>
+                      )}
+                    </View>
+                  )}
+                </View>
+
+                <View>
+                  <Typo
+                    size={12}
+                    color={colors.NEUTRAL500}
+                    style={{ width: "90%" }}
+                  >
+                    {item?.flat}, {item?.area}, {item?.landmark}
+                  </Typo>
+                </View>
+              </View>
             </Pressable>
           )}
-          keyExtractor={(item) => item?.id?.toString()}
+          keyExtractor={(item, index) =>
+            item?.id?.toString() || index.toString()
+          }
           scrollEnabled={alreadySelect}
           showsVerticalScrollIndicator={false}
         />

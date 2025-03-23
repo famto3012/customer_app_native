@@ -17,7 +17,7 @@ import Typo from "@/components/Typo";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 import { UserAddressProps } from "@/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addAddressDetail } from "@/service/userService";
+import { updateUserAddress } from "@/service/userService";
 import { router } from "expo-router";
 import { useAuthStore } from "@/store/store";
 import { commonStyles } from "@/constants/commonStyles";
@@ -56,9 +56,9 @@ const EditAddressDetail = ({
     setAddressDetail((prev) => ({ ...prev, type }));
   };
 
-  const handleAddAddressMutation = useMutation({
-    mutationKey: ["add-address-detail"],
-    mutationFn: (data: UserAddressProps) => addAddressDetail(data),
+  const handleEditAddressMutation = useMutation({
+    mutationKey: ["update-address"],
+    mutationFn: (data: UserAddressProps) => updateUserAddress(data),
     onSuccess: (data) => {
       if (data.success) {
         const address = `${data.address?.flat}, ${data.address?.area}, ${data.address?.landmark}`;
@@ -169,9 +169,9 @@ const EditAddressDetail = ({
                 Alert.alert("Error", "Please fill all details");
                 return;
               }
-              handleAddAddressMutation.mutate(addressDetail);
+              handleEditAddressMutation.mutate(addressDetail);
             }}
-            isLoading={handleAddAddressMutation.isPending}
+            isLoading={handleEditAddressMutation.isPending}
             style={styles.buttonFromMap}
           />
         </BottomSheetScrollView>

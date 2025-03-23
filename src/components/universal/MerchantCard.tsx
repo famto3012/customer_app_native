@@ -30,11 +30,14 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
   const handleFavoriteMutation = useMutation({
     mutationKey: ["merchant-favorite", item.id],
     mutationFn: () => toggleMerchantFavorite(item.id, selectedBusiness),
-    onSuccess: () => {
-      setIsFavorite(!isFavorite);
-      scale.value = 1.2;
-      scale.value = withSpring(1, { damping: 5, stiffness: 150 });
-      queryClient.invalidateQueries({ queryKey: ["favoriteMerchantList"] });
+    onSuccess: (data) => {
+      if (data.success) {
+        console.log("Message:", data.message);
+        setIsFavorite(!isFavorite);
+        scale.value = 1.2;
+        scale.value = withSpring(1, { damping: 5, stiffness: 150 });
+        queryClient.invalidateQueries({ queryKey: ["favorite-merchant-list"] });
+      }
     },
   });
 

@@ -83,7 +83,7 @@ const PickAndDropCheckout = () => {
         });
       } else if (selectedPaymentMode === "Famto-cash") {
         if (data?.success && data?.orderId && data?.createdAt) {
-          addOrder(data.orderId, data.createdAt);
+          addOrder(data.orderId, data.createdAt, "Pick-and-drop");
 
           useAuthStore.setState({
             promoCode: {
@@ -106,7 +106,7 @@ const PickAndDropCheckout = () => {
       verifyPickAndDropPayment(orderId, amount),
     onSuccess: (data) => {
       if (data?.success && data?.orderId && data?.createdAt) {
-        addOrder(data.orderId, data.createdAt);
+        addOrder(data.orderId, data.createdAt, "Pick-and-drop");
 
         useAuthStore.setState({
           promoCode: {

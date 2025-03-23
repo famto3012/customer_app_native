@@ -17,7 +17,7 @@ import Typo from "@/components/Typo";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 import { UserAddressProps } from "@/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addAddressDetail } from "@/service/userService";
+import { updateUserAddress } from "@/service/userService";
 import { router } from "expo-router";
 import { useAuthStore } from "@/store/store";
 
@@ -28,7 +28,9 @@ const AddAddressDetail = ({
   addAddressSheetRef: any;
   addressData: any;
 }) => {
-  const [addressDetail, setAddressDetail] = useState<UserAddressProps>({
+  const [addressDetail, setAddressDetail] = useState<
+    Omit<UserAddressProps, "id">
+  >({
     type: "",
     fullName: "",
     phoneNumber: "",
@@ -60,8 +62,8 @@ const AddAddressDetail = ({
   };
 
   const handleAddAddressMutation = useMutation({
-    mutationKey: ["add-address-detail"],
-    mutationFn: (data: UserAddressProps) => addAddressDetail(data),
+    mutationKey: ["update-address"],
+    mutationFn: (data: Omit<UserAddressProps, "id">) => updateUserAddress(data),
     onSuccess: (data) => {
       if (data.success) {
         const address = `${data.address?.flat}, ${data.address?.area}, ${data.address?.landmark}`;

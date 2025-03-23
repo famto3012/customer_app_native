@@ -145,16 +145,6 @@ export type AddVariantProps = {
   variantTypeId: string;
 };
 
-export type AddressProps = {
-  id: string;
-  fullName: string;
-  phoneNumber: string;
-  flat: string;
-  area: string;
-  landmark?: string;
-  coordinates: number[];
-};
-
 export type OrderItemProps = {
   orderId: string;
   merchantName: string;
@@ -214,8 +204,8 @@ export type UserProfileProps = {
 export type CustomOrderItemsProps = {
   itemId?: string;
   itemName: string;
-  quantity: number | string;
-  unit: string;
+  quantity?: number | string;
+  unit?: string;
   numOfUnits: number;
   itemImage?: string;
 };
@@ -268,13 +258,13 @@ export type LocationAddressProps = {
 };
 
 export type UserAddressProps = {
-  id?: string;
-  type: string | null;
+  id: string;
+  type: string;
   fullName: string | null;
   phoneNumber: string | null;
   flat: string | null;
   area: string | null;
-  landmark: string | null;
+  landmark?: string;
   coordinates: number[] | null;
 };
 

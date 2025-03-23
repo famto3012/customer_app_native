@@ -15,6 +15,10 @@ interface DataContextType {
   setProductCounts: React.Dispatch<
     React.SetStateAction<{ [productId: string]: ProductCountType }>
   >;
+  openDuplicate: boolean;
+  setOpenDuplicate: React.Dispatch<React.SetStateAction<boolean>>;
+  productFilter: string;
+  setProductFilter: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -24,10 +28,21 @@ export const DataProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [productCounts, setProductCounts] = useState<{
     [productId: string]: ProductCountType;
   }>({});
+  const [openDuplicate, setOpenDuplicate] = useState<boolean>(false);
+  const [productFilter, setProductFilter] = useState<string>("");
 
   return (
     <DataContext.Provider
-      value={{ product, setProduct, productCounts, setProductCounts }}
+      value={{
+        product,
+        setProduct,
+        productCounts,
+        setProductCounts,
+        openDuplicate,
+        setOpenDuplicate,
+        productFilter,
+        setProductFilter,
+      }}
     >
       {children}
     </DataContext.Provider>

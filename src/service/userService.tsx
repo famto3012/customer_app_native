@@ -1,7 +1,10 @@
 import { appAxios } from "@/config/apiInterceptor";
-import { UserAddressProps } from "@/types";
+import { MerchantCardProps, UserAddressProps } from "@/types";
 import { Alert } from "react-native";
 import RazorpayCheckout from "react-native-razorpay";
+
+type AddressWithoutId = Omit<UserAddressProps, "id">;
+type AddressWithId = UserAddressProps;
 
 export const fetchUserAddress = async () => {
   try {
@@ -129,15 +132,17 @@ export const getFavoriteProducts = async () => {
   }
 };
 
-export const getFavoriteMerchants = async () => {
+export const getFavoriteMerchants = async (): Promise<{
+  success: boolean;
+  data: MerchantCardProps[];
+}> => {
   try {
     const res = await appAxios.get(`/customers/favorite-merchants`);
 
-    return res.status === 200 ? res.data.data : [];
+    return res.status === 200 ? res.data : { success: false, data: [] };
   } catch (err: any) {
     console.error(`Error in getting favorite merchants:`, err);
-    Alert.alert("Error", "Something went wrong!");
-    return [];
+    return { success: false, data: [] };
   }
 };
 
@@ -350,8 +355,8 @@ export const verifySubscription = async (
   }
 };
 
-export const addAddressDetail = async (
-  data: UserAddressProps
+export const updateUserAddress = async (
+  data: AddressWithoutId | AddressWithId
 ): Promise<{ success: boolean; address: UserAddressProps | null }> => {
   try {
     const res = await appAxios.patch(`/customers/update-address`, data);

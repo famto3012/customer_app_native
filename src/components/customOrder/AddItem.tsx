@@ -1,6 +1,7 @@
 import {
   Alert,
   Image,
+  KeyboardAvoidingView,
   Pressable,
   StyleSheet,
   TouchableOpacity,
@@ -19,6 +20,7 @@ import { useMutation } from "@tanstack/react-query";
 import { addItemDetail } from "@/service/customOrderService";
 import { Dropdown } from "react-native-element-dropdown";
 import { unitData } from "@/utils/defaultData";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 
 const AddItem: FC<{
   openAddSheet?: () => void;
@@ -84,7 +86,7 @@ const AddItem: FC<{
   });
 
   const handleSave = (data: CustomOrderItemsProps) => {
-    if (!item.itemName || !item.quantity || !item.unit) {
+    if (!item.itemName || (item.quantity && !item.unit)) {
       Alert.alert("Error", "Please add item details");
       return;
     }
@@ -267,6 +269,7 @@ export default AddItem;
 const styles = StyleSheet.create({
   container: {
     marginVertical: verticalScale(15),
+    flex: 1,
   },
   dataContainer: {
     flexDirection: "row",

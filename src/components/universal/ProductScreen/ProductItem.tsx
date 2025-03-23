@@ -1,4 +1,4 @@
-import React, { FC, memo, useEffect, useMemo, useState } from "react";
+import { FC, memo, useMemo, useState } from "react";
 import { View, Pressable, StyleSheet } from "react-native";
 import FastImage from "react-native-fast-image";
 import { Heart } from "phosphor-react-native";
@@ -12,31 +12,47 @@ import { router } from "expo-router";
 import { useAuthStore } from "@/store/store";
 import { updateCart } from "@/localDB/controller/cartController";
 import { useData } from "@/context/DataContext";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toggleProductFavorite } from "@/service/universal";
 
 interface ProductItemProps {
   product: ProductProps;
   showAddCart?: boolean;
   openVariant?: (count?: number) => void;
   openDetail?: () => void;
+  navigateToMerchant?: boolean;
 }
 
 const ProductItem: FC<ProductItemProps> = memo(
-  ({ product, showAddCart, openVariant, openDetail }) => {
+  ({ product, showAddCart, openVariant, openDetail, navigateToMerchant }) => {
     const [isFavorite, setIsFavorite] = useState<boolean>(product.isFavorite);
 
     // Remove local count state and use productCounts instead
     const { token, selectedMerchant } = useAuthStore.getState();
     const { productCounts, setProduct, setProductCounts } = useData();
+    const queryClient = useQueryClient();
 
-    // For example, in ProductItem.tsx
     const count = useMemo(() => {
-      if (product?.variantAvailable) {
-        return Object.entries(productCounts)
-          .filter(([id]) => id.split("-")[0] === product.productId)
-          .reduce((sum, [, { count }]) => sum + (count || 0), 0);
-      }
-      return productCounts[product.productId]?.count || 0;
+      if (!showAddCart) return 0;
+
+      return Object.entries(productCounts)
+        .filter(([id]) => id.startsWith(product.productId))
+        .reduce((sum, [, { count }]) => sum + (count || 0), 0);
     }, [product.productId, productCounts]);
+
+    const handleFavoriteMutation = useMutation({
+      mutationKey: ["product-favorite", product.productId],
+      mutationFn: () => toggleProductFavorite(product.productId),
+      onSuccess: (data) => {
+        if (data.success) {
+          setIsFavorite(!isFavorite);
+
+          queryClient.invalidateQueries({
+            queryKey: ["favorite-product-list"],
+          });
+        }
+      },
+    });
 
     const isUserAuthenticated = () => {
       if (!token) {
@@ -50,8 +66,13 @@ const ProductItem: FC<ProductItemProps> = memo(
       if (!isUserAuthenticated() || !product.inventory) return;
 
       if (product.variantAvailable) {
+        const totalCount = Object.entries(productCounts)
+          .filter(([id]) => id.startsWith(product.productId)) // Get all variants
+          .reduce((sum, [, { count }]) => sum + (count || 0), 0);
+
         setProduct(product);
-        openVariant?.(productCounts[product.productId]?.count);
+
+        openVariant?.(totalCount);
       } else {
         const newQuantity = (productCounts[product.productId]?.count || 0) - 1;
         const updatedQuantity = newQuantity < 1 ? 0 : newQuantity;
@@ -78,8 +99,14 @@ const ProductItem: FC<ProductItemProps> = memo(
       if (!isUserAuthenticated() || !product.inventory) return;
 
       if (product.variantAvailable) {
+        const totalCount = Object.entries(productCounts)
+          .filter(([id]) => id.startsWith(product.productId)) // Get all variants
+          .reduce((sum, [, { count }]) => sum + (count || 0), 0);
+
+        openVariant?.(totalCount);
+
         setProduct(product);
-        openVariant?.(productCounts[product.productId]?.count);
+        openVariant?.(totalCount);
       } else {
         const newQuantity = (productCounts[product.productId]?.count || 0) + 1;
 
@@ -102,7 +129,16 @@ const ProductItem: FC<ProductItemProps> = memo(
     };
 
     return (
-      <View style={styles.productContainer}>
+      <Pressable
+        onPress={() => {
+          navigateToMerchant &&
+            router.push({
+              pathname: "/screens/universal/products",
+              params: { merchantId: product.merchantId },
+            });
+        }}
+        style={styles.productContainer}
+      >
         <View>
           <Pressable
             onPress={() => {
@@ -134,8 +170,13 @@ const ProductItem: FC<ProductItemProps> = memo(
           </Pressable>
 
           <Pressable
-            onPress={() => {}}
-            style={{ position: "absolute", right: 0, padding: scale(7) }}
+            onPress={() => handleFavoriteMutation.mutate()}
+            style={{
+              position: "absolute",
+              right: 0,
+              zIndex: 10,
+              padding: scale(7),
+            }}
           >
             <Heart
               color={isFavorite ? colors.RED : colors.WHITE}
@@ -192,7 +233,7 @@ const ProductItem: FC<ProductItemProps> = memo(
             {product.longDescription || product.description}
           </Typo>
         </View>
-      </View>
+      </Pressable>
     );
   },
   (prevProps, nextProps) => {

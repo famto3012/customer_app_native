@@ -4,6 +4,7 @@ import Order from "../models/Order";
 export const addOrder = async (
   orderId: string,
   createdAt: string,
+  deliveryMode: string,
   merchantName?: string
 ) => {
   try {
@@ -11,17 +12,22 @@ export const addOrder = async (
       await database.get<Order>("order").create((order) => {
         order.orderId = orderId;
         order.createdAt = createdAt;
+        order.deliveryMode = deliveryMode;
         order.merchantName = merchantName || "";
       });
     });
-    // console.log("Order added successfully");
   } catch (error) {
     console.error("Error adding order:", error);
   }
 };
 
 export const getAllOrder = async (): Promise<
-  { orderId: string; createdAt: string; merchantName: string }[]
+  {
+    orderId: string;
+    createdAt: string;
+    deliveryMode: string;
+    merchantName: string;
+  }[]
 > => {
   try {
     const orderCollection = database.get<Order>("order");
@@ -31,7 +37,8 @@ export const getAllOrder = async (): Promise<
 
     return orders.map((order) => ({
       orderId: order.orderId,
-      createdAt: order.createdAt || new Date().toISOString(),
+      createdAt: order.createdAt,
+      deliveryMode: order.deliveryMode || "",
       merchantName: order.merchantName,
     }));
   } catch (error) {
@@ -51,9 +58,6 @@ export const removeOrderById = async (orderId: string) => {
         await orderToDelete.markAsDeleted();
         await orderToDelete.destroyPermanently();
       });
-      // console.log("Order deleted successfully");
-    } else {
-      console.log("Order not found");
     }
   } catch (error) {
     console.error("Error deleting order:", error);

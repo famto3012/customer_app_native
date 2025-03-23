@@ -34,6 +34,7 @@ import { useAuthStore } from "@/store/store";
 import { commonStyles } from "@/constants/commonStyles";
 import AppliedPromoCode from "@/components/common/AppliedPromoCode";
 import { addOrder } from "@/localDB/controller/orderController";
+import { useData } from "@/context/DataContext";
 
 const Bill = () => {
   const [selectedPaymentMode, setSelectedPaymentMode] =
@@ -46,6 +47,7 @@ const Bill = () => {
 
   const { cartId, merchantId, deliveryMode } = useLocalSearchParams();
   const { promoCode } = useAuthStore.getState();
+  const { setProductCounts } = useData();
 
   const queryClient = useQueryClient();
 
@@ -83,7 +85,14 @@ const Bill = () => {
         }
       } else {
         if (data?.success && data?.orderId) {
-          addOrder(data?.orderId, data?.createdAt, data?.merchantName);
+          addOrder(
+            data?.orderId,
+            data?.createdAt,
+            "Universal",
+            data?.merchantName
+          );
+
+          setProductCounts({});
 
           useAuthStore.setState({
             cart: {
@@ -105,7 +114,14 @@ const Bill = () => {
       verifyPayment(orderId, amount),
     onSuccess: (data) => {
       if (data) {
-        addOrder(data?.orderId, data?.createdAt, data?.merchantName);
+        addOrder(
+          data?.orderId,
+          data?.createdAt,
+          "Universal",
+          data?.merchantName
+        );
+
+        setProductCounts({});
 
         useAuthStore.setState({
           cart: {
@@ -114,6 +130,7 @@ const Bill = () => {
             cartId: "",
           },
         });
+
         router.replace({ pathname: "/(tabs)" });
       }
     },

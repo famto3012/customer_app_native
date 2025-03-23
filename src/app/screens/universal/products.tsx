@@ -27,6 +27,8 @@ import MerchantRatingSheet from "@/components/BottomSheets/universal/MerchantRat
 import DistanceWarning from "@/components/BottomSheets/universal/DistanceWarning";
 import ProductCategoryLoader from "@/components/Loader/ProductCategoryLoader";
 import { verticalScale } from "@/utils/styling";
+import { useData } from "@/context/DataContext";
+import CategoryFooter from "@/components/universal/ProductScreen/CategoryFooter";
 
 const Products = () => {
   // Combined data structure for categories and their products
@@ -65,6 +67,7 @@ const Products = () => {
   const { selectedBusiness } = useAuthStore.getState();
   const { latitude, longitude } = useSafeLocation();
   const showCart = useAuthStore((state) => state.cart.showCart);
+  const { openDuplicate, setOpenDuplicate, productFilter } = useData();
 
   const { data: merchantData, isLoading: merchantDataLoading } =
     useQuery<MerchantDataProps>({
@@ -133,7 +136,8 @@ const Products = () => {
           const { data, hasNextPage } = await fetchProduct(
             category.categoryId,
             merchantId,
-            nextPage
+            nextPage,
+            productFilter
           );
 
           // Filter out duplicates from new products
@@ -245,9 +249,12 @@ const Products = () => {
             category={item.category}
             products={item.products}
             openVariant={(count?: number) => {
-              count && count > 0
-                ? duplicateVariantSheetRef.current?.expand()
-                : variantSheetRef.current?.expand();
+              if (count && count > 0) {
+                setOpenDuplicate(true);
+                duplicateVariantSheetRef.current?.expand();
+              } else {
+                variantSheetRef.current?.expand();
+              }
             }}
             openDetail={() => productDetailRef.current?.expand()}
           />
@@ -313,12 +320,15 @@ const Products = () => {
           ListEmptyComponent={ListEmptyComponent}
           ListHeaderComponent={() => (
             <HeaderComponent
-              merchantData={merchantData ? merchantData : null}
+              merchantData={merchantData ?? null}
               merchantDataLoading={merchantDataLoading}
               merchantId={merchantId}
               openRating={() => ratingSheetRef.current?.expand()}
             />
           )}
+          ListFooterComponent={
+            <CategoryFooter merchantData={merchantData ?? null} />
+          }
           contentContainerStyle={{
             paddingBottom: showCart ? verticalScale(60) : 0,
           }}
@@ -374,15 +384,18 @@ const Products = () => {
         enableDynamicSizing={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
+        onClose={() => setOpenDuplicate(false)}
       >
         <DuplicateVariantSheet
           onNewCustomization={() => {
+            setOpenDuplicate(false);
             duplicateVariantSheetRef.current?.close();
             variantSheetRef.current?.expand();
           }}
           closeSheet={() => {
             duplicateVariantSheetRef.current?.close();
           }}
+          openDuplicate={openDuplicate}
         />
       </BottomSheet>
 
