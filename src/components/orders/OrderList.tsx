@@ -150,9 +150,24 @@ const OrderList = () => {
 
     useEffect(() => {
       if (item.orderStatus === "On-going") {
+        console.log("orderTime", item);
+
         const interval = setInterval(() => {
-          const now = new Date().getTime();
-          // console.log("orderTime", item.orderTime);
+          const now = new Date();
+
+          // Extract the current date as "DD MMM YYYY"
+          const currentDate = now.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          });
+
+          // Compare with item.orderDate
+          if (item.orderDate !== currentDate) {
+            setRemainingTime("Arriving soon");
+            clearInterval(interval);
+            return;
+          }
 
           // Convert 12-hour format to 24-hour format
           const [time, modifier] = item.orderTime.split(" ");
@@ -168,15 +183,11 @@ const OrderList = () => {
           orderDate.setHours(orderHours, orderMinutes, 0, 0);
 
           // Add 30 minutes to the order time
-          const deliveryTime: any = new Date(
-            orderDate.getTime() + 30 * 60 * 1000
-          );
+          const deliveryTime = new Date(orderDate.getTime() + 30 * 60 * 1000);
           const diffInMinutes = Math.max(
             0,
-            Math.floor((deliveryTime - now) / 60000)
+            Math.floor((deliveryTime - now.getTime()) / 60000)
           );
-
-          // console.log("diffInMinutes", diffInMinutes, deliveryTime);
 
           if (diffInMinutes > 0) {
             setRemainingTime(`${diffInMinutes} min`);
@@ -188,7 +199,7 @@ const OrderList = () => {
 
         return () => clearInterval(interval);
       }
-    }, [item.orderStatus, item.orderTime]);
+    }, [item.orderStatus, item.orderTime, item.orderDate]);
 
     return (
       <Pressable
