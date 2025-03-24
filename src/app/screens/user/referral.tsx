@@ -44,8 +44,9 @@ const Referral = () => {
     }
   }, [data]);
 
-  const link =
-    "Your referral code is: " + data?.referralCode + "\n" + data?.appLink;
+  // const link =
+  //   "Your referral code is: " + data?.referralCode + "\n" + data?.appLink;
+  const link = `https://famto.in/ref/customer-app?code=${referralCode}`;
 
   const copyToClipboard = async () => {
     await Clipboard.setStringAsync(link);

@@ -37,7 +37,7 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="myapp"/>
+        <data android:scheme="famtocustomerapp" android:host="auth"/>
         <data android:scheme="com.famto.customerapp"/>
         <data android:scheme="exp+famto-app"/>
       </intent-filter>
