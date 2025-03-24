@@ -28,7 +28,7 @@
       "config": {},
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/app_logo.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#00CED1"
       },
       "package": "com.famto.customerapp",
       "permissions": [

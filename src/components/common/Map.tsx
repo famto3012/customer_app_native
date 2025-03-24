@@ -43,6 +43,8 @@ const DEFAULT_COORDINATES = [77.209, 28.6139]; // Delhi coordinates as fallback
 // Define image assets outside component to prevent recreation
 const MARKER_IMAGES = {
   agentMarker: require("@/assets/images/agent-marker.webp"),
+  pickupMarker: require("@/assets/images/pickup-marker.webp"),
+  deliveryMarker: require("@/assets/images/delivery-marker.webp"),
 };
 
 interface MapProps {
@@ -244,6 +246,62 @@ const Map = ({ pickupLocation, deliveryLocation, orderId }: MapProps) => {
       ],
     };
   }, [agentLocation]);
+
+  const pickupMarker = useMemo(() => {
+    if (
+      !pickupCoordinates ||
+      !Array.isArray(pickupCoordinates) ||
+      pickupCoordinates.length !== 2
+    ) {
+      return null;
+    }
+
+    return {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          id: "pickup",
+          properties: {
+            id: "pickup",
+            icon: "pickupMarker",
+          },
+          geometry: {
+            type: "Point",
+            coordinates: pickupCoordinates,
+          },
+        },
+      ],
+    };
+  }, [pickupCoordinates]);
+
+  const deliveryMarker = useMemo(() => {
+    if (
+      !deliveryCoordinates ||
+      !Array.isArray(deliveryCoordinates) ||
+      deliveryCoordinates.length !== 2
+    ) {
+      return null;
+    }
+
+    return {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          id: "delivery",
+          properties: {
+            id: "delivery",
+            icon: "deliveryMarker",
+          },
+          geometry: {
+            type: "Point",
+            coordinates: deliveryCoordinates,
+          },
+        },
+      ],
+    };
+  }, [deliveryCoordinates]);
 
   const routeLine = useMemo(
     () => ({
@@ -447,6 +505,8 @@ const Map = ({ pickupLocation, deliveryLocation, orderId }: MapProps) => {
             <Images
               images={{
                 agentMarker: MARKER_IMAGES.agentMarker,
+                pickupMarker: MARKER_IMAGES.pickupMarker,
+                deliveryMarker: MARKER_IMAGES.deliveryMarker,
               }}
             />
 
@@ -476,7 +536,7 @@ const Map = ({ pickupLocation, deliveryLocation, orderId }: MapProps) => {
                   style={{
                     lineColor: colors.PRIMARY,
                     lineWidth: 4,
-                    lineOpacity: 0.5,
+                    lineOpacity: 0.8,
                   }}
                 />
               </ShapeSource>
@@ -486,7 +546,7 @@ const Map = ({ pickupLocation, deliveryLocation, orderId }: MapProps) => {
             {imagesLoaded && (
               <>
                 {/* Pickup Marker */}
-                <PointAnnotation
+                {/* <PointAnnotation
                   id="pickupAnnotation"
                   title="pickup"
                   coordinate={pickupCoordinates}
@@ -535,7 +595,31 @@ const Map = ({ pickupLocation, deliveryLocation, orderId }: MapProps) => {
                   >
                     <House color={colors.WHITE} size={28} weight="duotone" />
                   </View>
-                </PointAnnotation>
+                </PointAnnotation> */}
+
+                <ShapeSource id="pickupSource" shape={pickupMarker}>
+                  <SymbolLayer
+                    id="pickupSymbol"
+                    style={{
+                      iconImage: ["get", "icon"],
+                      iconSize: 0.15,
+                      iconAllowOverlap: false,
+                      iconIgnorePlacement: false,
+                    }}
+                  />
+                </ShapeSource>
+
+                <ShapeSource id="deliverySource" shape={deliveryMarker}>
+                  <SymbolLayer
+                    id="deliverySymbol"
+                    style={{
+                      iconImage: ["get", "icon"],
+                      iconSize: 0.15,
+                      iconAllowOverlap: false,
+                      iconIgnorePlacement: false,
+                    }}
+                  />
+                </ShapeSource>
 
                 {/* Agent Marker - only render when data is available and valid */}
                 {agentLocation &&
@@ -550,8 +634,8 @@ const Map = ({ pickupLocation, deliveryLocation, orderId }: MapProps) => {
                         style={{
                           iconImage: ["get", "icon"],
                           iconSize: 0.15,
-                          iconAllowOverlap: true,
-                          iconIgnorePlacement: true,
+                          iconAllowOverlap: false,
+                          iconIgnorePlacement: false,
                         }}
                       />
                     </ShapeSource>
