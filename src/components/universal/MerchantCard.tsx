@@ -24,7 +24,6 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    console.log(item.isFavorite);
     item.isFavorite ? setIsFavorite(true) : setIsFavorite(false);
   }, [item.isFavorite]);
 
@@ -33,7 +32,6 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
     mutationFn: () => toggleMerchantFavorite(item.id, selectedBusiness),
     onSuccess: (data) => {
       if (data.success) {
-        console.log("Message:", data.message);
         setIsFavorite(!isFavorite);
         scale.value = 1.2;
         scale.value = withSpring(1, { damping: 5, stiffness: 150 });
@@ -50,7 +48,7 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
     <Pressable
       style={styles.container}
       onPress={() => {
-        // if (!item.status) return null;
+        if (!item.status) return null;
 
         setSelectedMerchant(item.id, item.merchantName);
 

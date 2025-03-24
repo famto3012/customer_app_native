@@ -3,6 +3,17 @@ import * as Location from "expo-location";
 import { Audio, AVPlaybackStatusSuccess } from "expo-av";
 import { Alert, Linking, PermissionsAndroid, Platform } from "react-native";
 import messaging from "@react-native-firebase/messaging";
+import SpInAppUpdates, {
+  IAUInstallStatus,
+  AndroidStatusEventListener,
+} from "sp-react-native-in-app-updates";
+import DeviceInfo from "react-native-device-info";
+import { getCustomerAppUpdateType } from "@/service/userService";
+
+const APP_STORE_ID = "YOUR_APP_ID";
+const APP_STORE_URL = `itms-apps://apps.apple.com/app/id${APP_STORE_ID}`;
+
+let statusUpdateListener: AndroidStatusEventListener | null = null;
 
 export const requestLocationPermission = async () => {
   try {
@@ -216,5 +227,74 @@ export const stopScheduleSound = async (
     await sound.unloadAsync();
     setSound(null);
     setIsPlaying(false);
+  }
+};
+
+export const checkForUpdate = async (): Promise<void> => {
+  const inAppUpdates = new SpInAppUpdates(false); // false = production mode
+
+  try {
+    const result = await inAppUpdates.checkNeedsUpdate();
+    if (result.shouldUpdate) {
+      if (Platform.OS === "android") {
+        const updateType = await getCustomerAppUpdateType();
+        // console.log(
+        //   `Starting update with type: ${
+        //     updateType === IAUUpdateKind.IMMEDIATE ? "IMMEDIATE" : "FLEXIBLE"
+        //   }`
+        // );
+
+        inAppUpdates.startUpdate({ updateType });
+
+        // Define and store the listener
+        statusUpdateListener = (downloadStatus) => {
+          // console.log("Download status:", downloadStatus);
+          if (downloadStatus.status === IAUInstallStatus.DOWNLOADED) {
+            // console.log("Update downloaded, installing...");
+            inAppUpdates.installUpdate();
+            if (statusUpdateListener) {
+              inAppUpdates.removeStatusUpdateListener(statusUpdateListener);
+              statusUpdateListener = null; // Clear the reference
+            }
+          }
+        };
+
+        inAppUpdates.addStatusUpdateListener(statusUpdateListener);
+      } else {
+        checkiOSUpdate();
+      }
+    }
+  } catch (error) {
+    console.error("Error checking for update:", error);
+  }
+};
+
+const checkiOSUpdate = async (): Promise<void> => {
+  try {
+    const currentVersion = DeviceInfo.getVersion();
+    // console.log("Current iOS Version:", currentVersion);
+
+    const response = await fetch(
+      `https://itunes.apple.com/lookup?id=${APP_STORE_ID}`
+    );
+    const data: { results: { version: string }[] } = await response.json();
+
+    if (data.results.length > 0) {
+      const latestVersion = data.results[0].version;
+      // console.log("Latest iOS Version:", latestVersion);
+
+      if (currentVersion < latestVersion) {
+        Alert.alert(
+          "Update Available",
+          "A new version of the app is available. Please update for the best experience.",
+          [
+            { text: "Update", onPress: () => Linking.openURL(APP_STORE_URL) },
+            { text: "Cancel", style: "cancel" },
+          ]
+        );
+      }
+    }
+  } catch (error) {
+    console.error("Error checking iOS update:", error);
   }
 };

@@ -15,6 +15,7 @@ import { resetAndNavigate } from "@/utils/navigation";
 import Typo from "@/components/Typo";
 import { colors } from "@/constants/theme";
 import { Fingerprint } from "phosphor-react-native";
+import { checkForUpdate } from "@/utils/helpers";
 
 const Main = () => {
   const [loaded] = useFonts({
@@ -97,6 +98,10 @@ const Main = () => {
       }
     }
   }, [loaded]);
+
+  useEffect(() => {
+    checkForUpdate();
+  }, []);
 
   return (
     <View style={{ flex: 1 }}>
