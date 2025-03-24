@@ -11,7 +11,7 @@ const UserSelectedAddress = () => {
 
   return (
     <Pressable
-      onPress={() => router.push("/(modal)/SelectAddress")}
+      onPress={() => router.push("/(modals)/SelectAddress")}
       style={{
         flexDirection: "row",
         alignItems: "center",

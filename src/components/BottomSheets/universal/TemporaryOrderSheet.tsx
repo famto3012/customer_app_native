@@ -53,25 +53,18 @@ const TemporaryOrderSheet = ({
       orderId: string;
       deliveryMode: string;
     }) => cancelOrder(orderId, deliveryMode),
-    onSuccess: async (data) => {
+    onSuccess: async (data, variables) => {
       if (data.success) {
-        await removeOrderById(selected);
+        await removeOrderById(variables.orderId);
 
-        // Update tempOrders state
         setTempOrders((prev) =>
-          prev.filter((order) => order.orderId !== selected)
+          prev.filter((order) => order.orderId !== variables.orderId)
         );
 
-        // Call onCancel to update showCountDown in FloatingPreparingOrder
         onCancel();
 
-        // Reset selected state
-        setSelected("");
-
-        // Check if there are any orders left
         const remainingOrders = await getAllOrder();
         if (remainingOrders.length === 0) {
-          // Close the bottom sheet if no orders remain
           onClose();
         }
       }

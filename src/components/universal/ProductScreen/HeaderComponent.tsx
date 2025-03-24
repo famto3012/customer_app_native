@@ -35,33 +35,21 @@ const HeaderComponent: FC<ListHeaderProps> = ({
   merchantId,
   merchantDataLoading,
 }) => {
-  const [selectedFilter, setSelectedFilter] = useState<string>("");
-
-  const { setProductFilter } = useData();
-
-  useEffect(() => {
-    setProductFilter(selectedFilter);
-  }, [selectedFilter]);
+  const { productFilter, setProductFilter } = useData();
 
   const renderItem = ({ item }: any) => {
+    const isSelected = productFilter === item.value;
+
     return (
       <Pressable
-        style={[
-          styles.filterItem,
-          selectedFilter === item.value && styles.selectedFilter,
-        ]}
-        onPress={() => setSelectedFilter(item.value)}
+        style={[styles.filterItem, isSelected && styles.selectedFilter]}
+        onPress={() => setProductFilter(item.value)} // Directly update context state
       >
-        <Typo
-          size={13}
-          color={
-            selectedFilter === item.value ? colors.WHITE : colors.NEUTRAL900
-          }
-        >
+        <Typo size={13} color={isSelected ? colors.WHITE : colors.NEUTRAL900}>
           {item.label}
         </Typo>
 
-        {selectedFilter === item.value && <XCircle size={20} color="white" />}
+        {isSelected && <XCircle size={20} color="white" />}
       </Pressable>
     );
   };
@@ -86,7 +74,7 @@ const HeaderComponent: FC<ListHeaderProps> = ({
           onPress={() => router.push("/screens/universal/product-search")}
         />
 
-        <FlatList
+        {/* <FlatList
           data={productFilters}
           renderItem={renderItem}
           keyExtractor={(item) => item.value}
@@ -94,7 +82,7 @@ const HeaderComponent: FC<ListHeaderProps> = ({
           nestedScrollEnabled
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ marginVertical: verticalScale(15) }}
-        />
+        /> */}
       </View>
     </>
   );

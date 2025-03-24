@@ -95,15 +95,28 @@ const AddItem: FC<{
   });
 
   const handleSave = (data: CustomOrderItemsProps) => {
-    if (!item.itemName || !item.quantity || !item.unit) {
+    if (!item.itemName) {
       if (Platform.OS === "android") {
         ToastAndroid.showWithGravity(
-          "Please add item details",
+          "Please add item name",
           ToastAndroid.SHORT,
           ToastAndroid.CENTER
         );
       } else {
-        Alert.alert("Error", "Please add item details");
+        Alert.alert("Error", "Please add item name");
+      }
+      return;
+    }
+
+    if ((item.quantity && !item.unit) || (!item.quantity && item.unit)) {
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Please add both quantity and unit",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert("Error", "Please add both quantity and unit");
       }
       return;
     }
