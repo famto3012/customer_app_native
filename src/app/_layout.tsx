@@ -1,4 +1,6 @@
-import { Stack } from "expo-router";
+import { useEffect } from "react";
+import { Stack, useRouter } from "expo-router";
+import * as Linking from "expo-linking";
 import {
   gestureHandlerRootHOC,
   GestureHandlerRootView,
@@ -10,6 +12,7 @@ import {
 } from "react-native-paper";
 import { SocketProvider } from "@/service/socketProvider";
 import { DataProvider } from "@/context/DataContext";
+import { resetAndNavigate } from "@/utils/navigation";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,10 +26,10 @@ const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: "#00CED1", // ✅ Change selection color to blue
-    onSurface: "#000000", // ✅ Text color inside the calendar
-    surface: "#ffffff", // ✅ Background of the calendar
-    backdrop: "rgba(0, 0, 0, 0.12)", // ✅ Background overlay color
+    primary: "#00CED1",
+    onSurface: "#000000",
+    surface: "#ffffff",
+    backdrop: "rgba(0, 0, 0, 0.12)",
     primaryContainer: "rgba(4, 255, 242, 0.4)",
     onPrimaryContainer: "rgba(4, 255, 242, 0.37)",
     secondaryContainer: "#fff",
@@ -51,6 +54,34 @@ const Layout = () => {
 };
 
 const RootLayout = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleDeepLink = (event: { url: string }) => {
+      const { url } = event;
+      const parsedUrl = Linking.parse(url);
+      if (parsedUrl.queryParams?.code) {
+        resetAndNavigate({
+          pathname: "/auth",
+          params: { code: parsedUrl.queryParams.code },
+        });
+        // router.replace(`/auth?code=${parsedUrl.queryParams.code}`);
+      }
+    };
+
+    // Listen for deep links when the app is open
+    const subscription = Linking.addEventListener("url", handleDeepLink);
+
+    // Handle the initial deep link when the app is launched
+    Linking.getInitialURL().then((url) => {
+      if (url) handleDeepLink({ url });
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [router]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView>

@@ -24,14 +24,21 @@ const Auth = () => {
   const [showReferral, setShowReferral] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isGeneratingOTP, setIsGeneratingOTP] = useState<boolean>(false);
-  const { showSkip } = useLocalSearchParams();
+  const { showSkip, code } = useLocalSearchParams();
+
+  useEffect(() => {
+    if (code) {
+      setShowReferral(true);
+      setReferral(code as string);
+    }
+  }, [code]);
 
   useEffect(() => {
     requestLocationPermission();
   }, []);
 
   const sendOTP = async () => {
-    if (phoneNumberRef.current.length !== 10) {
+    if (!/^\d{10}$/.test(phoneNumberRef.current)) {
       if (Platform.OS === "android") {
         ToastAndroid.showWithGravity(
           "Please enter a valid phone number",
@@ -173,6 +180,7 @@ const Auth = () => {
             <Input
               placeholder="Referral code"
               onChangeText={(value: string) => setReferral(value)}
+              value={referral}
             />
           </View>
         ) : (
