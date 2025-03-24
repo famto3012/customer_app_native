@@ -7,6 +7,7 @@ import { colors, radius } from "@/constants/theme";
 import { FC, useState } from "react";
 import { useAuthStore } from "@/store/store";
 import { router } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 
 const SelectAddress: FC<{ onCloseModal: () => void }> = ({ onCloseModal }) => {
   const [address, setAddress] = useState<{
@@ -19,7 +20,8 @@ const SelectAddress: FC<{ onCloseModal: () => void }> = ({ onCloseModal }) => {
     address: "",
   });
 
-  const { setUserAddress } = useAuthStore.getState();
+  const { setUserAddress, setLocation } = useAuthStore.getState();
+  const queryClient = useQueryClient();
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.WHITE }}>
@@ -45,20 +47,30 @@ const SelectAddress: FC<{ onCloseModal: () => void }> = ({ onCloseModal }) => {
       <ScrollView style={{ marginTop: verticalScale(20) }}>
         <Address
           alreadySelect={true}
-          onSelect={(type, otherId, address) =>
+          onSelect={(type, otherId, address, coordinates) => {
             setAddress({
               type,
               otherId: otherId as string,
               address: address as string,
-            })
-          }
-          selectedAddress={(type, otherId, address) =>
+            });
+            const coords: any = {
+              latitude: coordinates?.[0],
+              longitude: coordinates?.[1],
+            };
+            setLocation(coords);
+          }}
+          selectedAddress={(type, otherId, address, coordinates) => {
             setAddress({
               type,
               otherId: otherId as string,
               address: address as string,
-            })
-          }
+            });
+            const coords: any = {
+              latitude: coordinates?.[0],
+              longitude: coordinates?.[1],
+            };
+            setLocation(coords);
+          }}
         />
       </ScrollView>
 
@@ -77,6 +89,7 @@ const SelectAddress: FC<{ onCloseModal: () => void }> = ({ onCloseModal }) => {
           title="Continue"
           onPress={() => {
             setUserAddress(address);
+            queryClient.invalidateQueries({ queryKey: ["business-category"] });
             // onCloseModal();
             router.back();
           }}

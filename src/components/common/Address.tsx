@@ -24,12 +24,18 @@ const Address: FC<{
   onSelect?: (
     type: string,
     otherId?: string,
-    address?: string
+    address?: string,
+    coordinates?: number[]
   ) => boolean | void;
   showActionButton?: boolean;
   addressType?: string;
   addressOtherId?: string;
-  selectedAddress?: (type: string, otherId?: string, address?: string) => void;
+  selectedAddress?: (
+    type: string,
+    otherId?: string,
+    address?: string,
+    coordinates?: number[]
+  ) => void;
   validateSelection?: boolean;
 }> = ({
   onSelect,
@@ -67,15 +73,29 @@ const Address: FC<{
       setWork(data?.workAddress || null);
       setOther(data?.otherAddress || []);
     }
-
     if (alreadySelect) {
       setSelected(userAddress.type);
       setSelectedOtherId(userAddress.otherId);
+
+      let coordinates = null;
+
+      if (userAddress.type === "home") {
+        coordinates = data?.homeAddress?.coordinates;
+      } else if (userAddress?.type === "work") {
+        coordinates = data.workAddress?.coordinates;
+      } else if (userAddress.type === "other") {
+        // Find the specific other address by ID
+        const otherAddress = data?.otherAddress.find(
+          (addr: any) => addr?.id === userAddress?.otherId
+        );
+        coordinates = otherAddress?.coordinates;
+      }
       if (selectedAddress) {
         selectedAddress(
           userAddress.type,
           userAddress.otherId,
-          userAddress.address
+          userAddress.address,
+          coordinates
         );
       }
     }
@@ -98,11 +118,12 @@ const Address: FC<{
   const handleSelectAddress = (
     type: string,
     otherId?: string,
-    address?: string
+    address?: string,
+    coordinates?: number[]
   ) => {
     // If validateSelection prop is true, call onSelect and check the return value
     if (validateSelection && onSelect) {
-      const isValid = onSelect(type, otherId, address);
+      const isValid = onSelect(type, otherId, address, coordinates);
 
       // If onSelect returns false, don't update local state
       if (isValid === false) {
@@ -111,7 +132,7 @@ const Address: FC<{
       }
     } else if (onSelect) {
       // If validateSelection is false, just call onSelect
-      onSelect(type, otherId, address);
+      onSelect(type, otherId, address, coordinates);
     }
 
     setSelectionValid(true);
@@ -278,7 +299,8 @@ const Address: FC<{
             handleSelectAddress(
               "home",
               "",
-              `${home?.flat}, ${home?.area}, ${home?.landmark}`
+              `${home?.flat}, ${home?.area}, ${home?.landmark}`,
+              home?.coordinates
             )
           }
           style={[
@@ -312,7 +334,8 @@ const Address: FC<{
             handleSelectAddress(
               "work",
               "",
-              `${work?.flat}, ${work?.area}, ${work?.landmark}`
+              `${work?.flat}, ${work?.area}, ${work?.landmark}`,
+              work?.coordinates
             )
           }
           style={[
@@ -394,7 +417,8 @@ const Address: FC<{
                 handleSelectAddress(
                   "other",
                   item.id,
-                  `${item.flat}, ${item.area}, ${item.landmark}`
+                  `${item.flat}, ${item.area}, ${item.landmark}`,
+                  item.coordinates
                 );
               }}
               style={[
