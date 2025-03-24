@@ -184,7 +184,7 @@ const FloatingPreparingOrder: FC<{
   data: any;
   refetchOngoingOrder: () => void;
   openTempOrderSheet: () => void;
-  countUpdate: boolean;
+  countUpdate: number;
 }> = ({ data, refetchOngoingOrder, openTempOrderSheet, countUpdate }) => {
   const [showCountDown, setShowCountDown] = useState(false);
   const [tempOrders, setTempOrders] = useState<
@@ -204,7 +204,7 @@ const FloatingPreparingOrder: FC<{
 
       // Initialize timeLeftMap with all orders starting at 60 seconds
       if (orders.length > 0) {
-        const initialTimeLeftMap = {};
+        const initialTimeLeftMap: any = {};
 
         orders.forEach((order) => {
           // Always start with 60 seconds for each order
@@ -221,22 +221,31 @@ const FloatingPreparingOrder: FC<{
     fetchOrders();
   }, []);
 
+  // Replace the effect that watches countUpdate
   useEffect(() => {
-    if (countUpdate === false) {
-      setShowCountDown(false);
-    } else {
-      // Recheck if there are any orders when countUpdate changes
-      const fetchOrders = async () => {
-        const orders = await getAllOrder();
-        if (orders.length > 0) {
-          setShowCountDown(true);
-        } else {
-          setShowCountDown(false);
-        }
-      };
+    const fetchOrders = async () => {
+      const orders = await getAllOrder();
 
-      fetchOrders();
-    }
+      // Update tempOrders state with fresh data
+      setTempOrders(orders);
+
+      if (orders.length > 0) {
+        // Reinitialize timer for all orders
+        const initialTimeLeftMap: any = {};
+        orders.forEach((order) => {
+          // For existing orders, preserve current time if available
+          initialTimeLeftMap[order.orderId] = timeLeftMap[order.orderId] || 60;
+        });
+
+        setTimeLeftMap(initialTimeLeftMap);
+        setShowCountDown(true);
+      } else {
+        setShowCountDown(false);
+      }
+    };
+
+    // Fetch orders whenever countUpdate changes
+    fetchOrders();
   }, [countUpdate]);
 
   useEffect(() => {
@@ -250,7 +259,7 @@ const FloatingPreparingOrder: FC<{
     const interval = setInterval(() => {
       setTimeLeftMap((prev) => {
         const updatedTimeLeftMap = { ...prev };
-        let ordersToRemove = [];
+        let ordersToRemove: any = [];
 
         tempOrders.forEach((order) => {
           const currentTimeLeft = prev[order.orderId] || 60;
@@ -267,7 +276,7 @@ const FloatingPreparingOrder: FC<{
         // Remove completed orders outside the forEach loop
         if (ordersToRemove.length > 0) {
           // Remove from DB
-          ordersToRemove.forEach((orderId) => {
+          ordersToRemove.forEach((orderId: string) => {
             removeOrderById(orderId);
           });
 

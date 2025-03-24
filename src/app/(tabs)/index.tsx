@@ -40,7 +40,7 @@ import { getAllOrder } from "@/localDB/controller/orderController";
 
 const Home = () => {
   const temporaryOrderSheet = useRef<BottomSheet>(null);
-  const [showCount, setShowCount] = useState(false);
+  const [showCount, setShowCount] = useState(0);
   const [hasTemporaryOrders, setHasTemporaryOrders] = useState(false);
 
   const temporarySnapPoints = useMemo(() => ["60%"], []);
@@ -114,7 +114,10 @@ const Home = () => {
   );
 
   const handleOrderCancel = useCallback(async () => {
-    setShowCount(false);
+    // First set to false to trigger state change
+    setShowCount((prev) => prev + 1);
+
+    // Add timeout to ensure state updates properly
     const hasOrders = await checkTemporaryOrders();
     if (!hasOrders) {
       temporaryOrderSheet.current?.close();
