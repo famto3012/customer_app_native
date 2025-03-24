@@ -93,7 +93,7 @@ const Products = () => {
     if (merchantId && selectedBusiness) {
       fetchNextCategoryWithProducts();
     }
-  }, [merchantId, selectedBusiness]);
+  }, [merchantId, selectedBusiness, productFilter]);
 
   // Function to fetch a category and all its products
   const fetchNextCategoryWithProducts = async () => {

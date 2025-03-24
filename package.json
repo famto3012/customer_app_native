@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
@@ -13,7 +12,8 @@
     "generate-debug": "cd android && gradlew.bat assembleDebug && adb install -r app/build/outputs/apk/debug/app-debug.apk",
     "generate-apk": "cd android && gradlew.bat assembleRelease && adb install -r app/build/outputs/apk/release/app-release.apk",
     "generate-clean-debug": "cd android && gradlew.bat clean && gradlew.bat assembleDebug && adb uninstall com.famto.customerapp.debug && adb install -r app/build/outputs/apk/debug/app-debug.apk",
-    "install-debug": "adb install -r app/build/outputs/apk/debug/app-debug.apk"
+    "install-debug": "adb install -r app/build/outputs/apk/debug/app-debug.apk",
+    "generate-bundle": "cd android && gradlew.bat assembleBundle"
   },
   "jest": {
     "preset": "jest-expo"
