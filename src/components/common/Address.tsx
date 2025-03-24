@@ -261,7 +261,7 @@ const Address: FC<{
           </View>
 
           <View>
-            <Typo size={12} color={colors.NEUTRAL500} style={{ width: "90%" }}>
+            <Typo size={12} color={colors.NEUTRAL500} style={{ width: "75%" }}>
               {address?.flat}, {address?.area}, {address?.landmark}
             </Typo>
           </View>
