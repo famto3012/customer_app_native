@@ -3,6 +3,7 @@ import { appAxios } from "@/config/apiInterceptor";
 import { Alert, Platform, ToastAndroid } from "react-native";
 import { MerchantCardProps, UserAddressProps } from "@/types";
 import RazorpayCheckout from "react-native-razorpay";
+import { IAUUpdateKind } from "sp-react-native-in-app-updates";
 
 type AddressWithoutId = Omit<UserAddressProps, "id">;
 type AddressWithId = UserAddressProps;
@@ -553,5 +554,20 @@ export const searchMerchantAndProducts = async (
       Alert.alert("", "Something went wrong");
     }
     return { data: [], hasNextPage: false };
+  }
+};
+
+export const getCustomerAppUpdateType = async (): Promise<IAUUpdateKind> => {
+  try {
+    const res = await appAxios.get("/customers/customer-app-update-type");
+
+    return res.data.updateType === "IMMEDIATE"
+      ? IAUUpdateKind.IMMEDIATE
+      : IAUUpdateKind.FLEXIBLE;
+  } catch (err: any) {
+    console.log(
+      `Error in retrieving app update type: ${JSON.stringify(err.message)}`
+    );
+    return IAUUpdateKind.IMMEDIATE;
   }
 };
