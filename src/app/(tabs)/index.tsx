@@ -36,9 +36,12 @@ import BottomSheet, {
 import { commonStyles } from "@/constants/commonStyles";
 import TemporaryOrderSheet from "@/components/BottomSheets/universal/TemporaryOrderSheet";
 import FastImage from "react-native-fast-image";
+import { getAllOrder } from "@/localDB/controller/orderController";
 
 const Home = () => {
   const temporaryOrderSheet = useRef<BottomSheet>(null);
+  const [showCount, setShowCount] = useState(false);
+  const [hasTemporaryOrders, setHasTemporaryOrders] = useState(false);
 
   const temporarySnapPoints = useMemo(() => ["60%"], []);
 
@@ -53,6 +56,16 @@ const Home = () => {
       router.push("/(modals)/SelectAddress");
     }
   }, [outsideGeofence]);
+
+  const checkTemporaryOrders = useCallback(async () => {
+    const orders = await getAllOrder();
+    setHasTemporaryOrders(orders.length > 0);
+    return orders.length > 0;
+  }, []);
+
+  useEffect(() => {
+    checkTemporaryOrders();
+  }, []);
 
   const queryClient = useQueryClient();
 
@@ -99,6 +112,14 @@ const Home = () => {
     ),
     []
   );
+
+  const handleOrderCancel = useCallback(async () => {
+    setShowCount(false);
+    const hasOrders = await checkTemporaryOrders();
+    if (!hasOrders) {
+      temporaryOrderSheet.current?.close();
+    }
+  }, [checkTemporaryOrders]);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.WHITE }}>
@@ -169,7 +190,14 @@ const Home = () => {
         <FloatingPreparingOrder
           data={ongoingOrder}
           refetchOngoingOrder={refetchOngoingOrder}
-          openTempOrderSheet={() => temporaryOrderSheet.current?.snapToIndex(0)}
+          openTempOrderSheet={() => {
+            checkTemporaryOrders().then((hasOrders) => {
+              if (hasOrders) {
+                temporaryOrderSheet.current?.snapToIndex(0);
+              }
+            });
+          }}
+          countUpdate={showCount}
         />
       </View>
 
@@ -181,18 +209,10 @@ const Home = () => {
         enablePanDownToClose
         backdropComponent={renderBackdrop}
       >
-        <TemporaryOrderSheet />
-      </BottomSheet>
-
-      <BottomSheet
-        ref={temporaryOrderSheet}
-        index={-1}
-        snapPoints={temporarySnapPoints}
-        enableDynamicSizing={false}
-        enablePanDownToClose
-        backdropComponent={renderBackdrop}
-      >
-        <TemporaryOrderSheet />
+        <TemporaryOrderSheet
+          onClose={() => temporaryOrderSheet.current?.close}
+          onCancel={handleOrderCancel}
+        />
       </BottomSheet>
     </View>
   );

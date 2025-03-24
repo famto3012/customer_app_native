@@ -25,7 +25,13 @@ interface TemporaryOrderProps {
   merchantName: string;
 }
 
-const TemporaryOrderSheet = () => {
+const TemporaryOrderSheet = ({
+  onClose,
+  onCancel,
+}: {
+  onClose: () => void;
+  onCancel: () => void;
+}) => {
   const [tempOrders, setTempOrders] = useState<TemporaryOrderProps[]>([]);
   const [selected, setSelected] = useState<string>("");
 
@@ -47,13 +53,27 @@ const TemporaryOrderSheet = () => {
       orderId: string;
       deliveryMode: string;
     }) => cancelOrder(orderId, deliveryMode),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data.success) {
-        removeOrderById(selected);
+        await removeOrderById(selected);
+
+        // Update tempOrders state
         setTempOrders((prev) =>
           prev.filter((order) => order.orderId !== selected)
         );
+
+        // Call onCancel to update showCountDown in FloatingPreparingOrder
+        onCancel();
+
+        // Reset selected state
         setSelected("");
+
+        // Check if there are any orders left
+        const remainingOrders = await getAllOrder();
+        if (remainingOrders.length === 0) {
+          // Close the bottom sheet if no orders remain
+          onClose();
+        }
       }
     },
   });

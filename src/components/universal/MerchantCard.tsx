@@ -24,6 +24,7 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    console.log(item.isFavorite);
     item.isFavorite ? setIsFavorite(true) : setIsFavorite(false);
   }, [item.isFavorite]);
 

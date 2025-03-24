@@ -156,7 +156,7 @@ const PickAndDropCheckout = () => {
             <View style={styles.promoContainer}>
               <BillUpdate
                 total={cartBill?.grandTotal}
-                onPress={() => billSheetRef.current?.snapToIndex(0)}
+                onPress={() => billSheetRef.current?.expand()}
               />
 
               <View style={styles.separator} />
