@@ -7,6 +7,8 @@ import Input from "../Input";
 import { getRecordingPermissions } from "@/utils/helpers";
 import { Audio } from "expo-av";
 import Typo from "../Typo";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 const Instructions: FC<{
   placeholder: string;
@@ -22,15 +24,78 @@ const Instructions: FC<{
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
+  // This effect handles text input changes
   useEffect(() => {
     onChangeText(textInstruction?.current);
   }, [textInstruction]);
+
+  // Function to stop and clean up all audio
+  const cleanupAudio = useCallback(async () => {
+    console.log("Cleaning up audio resources");
+
+    // Stop and unload sound
+    if (sound) {
+      try {
+        const status = await sound.getStatusAsync();
+        if (status.isLoaded) {
+          console.log("Stopping playback");
+          await sound.stopAsync();
+          await sound.unloadAsync();
+        }
+      } catch (error) {
+        console.log(`Error cleaning up sound: ${error}`);
+      } finally {
+        setSound(null);
+        setIsPlaying(false);
+      }
+    }
+
+    // Stop and unload recording
+    if (voiceRecording) {
+      try {
+        console.log("Stopping recording");
+        await voiceRecording.stopAndUnloadAsync();
+      } catch (error) {
+        console.log(`Error cleaning up recording: ${error}`);
+      } finally {
+        setVoiceRecording(null);
+        setIsRecording(false);
+      }
+    }
+  }, [sound, voiceRecording]);
+
+  // This runs when the screen loses focus (user navigates away)
+  useFocusEffect(
+    useCallback(() => {
+      // Setup on focus
+      console.log("Screen focused");
+
+      // Cleanup when screen loses focus
+      return () => {
+        console.log("Screen unfocused - stopping audio");
+        cleanupAudio();
+      };
+    }, [cleanupAudio])
+  );
+
+  // This runs when component unmounts
+  useEffect(() => {
+    return () => {
+      console.log("Component unmounting");
+      cleanupAudio();
+    };
+  }, [cleanupAudio]);
 
   const startRecording = async () => {
     const hasPermission = await getRecordingPermissions();
     if (!hasPermission) return;
 
     try {
+      // Make sure any existing recording is stopped
+      if (voiceRecording) {
+        await voiceRecording.stopAndUnloadAsync();
+      }
+
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
@@ -59,33 +124,55 @@ const Instructions: FC<{
 
   const playRecording = async () => {
     if (voiceInstruction) {
-      const { sound } = await Audio.Sound.createAsync({
-        uri: voiceInstruction,
-      });
-      setSound(sound);
-      await sound.playAsync();
-      setIsPlaying(true);
-
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded && status.didJustFinish) {
-          setIsPlaying(false);
+      try {
+        // Clean up previous sound instance
+        if (sound) {
+          const status = await sound.getStatusAsync();
+          if (status.isLoaded) {
+            await sound.stopAsync();
+            await sound.unloadAsync();
+          }
         }
-      });
+
+        console.log("Creating new sound instance");
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          { uri: voiceInstruction },
+          { shouldPlay: false } // Don't play immediately
+        );
+
+        setSound(newSound); // Set sound state
+
+        // Play the sound immediately
+        await newSound.playAsync();
+        setIsPlaying(true);
+
+        newSound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            console.log("Playback finished");
+            setIsPlaying(false);
+          }
+        });
+      } catch (error) {
+        console.log(`Error playing recording: ${error}`);
+        setIsPlaying(false);
+      }
     }
   };
 
   const stopPlayback = async () => {
     if (sound) {
-      await sound.stopAsync();
-      setIsPlaying(false);
+      try {
+        console.log("Manually stopping playback");
+        await sound.stopAsync();
+        setIsPlaying(false);
+      } catch (error) {
+        console.log(`Error stopping playback: ${error}`);
+      }
     }
   };
 
   const deleteVoice = async () => {
-    if (sound) {
-      await sound.stopAsync();
-      setIsPlaying(false);
-    }
+    await cleanupAudio();
     setVoiceInstruction(null);
     onRecordComplete("");
   };
@@ -117,7 +204,7 @@ const Instructions: FC<{
             </Typo>
           </Pressable>
 
-          <Pressable onPress={() => deleteVoice()} style={styles.deleteBtn}>
+          <Pressable onPress={deleteVoice} style={styles.deleteBtn}>
             <Trash color={colors.RED} />
           </Pressable>
         </View>

@@ -170,21 +170,27 @@ const DuplicateVariantSheet: FC<{
   return (
     <BottomSheetScrollView
       contentContainerStyle={{
-        flex: 1,
+        flexGrow: 1,
         paddingHorizontal: scale(20),
         marginTop: verticalScale(20),
+        paddingBottom: verticalScale(20),
       }}
+      showsVerticalScrollIndicator={false}
     >
       <View style={{ gap: spacingY._10 }}>
         <FlatList
           data={localData}
           renderItem={({ item }) => <RenderItem item={item} />}
           keyExtractor={(_, index) => index.toString()}
-          scrollEnabled={false}
+          scrollEnabled={false} // Disable FlatList scrolling
+          nestedScrollEnabled={true}
           ItemSeparatorComponent={() => (
-            <View style={{ marginVertical: verticalScale(10) }} />
+            <View style={{ marginVertical: verticalScale(5) }} />
           )}
-          contentContainerStyle={{ paddingRight: scale(10) }}
+          contentContainerStyle={{
+            paddingRight: scale(10),
+            paddingBottom: verticalScale(20),
+          }}
         />
       </View>
 
