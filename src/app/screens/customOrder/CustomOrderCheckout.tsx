@@ -94,12 +94,14 @@ const CustomOrderCheckout = () => {
 
   const handleDeleteMutation = useMutation({
     mutationKey: ["delete-item"],
-    mutationFn: () => deleteItem(itemId),
-    onSuccess: () => {
-      setCartItem((prevItems) =>
-        prevItems.filter((item) => item.itemId !== itemId)
-      );
-      setItemId("");
+    mutationFn: (itemId: string) => deleteItem(itemId),
+    onSuccess: (data, variables) => {
+      if (data.success) {
+        setCartItem((prevItems) =>
+          prevItems.filter((item) => item.itemId !== variables)
+        );
+        setItemId("");
+      }
     },
   });
 
@@ -211,7 +213,7 @@ const CustomOrderCheckout = () => {
                   onViewImage={handleViewImage}
                   onDeleteItem={(itemId) => {
                     setItemId(itemId);
-                    handleDeleteMutation.mutate();
+                    handleDeleteMutation.mutate(itemId);
                   }}
                   isDeleting={handleDeleteMutation.isPending}
                   deletingId={itemId}

@@ -20,20 +20,28 @@ const UserSelectedAddress = () => {
         backgroundColor: colors.NEUTRAL200,
         borderRadius: radius._6,
         paddingHorizontal: scale(10),
-        paddingVertical: verticalScale(8),
+        paddingVertical: verticalScale(10),
       }}
     >
       <House weight="fill" color={colors.NEUTRAL400} />
 
       <View style={{ flex: 1, marginLeft: scale(10) }}>
-        <Typo size={14} color={colors.NEUTRAL800} fontFamily="Medium">
-          Delivery at{" "}
-          {userAddress?.type?.charAt(0)?.toUpperCase() +
-            userAddress?.type?.slice(1)}
-        </Typo>
-        <Typo size={11} color={colors.NEUTRAL500}>
-          {userAddress?.address}
-        </Typo>
+        {!userAddress.type ? (
+          <Typo size={14} color={colors.NEUTRAL800} fontFamily="SemiBold">
+            Select a Delivery address
+          </Typo>
+        ) : (
+          <>
+            <Typo size={14} color={colors.NEUTRAL800} fontFamily="Medium">
+              Delivery at{" "}
+              {userAddress?.type?.charAt(0)?.toUpperCase() +
+                userAddress?.type?.slice(1)}
+            </Typo>
+            <Typo size={11} color={colors.NEUTRAL500}>
+              {userAddress?.address}
+            </Typo>
+          </>
+        )}
       </View>
 
       <CaretRight />

@@ -92,13 +92,17 @@ export const editItemDetail = async (itemId: string, data: FormData) => {
   }
 };
 
-export const deleteItem = async (itemId: string) => {
+export const deleteItem = async (
+  itemId: string
+): Promise<{ success: boolean; message: string }> => {
   try {
     const res = await appAxios.delete(`/customers/delete-item/${itemId}`);
 
-    return res.status === 200 ? res.data.message : null;
+    return res.status === 200
+      ? res.data
+      : { success: false, message: "Failed" };
   } catch (err) {
-    console.error(`Error in deleting item detail:`, err);
+    console.error(`Error in deleting item detail:`, JSON.stringify(err));
     if (Platform.OS === "android") {
       ToastAndroid.showWithGravity(
         "Something went wrong",
@@ -108,7 +112,7 @@ export const deleteItem = async (itemId: string) => {
     } else {
       Alert.alert("", "Something went wrong");
     }
-    return null;
+    return { success: false, message: "Failed" };
   }
 };
 

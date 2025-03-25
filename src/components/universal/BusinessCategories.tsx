@@ -21,6 +21,7 @@ const BusinessCategories: FC<{ query: string }> = ({ query }) => {
   const { data } = useQuery({
     queryKey: ["business-category"],
     queryFn: () => getBusinessCategories(latitude, longitude, query),
+    enabled: !!latitude && !!longitude,
   });
 
   useEffect(() => {
