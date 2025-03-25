@@ -1,17 +1,96 @@
-import { Pressable, View } from "react-native";
+import { Alert, Pressable, ToastAndroid, View } from "react-native";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius } from "@/constants/theme";
 import { CaretRight, House } from "phosphor-react-native";
 import Typo from "../Typo";
 import { useAuthStore } from "@/store/store";
 import { router } from "expo-router";
+import { FC, useEffect, useState } from "react";
+import { UserAddressProps, SelectedAddress } from "@/types";
+import { useData } from "@/context/DataContext";
+import { useShowAlert } from "@/hooks/useShowAlert";
 
-const UserSelectedAddress = () => {
+interface UserSelectedAddressProps {
+  address?: SelectedAddress;
+  deliveryMode: string;
+  pick?: boolean;
+  drop?: boolean;
+  onSelect: (type: string, address: any) => void;
+}
+
+const UserSelectedAddress: FC<UserSelectedAddressProps> = ({
+  address,
+  deliveryMode,
+  pick,
+  drop,
+  onSelect,
+}) => {
+  const [selectedAddress, setSelectedAddress] = useState<SelectedAddress>({
+    type: "",
+    otherId: "",
+    address: "",
+  });
+
+  const { pickAddress, dropAddress } = useData();
+  const { showAlert } = useShowAlert();
+
+  useEffect(() => {
+    if (!address?.type && !pickAddress.type && !dropAddress.type) return;
+
+    if (deliveryMode === "Pick and Drop") {
+      if (pick) {
+        if (address?.type === "other") {
+          if (address.otherId === pickAddress.otherId) {
+            showAlert("Pick and drop address cannot be same");
+            return;
+          }
+        } else if (address?.type === pickAddress.type) {
+          showAlert("Pick and drop address cannot be same");
+          return;
+        }
+
+        setSelectedAddress(pickAddress);
+        onSelect("pick", pickAddress);
+        return;
+      }
+
+      if (drop) {
+        if (address?.type === "other") {
+          if (address.otherId === dropAddress.otherId) {
+            showAlert("Pick and drop address cannot be same");
+            return;
+          }
+        } else if (address?.type === dropAddress.type) {
+          showAlert("Pick and drop address cannot be same");
+          return;
+        }
+
+        setSelectedAddress(dropAddress);
+        onSelect("drop", dropAddress);
+        return;
+      }
+    }
+
+    if (deliveryMode !== "Pick and Drop") {
+      setSelectedAddress(dropAddress);
+      onSelect("drop", dropAddress);
+    }
+  }, [pickAddress, dropAddress]);
+
   const userAddress = useAuthStore((state) => state.userAddress);
 
   return (
     <Pressable
-      onPress={() => router.push("/(modals)/SelectAddress")}
+      onPress={() =>
+        router.push({
+          pathname: "/(modals)/SelectAddress",
+          params: {
+            setAsUserAddress: "false",
+            showActionButton: "false",
+            addressFor: pick ? "pick" : drop ? "drop" : "drop",
+          },
+        })
+      }
       style={{
         flexDirection: "row",
         alignItems: "center",
@@ -25,24 +104,62 @@ const UserSelectedAddress = () => {
     >
       <House weight="fill" color={colors.NEUTRAL400} />
 
-      <View style={{ flex: 1, marginLeft: scale(10) }}>
-        {!userAddress.type ? (
-          <Typo size={14} color={colors.NEUTRAL800} fontFamily="SemiBold">
-            Select a Delivery address
-          </Typo>
-        ) : (
-          <>
-            <Typo size={14} color={colors.NEUTRAL800} fontFamily="Medium">
-              Delivery at{" "}
-              {userAddress?.type?.charAt(0)?.toUpperCase() +
-                userAddress?.type?.slice(1)}
+      {deliveryMode !== "Pick and Drop" ? (
+        <View style={{ flex: 1, marginLeft: scale(10) }}>
+          {!userAddress.type ? (
+            <Typo size={14} color={colors.NEUTRAL800} fontFamily="SemiBold">
+              Select a Delivery address
             </Typo>
-            <Typo size={11} color={colors.NEUTRAL500}>
-              {userAddress?.address}
+          ) : !selectedAddress.type ? (
+            <>
+              <Typo size={14} color={colors.NEUTRAL800} fontFamily="Medium">
+                Delivery at{" "}
+                {userAddress?.type?.charAt(0)?.toUpperCase() +
+                  userAddress?.type?.slice(1)}
+              </Typo>
+              <Typo size={11} color={colors.NEUTRAL500}>
+                {userAddress?.address}
+              </Typo>
+            </>
+          ) : (
+            <>
+              <Typo size={14} color={colors.NEUTRAL800} fontFamily="Medium">
+                Delivery at{" "}
+                {selectedAddress?.type?.charAt(0)?.toUpperCase() +
+                  selectedAddress?.type?.slice(1)}
+              </Typo>
+              <Typo size={11} color={colors.NEUTRAL500}>
+                {selectedAddress?.address}
+              </Typo>
+            </>
+          )}
+        </View>
+      ) : (
+        <View style={{ flex: 1, marginLeft: scale(10) }}>
+          {selectedAddress?.type ? (
+            <>
+              <Typo size={12} color={colors.NEUTRAL800} fontFamily="Medium">
+                {pick ? "Pick From " : "Delivery To "}
+              </Typo>
+              <Typo size={14} color={colors.NEUTRAL800} fontFamily="Medium">
+                {selectedAddress?.type?.charAt(0)?.toUpperCase() +
+                  selectedAddress?.type?.slice(1)}
+              </Typo>
+              <Typo size={11} color={colors.NEUTRAL500}>
+                {selectedAddress?.address}
+              </Typo>
+            </>
+          ) : (
+            <Typo size={14} color={colors.NEUTRAL800} fontFamily="SemiBold">
+              {pick
+                ? "Select a Pick Address"
+                : drop
+                ? "Select a Drop address"
+                : ""}
             </Typo>
-          </>
-        )}
-      </View>
+          )}
+        </View>
+      )}
 
       <CaretRight />
     </Pressable>

@@ -1,14 +1,4 @@
-import {
-  Alert,
-  AppState,
-  BackHandler,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  ToastAndroid,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
@@ -41,11 +31,9 @@ import { CartProps } from "@/types";
 import { useAuthStore } from "@/store/store";
 import Button from "@/components/Button";
 import { commonStyles } from "@/constants/commonStyles";
-import { Audio, AVPlaybackStatusSuccess } from "expo-av";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-
-// Global audio reference - will ensure we only have one audio instance
-let GLOBAL_SOUND: Audio.Sound | null = null;
+import { forceAudioCleanup, playOrStopSound } from "@/utils/helpers";
+import { useAudioCleanup } from "@/hooks/useAudio";
+import { useShowAlert } from "@/hooks/useShowAlert";
 
 const TAB_WIDTH = (SCREEN_WIDTH - scale(40)) / 2;
 
@@ -118,11 +106,12 @@ const Checkout = () => {
   const indicatorPosition = useSharedValue(0);
 
   const scheduleSheetRef = useRef<BottomSheet>(null);
-  const isNavigatingRef = useRef(false);
-
-  const navigation = useNavigation();
 
   const scheduleSheetSnapPoints = useMemo(() => ["85%"], []);
+
+  useAudioCleanup();
+
+  const { showAlert } = useShowAlert();
 
   const { data: cartData } = useQuery({
     queryKey: ["customer-cart"],
@@ -177,137 +166,6 @@ const Checkout = () => {
     transform: [{ translateX: indicatorPosition.value }],
   }));
 
-  const forceAudioCleanup = async () => {
-    try {
-      // Force set our state regardless of what happens with the actual cleanup
-      setIsPlaying(false);
-
-      // If we have a reference to the global sound
-      if (GLOBAL_SOUND) {
-        try {
-          await GLOBAL_SOUND.pauseAsync().catch(() => {});
-
-          await GLOBAL_SOUND.stopAsync().catch(() => {});
-
-          await GLOBAL_SOUND.unloadAsync().catch(() => {});
-        } catch (e) {
-          console.log("Caught error during force cleanup:", e);
-        }
-
-        // Clear the global reference
-        GLOBAL_SOUND = null;
-      }
-
-      // Try to set volume to 0 on the Audio module directly (as a last resort)
-      try {
-        await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: false,
-          staysActiveInBackground: false,
-          shouldDuckAndroid: false,
-        });
-      } catch (e) {
-        console.log("Error setting audio mode:", e);
-      }
-    } catch (e) {
-      console.error("Critical error in force cleanup:", e);
-    }
-  };
-
-  const playOrStopSound = async () => {
-    try {
-      if (isPlaying) {
-        await forceAudioCleanup();
-      } else {
-        // Force cleanup first in case there's a lingering instance
-        await forceAudioCleanup();
-
-        // Create new sound
-        try {
-          const { sound: newSound } = await Audio.Sound.createAsync(
-            {
-              uri: "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FScheduled%20Order.mp3?alt=media&token=da59e122-08f8-4964-8b6f-bfebc8c32fbe",
-            },
-            { shouldPlay: true }
-          );
-
-          // Set our global reference
-          GLOBAL_SOUND = newSound;
-          setIsPlaying(true);
-
-          newSound.setOnPlaybackStatusUpdate((status) => {
-            if (
-              status.isLoaded &&
-              (status as AVPlaybackStatusSuccess).didJustFinish
-            ) {
-              forceAudioCleanup();
-            }
-          });
-        } catch (soundError) {
-          console.error("Error creating sound:", soundError);
-          forceAudioCleanup();
-        }
-      }
-    } catch (error) {
-      console.error("Critical error in playOrStopSound:", error);
-      forceAudioCleanup();
-    }
-  };
-
-  useEffect(() => {
-    const subscription = AppState.addEventListener("change", (nextAppState) => {
-      if (nextAppState !== "active") {
-        console.log("App going to background");
-        forceAudioCleanup();
-      }
-    });
-
-    return () => subscription.remove();
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      const onBackPress = () => {
-        forceAudioCleanup();
-        return false;
-      };
-
-      const backHandler = BackHandler.addEventListener(
-        "hardwareBackPress",
-        onBackPress
-      );
-
-      return () => backHandler.remove();
-    }, [])
-  );
-
-  // On navigation gestures
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("beforeRemove", () => {
-      forceAudioCleanup();
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
-  // On component unmount
-  useEffect(() => {
-    return () => {
-      forceAudioCleanup();
-    };
-  }, []);
-
-  // On screen focus change
-  useFocusEffect(
-    useCallback(() => {
-      // Cleanup when losing focus
-      return () => {
-        if (!isNavigatingRef.current) {
-          forceAudioCleanup();
-        }
-      };
-    }, [])
-  );
-
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop
@@ -316,7 +174,6 @@ const Checkout = () => {
         appearsOnIndex={0}
         opacity={0.5}
         style={[props.style, commonStyles.backdrop]}
-        // onPress={handleClosePress}
       />
     ),
     []
@@ -375,19 +232,7 @@ const Checkout = () => {
 
   const handleConfirm = (data: formDataProps) => {
     if (!data.deliveryAddressType) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          "Please select a delivery address to continue ordering",
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert(
-          "",
-          "Please select a delivery address to continue ordering"
-        );
-      }
-
+      showAlert("Please select a delivery address");
       return;
     }
 
@@ -533,15 +378,21 @@ const Checkout = () => {
         enableDynamicSizing={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
-        onClose={() => forceAudioCleanup()}
+        onClose={() => forceAudioCleanup(setIsPlaying)}
       >
         <ScheduleSheet
           onPress={(startDate: string, endDate: string, time: string) => {
-            forceAudioCleanup();
+            forceAudioCleanup(setIsPlaying);
             scheduleSheetRef?.current?.close();
             handleSchedule(startDate, endDate, time);
           }}
-          playSound={playOrStopSound}
+          playSound={() =>
+            playOrStopSound(
+              "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FScheduled%20Order.mp3?alt=media&token=da59e122-08f8-4964-8b6f-bfebc8c32fbe",
+              isPlaying,
+              setIsPlaying
+            )
+          }
           isPlaying={isPlaying}
         />
       </BottomSheet>

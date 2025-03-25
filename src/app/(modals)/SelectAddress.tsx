@@ -1,27 +1,14 @@
-import { Pressable, ScrollView, View } from "react-native";
-import Address from "@/components/common/Address";
+import { Pressable, View } from "react-native";
 import { scale, verticalScale } from "@/utils/styling";
-import Button from "@/components/Button";
 import { CaretLeft } from "phosphor-react-native";
 import { colors, radius } from "@/constants/theme";
-import { FC, useState } from "react";
-import { useAuthStore } from "@/store/store";
-import { router } from "expo-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { FC } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import UserSavedAddress from "../screens/user/UserSavedAddress";
 
 const SelectAddress: FC<{ onCloseModal: () => void }> = ({ onCloseModal }) => {
-  const [address, setAddress] = useState<{
-    type: string;
-    otherId: string;
-    address: string;
-  }>({
-    type: "",
-    otherId: "",
-    address: "",
-  });
-
-  const { setUserAddress, setLocation } = useAuthStore.getState();
-  const queryClient = useQueryClient();
+  const { setAsUserAddress, showActionButton, addressFor } =
+    useLocalSearchParams();
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.WHITE }}>
@@ -44,57 +31,11 @@ const SelectAddress: FC<{ onCloseModal: () => void }> = ({ onCloseModal }) => {
         </Pressable>
       </View>
 
-      <ScrollView style={{ marginTop: verticalScale(20) }}>
-        <Address
-          alreadySelect={true}
-          onSelect={(type, otherId, address, coordinates) => {
-            setAddress({
-              type,
-              otherId: otherId as string,
-              address: address as string,
-            });
-            const coords: any = {
-              latitude: coordinates?.[0],
-              longitude: coordinates?.[1],
-            };
-            setLocation(coords);
-          }}
-          selectedAddress={(type, otherId, address, coordinates) => {
-            setAddress({
-              type,
-              otherId: otherId as string,
-              address: address as string,
-            });
-            const coords: any = {
-              latitude: coordinates?.[0],
-              longitude: coordinates?.[1],
-            };
-            setLocation(coords);
-          }}
-        />
-      </ScrollView>
-
-      <View
-        style={{
-          marginTop: "auto",
-          padding: verticalScale(20),
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: -10 },
-          elevation: 20,
-          shadowRadius: 25,
-          shadowOpacity: 0.25,
-        }}
-      >
-        <Button
-          title="Continue"
-          onPress={() => {
-            setUserAddress(address);
-            queryClient.invalidateQueries({ queryKey: ["business-category"] });
-            // onCloseModal();
-            router.back();
-          }}
-        />
-      </View>
+      <UserSavedAddress
+        showActionButton={showActionButton === "true"}
+        setAsUserAddress={setAsUserAddress === "true"}
+        addressFor={addressFor as string}
+      />
     </View>
   );
 };

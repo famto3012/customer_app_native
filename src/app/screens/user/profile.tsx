@@ -129,12 +129,22 @@ const Profile = () => {
             <View key={index}>
               <TouchableOpacity
                 onPress={() => {
-                  token || ["Rate Us", "About Us"].includes(option.label)
-                    ? router.push(option.route as any)
-                    : router.push({
-                        pathname: "/auth",
-                        params: { showSkip: 0 },
-                      });
+                  if (
+                    !token &&
+                    !["Rate Us", "About Us"].includes(option.label)
+                  ) {
+                    router.push({ pathname: "/auth", params: { showSkip: 0 } });
+                    return;
+                  }
+
+                  if (typeof option.route === "string") {
+                    router.push(option.route as any);
+                  } else {
+                    router.push(
+                      option.route.pathName as any,
+                      option.route.params
+                    );
+                  }
                 }}
                 style={styles.pressableContainer}
               >

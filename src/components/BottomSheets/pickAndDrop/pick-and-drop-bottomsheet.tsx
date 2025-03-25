@@ -42,7 +42,11 @@ const PickAndDropBottomSheet: FC<{
         you know where he is all the time while working on your tasks.
       </Typo>
 
-      <Button title="Ok, got it!" onPress={closeSheet} style={styles.button} />
+      <Button
+        title="Ok, got it!"
+        onPress={() => closeSheet()}
+        style={styles.button}
+      />
     </BottomSheetScrollView>
   );
 };

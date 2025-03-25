@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet } from "react-native";
 import Typo from "./Typo";
 
 import { ButtonProps } from "@/types";
-import { colors, radius } from "@/constants/theme";
+import { colors, radius, spacingX } from "@/constants/theme";
 import { scale } from "@/utils/styling";
 
 const Button = ({
@@ -12,21 +12,34 @@ const Button = ({
   style,
   isLoading,
   labelColor,
+  icon,
 }: ButtonProps) => {
   const textColor = labelColor || colors.WHITE;
 
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.container, style]}
+      style={[
+        styles.container,
+        style,
+        {
+          gap: icon ? spacingX._10 : 0,
+          flexDirection: "row",
+          justifyContent: "center",
+        },
+      ]}
       disabled={isLoading}
     >
       {isLoading ? (
         <ActivityIndicator size={"small"} color={textColor} />
       ) : (
-        <Typo size={14} color={textColor} style={{ textAlign: "center" }}>
-          {title}
-        </Typo>
+        <>
+          {icon && icon}
+
+          <Typo size={14} color={textColor} style={{ textAlign: "center" }}>
+            {title}
+          </Typo>
+        </>
       )}
     </Pressable>
   );

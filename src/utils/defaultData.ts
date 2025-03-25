@@ -27,12 +27,15 @@ export const scheduleDetails = [
 
 export const profileOptions: {
   label: string;
-  route: `/${string}`;
+  route: `/${string}` | { pathName: string; params: any };
   image: any;
 }[] = [
   {
     label: "Saved Address",
-    route: "/screens/user/user-address",
+    route: {
+      pathName: "/screens/user/new-address-ui",
+      params: { showSelection: "false", showActionButton: "true" },
+    },
     image: require("@/assets/icons/book-square.webp"),
   },
   {

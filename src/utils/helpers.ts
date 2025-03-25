@@ -9,53 +9,15 @@ import SpInAppUpdates, {
 } from "sp-react-native-in-app-updates";
 import DeviceInfo from "react-native-device-info";
 import { getCustomerAppUpdateType } from "@/service/userService";
+import { useNavigation } from "expo-router";
+import { useEffect } from "react";
 
 const APP_STORE_ID = "YOUR_APP_ID";
 const APP_STORE_URL = `itms-apps://apps.apple.com/app/id${APP_STORE_ID}`;
 
 let statusUpdateListener: AndroidStatusEventListener | null = null;
 
-// export const requestLocationPermission = async () => {
-//   try {
-//     const { setLocation } = useAuthStore.getState();
-
-//     let { status } = await Location.getForegroundPermissionsAsync();
-
-//     if (status !== "granted") {
-//       const { status: newStatus } =
-//         await Location.requestForegroundPermissionsAsync();
-//       if (newStatus !== "granted") return false;
-//       status = newStatus;
-//     }
-
-//     let location = await Location.getCurrentPositionAsync({
-//       accuracy: Location.Accuracy.High,
-//       distanceInterval: 10,
-//     }).catch(() => null);
-
-//     if (!location) {
-//       console.log("Initial location fetch failed, retrying...");
-//       await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait 2 sec
-//       location = await Location.getCurrentPositionAsync({
-//         accuracy: Location.Accuracy.High,
-//         distanceInterval: 10,
-//       }).catch(() => null);
-//     }
-
-//     if (!location) {
-//       console.log("Location fetch failed after retry");
-//       return false;
-//     }
-
-//     const { latitude, longitude } = location.coords;
-//     setLocation({ latitude, longitude });
-
-//     return true;
-//   } catch (error) {
-//     console.error("Location error:", error);
-//     return false;
-//   }
-// };
+let GLOBAL_SOUND: Audio.Sound | null = null;
 
 export const requestLocationPermission = async () => {
   try {
@@ -172,7 +134,6 @@ export const requestNotificationPermission = async () => {
   }
 };
 
-// Separate function to generate the FCM token with permission check
 export const generateFcmToken = async () => {
   try {
     console.log("Generating FCM token...");
@@ -347,5 +308,81 @@ const checkiOSUpdate = async (): Promise<void> => {
     }
   } catch (error) {
     console.error("Error checking iOS update:", error);
+  }
+};
+
+export const forceAudioCleanup = async (
+  setIsPlaying?: (state: boolean) => void
+) => {
+  try {
+    if (GLOBAL_SOUND) {
+      try {
+        await GLOBAL_SOUND.pauseAsync().catch(() => {});
+        await GLOBAL_SOUND.stopAsync().catch(() => {});
+        await GLOBAL_SOUND.unloadAsync().catch(() => {});
+      } catch (e) {
+        console.log("Caught error during force cleanup:", e);
+      }
+
+      GLOBAL_SOUND = null;
+    }
+
+    // Reset audio mode
+    try {
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: false,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: false,
+      });
+    } catch (e) {
+      console.log("Error setting audio mode:", e);
+    }
+
+    // Reset playing state if a setter is provided
+    if (setIsPlaying) {
+      setIsPlaying(false);
+    }
+  } catch (e) {
+    console.error("Critical error in force cleanup:", e);
+  }
+};
+
+export const playOrStopSound = async (
+  uri: string,
+  isPlaying: boolean,
+  setIsPlaying: (state: boolean) => void
+) => {
+  try {
+    if (isPlaying) {
+      await forceAudioCleanup();
+      setIsPlaying(false); // Reset state when stopping manually
+    } else {
+      await forceAudioCleanup();
+
+      try {
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          { uri },
+          { shouldPlay: true }
+        );
+
+        GLOBAL_SOUND = newSound;
+        setIsPlaying(true);
+
+        newSound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            forceAudioCleanup();
+            setIsPlaying(false); // Reset state after audio completes
+          }
+        });
+      } catch (soundError) {
+        console.error("Error creating sound:", soundError);
+        forceAudioCleanup();
+        setIsPlaying(false);
+      }
+    }
+  } catch (error) {
+    console.error("Critical error in playOrStopSound:", error);
+    forceAudioCleanup();
+    setIsPlaying(false);
   }
 };

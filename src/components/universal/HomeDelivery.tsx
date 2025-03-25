@@ -2,7 +2,7 @@ import { View } from "react-native";
 import Instructions from "../common/Instructions";
 import ItemList from "./ItemList";
 import { FC, useEffect } from "react";
-import { CartProps } from "@/types";
+import { CartProps, SelectedAddress } from "@/types";
 import { useAuthStore } from "@/store/store";
 import UserSelectedAddress from "../common/UserSelectedAddress";
 
@@ -33,7 +33,12 @@ const HomeDelivery: FC<HomeDeliveryProps> = ({
 
   return (
     <View>
-      <UserSelectedAddress />
+      <UserSelectedAddress
+        deliveryMode="Universal"
+        onSelect={(type: string, address: SelectedAddress) => {
+          onAddressSelect(address.type, address.otherId);
+        }}
+      />
 
       <Instructions
         placeholder="Instructions (if any)"

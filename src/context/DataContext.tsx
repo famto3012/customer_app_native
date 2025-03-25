@@ -1,4 +1,4 @@
-import { ProductProps } from "@/types";
+import { ProductProps, SelectedAddress } from "@/types";
 import { createContext, FC, ReactNode, useContext, useState } from "react";
 
 // Define the type for product counts with optional variantTypeId
@@ -19,6 +19,10 @@ interface DataContextType {
   setOpenDuplicate: React.Dispatch<React.SetStateAction<boolean>>;
   productFilter: string;
   setProductFilter: React.Dispatch<React.SetStateAction<string>>;
+  pickAddress: SelectedAddress;
+  setPickAddress: React.Dispatch<React.SetStateAction<SelectedAddress>>;
+  dropAddress: SelectedAddress;
+  setDropAddress: React.Dispatch<React.SetStateAction<SelectedAddress>>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -30,6 +34,16 @@ export const DataProvider: FC<{ children: ReactNode }> = ({ children }) => {
   }>({});
   const [openDuplicate, setOpenDuplicate] = useState<boolean>(false);
   const [productFilter, setProductFilter] = useState<string>("");
+  const [pickAddress, setPickAddress] = useState<SelectedAddress>({
+    type: "",
+    otherId: "",
+    address: "",
+  });
+  const [dropAddress, setDropAddress] = useState<SelectedAddress>({
+    type: "",
+    otherId: "",
+    address: "",
+  });
 
   return (
     <DataContext.Provider
@@ -42,6 +56,10 @@ export const DataProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setOpenDuplicate,
         productFilter,
         setProductFilter,
+        pickAddress,
+        setPickAddress,
+        dropAddress,
+        setDropAddress,
       }}
     >
       {children}
