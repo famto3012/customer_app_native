@@ -30,6 +30,7 @@ const Merchants = () => {
   const [query, setQuery] = useState<string>("");
   const [debounceQuery, setDebounceQuery] = useState<string>("");
   const [refreshing, setRefreshing] = useState(false);
+  const [showEmptyState, setShowEmptyState] = useState(false);
 
   const { latitude, longitude } = useSafeLocation();
 
@@ -81,6 +82,17 @@ const Merchants = () => {
       });
     }
   }, [data]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      const timer = setTimeout(() => {
+        setShowEmptyState(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowEmptyState(false);
+    }
+  }, [isLoading]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -166,22 +178,25 @@ const Merchants = () => {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          isLoading ? (
+          !showEmptyState && isLoading ? (
             <MerchantCardLoader />
-          ) : merchants.length === 0 ? (
-            <View
-              style={{
-                flex: 1,
-                height: SCREEN_HEIGHT - verticalScale(100),
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Typo size={16} color={colors.NEUTRAL800} fontFamily="SemiBold">
-                Coming soon...!
-              </Typo>
-            </View>
-          ) : null
+          ) : (
+            showEmptyState &&
+            merchants.length === 0 && (
+              <View
+                style={{
+                  flex: 1,
+                  height: SCREEN_HEIGHT - verticalScale(100),
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Typo size={16} color={colors.NEUTRAL800} fontFamily="SemiBold">
+                  Coming soon...!
+                </Typo>
+              </View>
+            )
+          )
         }
         ListFooterComponent={isFetchingNextPage ? <MerchantCardLoader /> : null}
         onEndReached={() => {

@@ -23,6 +23,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserProfileProps } from "@/types";
 import { fetchUserProfile, updateUserProfile } from "@/service/userService";
 import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
 
 const EditProfile = () => {
   const [profileData, setProfileData] = useState<UserProfileProps>({
@@ -89,6 +90,7 @@ const EditProfile = () => {
     mutationFn: (data: FormData) => updateUserProfile(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customer-profile"] });
+      router.back();
     },
   });
 

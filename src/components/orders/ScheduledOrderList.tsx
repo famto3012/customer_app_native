@@ -247,6 +247,7 @@ const ScheduledOrderList = () => {
           enabled={isScreenActive}
         />
       }
+      ListFooterComponent={<View style={{ height: verticalScale(80) }}></View>}
       ListEmptyComponent={
         !isLoading && !scheduledOrderList?.length ? (
           <View

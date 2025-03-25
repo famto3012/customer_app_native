@@ -333,6 +333,7 @@ const OrderList = () => {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
+      ListFooterComponent={<View style={{ height: verticalScale(80) }}></View>}
       ListEmptyComponent={
         !isLoading && !orderList?.length ? (
           <View

@@ -425,6 +425,7 @@ const Address: FC<{
                 commonStyles.flexRowBetween,
                 {
                   marginTop: 15,
+                  marginBottom: scale(10),
                   borderWidth: 1,
                   padding: 10,
                   borderRadius: 5,
@@ -521,7 +522,7 @@ const Address: FC<{
           keyExtractor={(item, index) =>
             item?.id?.toString() || index.toString()
           }
-          scrollEnabled={alreadySelect}
+          scrollEnabled={true}
           showsVerticalScrollIndicator={false}
         />
       )}
