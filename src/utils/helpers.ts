@@ -15,34 +15,85 @@ const APP_STORE_URL = `itms-apps://apps.apple.com/app/id${APP_STORE_ID}`;
 
 let statusUpdateListener: AndroidStatusEventListener | null = null;
 
+// export const requestLocationPermission = async () => {
+//   try {
+//     const { setLocation } = useAuthStore.getState();
+
+//     let { status } = await Location.getForegroundPermissionsAsync();
+
+//     if (status !== "granted") {
+//       const { status: newStatus } =
+//         await Location.requestForegroundPermissionsAsync();
+//       if (newStatus !== "granted") return false;
+//       status = newStatus;
+//     }
+
+//     let location = await Location.getCurrentPositionAsync({
+//       accuracy: Location.Accuracy.High,
+//       distanceInterval: 10,
+//     }).catch(() => null);
+
+//     if (!location) {
+//       console.log("Initial location fetch failed, retrying...");
+//       await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait 2 sec
+//       location = await Location.getCurrentPositionAsync({
+//         accuracy: Location.Accuracy.High,
+//         distanceInterval: 10,
+//       }).catch(() => null);
+//     }
+
+//     if (!location) {
+//       console.log("Location fetch failed after retry");
+//       return false;
+//     }
+
+//     const { latitude, longitude } = location.coords;
+//     setLocation({ latitude, longitude });
+
+//     return true;
+//   } catch (error) {
+//     console.error("Location error:", error);
+//     return false;
+//   }
+// };
+
 export const requestLocationPermission = async () => {
   try {
     const { setLocation } = useAuthStore.getState();
 
     let { status } = await Location.getForegroundPermissionsAsync();
-
     if (status !== "granted") {
       const { status: newStatus } =
         await Location.requestForegroundPermissionsAsync();
-      if (newStatus !== "granted") {
-        return false;
-      }
+      if (newStatus !== "granted") return false;
       status = newStatus;
     }
 
-    // Optimized location request for faster response
-    const location = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.High,
-      distanceInterval: 10,
-    }).catch(() => null);
+    let location = null;
+    const maxRetries = 10; // Max attempts
+    let attempt = 0;
+
+    while (!location && attempt < maxRetries) {
+      console.log(`Attempt ${attempt + 1} to get location...`);
+      location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+        distanceInterval: 10,
+      }).catch(() => null);
+
+      if (location) break; // Stop retrying if location is obtained
+
+      attempt++;
+      await new Promise((resolve) => setTimeout(resolve, 1300));
+    }
 
     if (!location) {
-      console.log("Location fetch failed");
+      console.log("Failed to get location after multiple attempts");
       return false;
     }
 
+    console.log("location:", location);
+
     const { latitude, longitude } = location.coords;
-    // console.log("Location", location.coords);
     setLocation({ latitude, longitude });
 
     return true;
@@ -115,21 +166,33 @@ export const requestNotificationPermission = async () => {
       }
     }
 
+    generateFcmToken();
+  } catch (error) {
+    console.log("Error requesting notification permission:", error);
+  }
+};
+
+// Separate function to generate the FCM token with permission check
+export const generateFcmToken = async () => {
+  try {
+    console.log("Generating FCM token...");
+
     const authStatus = await messaging().requestPermission();
     const enabled =
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-    if (enabled) {
-      console.log("Authorization status:", authStatus);
-      const token = await messaging().getToken();
-      console.log("FCM token:", token);
-      useAuthStore.getState().setFcmToken(token);
-    } else {
-      console.log("User denied push notifications");
+    if (!enabled) {
+      console.log("User denied push notifications. Cannot generate FCM token.");
+      return;
     }
+
+    const token = await messaging().getToken();
+    console.log("FCM token:", token);
+
+    useAuthStore.setState({ fcmToken: token });
   } catch (error) {
-    console.log("Error requesting notification permission:", error);
+    console.log("Error generating FCM token:", error);
   }
 };
 
@@ -148,19 +211,7 @@ export const toggleNotificationPermission = async (enable: boolean) => {
         }
       }
 
-      const authStatus = await messaging().requestPermission();
-      const hasPermission =
-        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-      if (hasPermission) {
-        console.log("Push notifications enabled!");
-        const token = await messaging().getToken();
-        console.log("FCM Token:", token);
-        useAuthStore.getState().setFcmToken(token);
-      } else {
-        console.log("User denied push notifications");
-      }
+      generateFcmToken();
     } else {
       // DISABLE NOTIFICATIONS
       await messaging().deleteToken(); // Remove FCM token

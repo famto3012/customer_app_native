@@ -8,7 +8,10 @@ import { colors } from "@/constants/theme";
 import { verticalScale, scale } from "@/utils/styling";
 import { router } from "expo-router";
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
-import { requestNotificationPermission } from "@/utils/helpers";
+import {
+  generateFcmToken,
+  requestNotificationPermission,
+} from "@/utils/helpers";
 import { resetAndNavigate } from "@/utils/navigation";
 import * as Notifications from "expo-notifications";
 
@@ -20,8 +23,9 @@ const NotificationPermission = () => {
 
     if (status === "granted") {
       resetAndNavigate("/delivery-ad");
+      generateFcmToken();
     } else {
-      setPermissionChecked(true); // Only request if not granted
+      setPermissionChecked(true);
     }
   };
 
