@@ -14,7 +14,7 @@ import { StyleSheet } from "react-native";
 
 const HomeHeader: FC<{ onPress: () => void }> = ({ onPress }) => {
   const token = useAuthStore((state) => state.token);
-  const userAddress = useAuthStore((state) => state.userAddress); // ✅ Subscribe to userAddress
+  const userAddress = useAuthStore((state) => state.userAddress);
 
   const { data, isLoading } = useQuery<UserProfileProps | null>({
     queryKey: ["customer-profile"],

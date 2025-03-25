@@ -1,4 +1,4 @@
-import { AppState, BackHandler, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Animated, {
   useSharedValue,
@@ -16,7 +16,7 @@ import BottomSheet, {
   BottomSheetBackdropProps,
   SCREEN_WIDTH,
 } from "@gorhom/bottom-sheet";
-import { router, useFocusEffect } from "expo-router";
+import { router } from "expo-router";
 import PickAndDropBottomSheet from "@/components/BottomSheets/pickAndDrop/pick-and-drop-bottomsheet";
 import { commonStyles } from "@/constants/commonStyles";
 import {
@@ -26,11 +26,9 @@ import {
 } from "@/utils/defaultData";
 import { useMutation } from "@tanstack/react-query";
 import { initializePickAndDrop } from "@/service/pickandDropService";
-import { Audio, AVPlaybackStatusSuccess } from "expo-av";
-import { useNavigation } from "@react-navigation/native";
-
-// Global audio reference - will ensure we only have one audio instance
-let GLOBAL_SOUND: Audio.Sound | null = null;
+import { forceAudioCleanup, playOrStopSound } from "@/utils/helpers";
+import { useAudioCleanup } from "@/hooks/useAudio";
+import { useData } from "@/context/DataContext";
 
 const PickAndDropHome = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -41,47 +39,12 @@ const PickAndDropHome = () => {
 
   const indexRef = useRef(0);
   const infoSheetRef = useRef<BottomSheet>(null);
-  const isNavigatingRef = useRef(false);
 
   const InfoSnapPoints = useMemo(() => ["55%"], []);
-  const navigation = useNavigation();
 
-  // Ultra aggressive sound cleanup - works even if the component state is stale
-  const forceAudioCleanup = async () => {
-    try {
-      // Force set our state regardless of what happens with the actual cleanup
-      setIsPlaying(false);
+  const { setPickAddress, setDropAddress } = useData();
 
-      // If we have a reference to the global sound
-      if (GLOBAL_SOUND) {
-        try {
-          await GLOBAL_SOUND.pauseAsync().catch(() => {});
-
-          await GLOBAL_SOUND.stopAsync().catch(() => {});
-
-          await GLOBAL_SOUND.unloadAsync().catch(() => {});
-        } catch (e) {
-          console.log("Caught error during force cleanup:", e);
-        }
-
-        // Clear the global reference
-        GLOBAL_SOUND = null;
-      }
-
-      // Try to set volume to 0 on the Audio module directly (as a last resort)
-      try {
-        await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: false,
-          staysActiveInBackground: false,
-          shouldDuckAndroid: false,
-        });
-      } catch (e) {
-        console.log("Error setting audio mode:", e);
-      }
-    } catch (e) {
-      console.error("Critical error in force cleanup:", e);
-    }
-  };
+  useAudioCleanup();
 
   useEffect(() => {
     const cycleImages = () => {
@@ -124,77 +87,19 @@ const PickAndDropHome = () => {
     transform: [{ translateX: textOffset.value }],
   }));
 
-  // For navigation
-  const prepareForNavigation = async () => {
-    isNavigatingRef.current = true;
-
-    // Force cleanup audio first
-    await forceAudioCleanup();
-
-    // Proceed with navigation
-    return true;
-  };
-
-  const handlePlaceOrder = async () => {
-    if (await prepareForNavigation()) {
-      initializeMutation.mutate();
-    }
-  };
-
   const initializeMutation = useMutation({
     mutationKey: ["initialize-cart"],
     mutationFn: initializePickAndDrop,
     onSuccess: (res) => {
       if (res) {
-        // Double check audio is stopped before navigating
-        forceAudioCleanup().then(() => {
-          router.push({
-            pathname: "/screens/pickAndDrop/Pick-and-Drop_ordering",
-          });
+        setPickAddress({ type: "", otherId: "", address: "" });
+        setDropAddress({ type: "", otherId: "", address: "" });
+        router.push({
+          pathname: "/screens/pickAndDrop/Pick-and-Drop_ordering",
         });
       }
     },
   });
-
-  const playOrStopSound = async () => {
-    try {
-      if (isPlaying) {
-        await forceAudioCleanup();
-      } else {
-        // Force cleanup first in case there's a lingering instance
-        await forceAudioCleanup();
-
-        // Create new sound
-        try {
-          const { sound: newSound } = await Audio.Sound.createAsync(
-            {
-              uri: "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FPick%20and%20drop.mp3?alt=media&token=09ccd097-3acf-4f91-8778-39b469ea9096",
-            },
-            { shouldPlay: true }
-          );
-
-          // Set our global reference
-          GLOBAL_SOUND = newSound;
-          setIsPlaying(true);
-
-          newSound.setOnPlaybackStatusUpdate((status) => {
-            if (
-              status.isLoaded &&
-              (status as AVPlaybackStatusSuccess).didJustFinish
-            ) {
-              forceAudioCleanup();
-            }
-          });
-        } catch (soundError) {
-          console.error("Error creating sound:", soundError);
-          forceAudioCleanup();
-        }
-      }
-    } catch (error) {
-      console.error("Critical error in playOrStopSound:", error);
-      forceAudioCleanup();
-    }
-  };
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
@@ -207,63 +112,6 @@ const PickAndDropHome = () => {
       />
     ),
     []
-  );
-
-  // On app state change (background/foreground)
-  useEffect(() => {
-    const subscription = AppState.addEventListener("change", (nextAppState) => {
-      if (nextAppState !== "active") {
-        console.log("App going to background");
-        forceAudioCleanup();
-      }
-    });
-
-    return () => subscription.remove();
-  }, []);
-
-  // On hardware back button
-  useFocusEffect(
-    useCallback(() => {
-      const onBackPress = () => {
-        forceAudioCleanup();
-        return false;
-      };
-
-      const backHandler = BackHandler.addEventListener(
-        "hardwareBackPress",
-        onBackPress
-      );
-
-      return () => backHandler.remove();
-    }, [])
-  );
-
-  // On navigation gestures
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("beforeRemove", () => {
-      forceAudioCleanup();
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
-  // On component unmount
-  useEffect(() => {
-    return () => {
-      forceAudioCleanup();
-    };
-  }, []);
-
-  // On screen focus change
-  useFocusEffect(
-    useCallback(() => {
-      // Cleanup when losing focus
-      return () => {
-        if (!isNavigatingRef.current) {
-          forceAudioCleanup();
-        }
-      };
-    }, [])
   );
 
   return (
@@ -320,7 +168,7 @@ const PickAndDropHome = () => {
 
         <Button
           title="Place your order"
-          onPress={handlePlaceOrder}
+          onPress={() => initializeMutation.mutate()}
           isLoading={initializeMutation.isPending}
           style={styles.button}
         />
@@ -333,14 +181,20 @@ const PickAndDropHome = () => {
         enableDynamicSizing={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
-        onClose={() => forceAudioCleanup()}
+        onClose={() => forceAudioCleanup(setIsPlaying)}
       >
         <PickAndDropBottomSheet
           closeSheet={() => {
-            forceAudioCleanup();
+            forceAudioCleanup(setIsPlaying);
             infoSheetRef.current?.close();
           }}
-          playSound={playOrStopSound}
+          playSound={() =>
+            playOrStopSound(
+              "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FPick%20and%20drop.mp3?alt=media&token=09ccd097-3acf-4f91-8778-39b469ea9096",
+              isPlaying,
+              setIsPlaying
+            )
+          }
           isPlaying={isPlaying}
         />
       </BottomSheet>

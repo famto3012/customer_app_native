@@ -25,7 +25,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import AddItemBottomSheet from "@/components/BottomSheets/customOrder/AddItemBottomSheet";
 import EditItemBottomSheet from "@/components/BottomSheets/customOrder/EditItemBottomSheet";
 import AddItem from "@/components/customOrder/AddItem";
-import { CustomOrderItemsProps } from "@/types";
+import { CustomOrderItemsProps, SelectedAddress } from "@/types";
 import ItemCard from "@/components/customOrder/ItemCard";
 import Button from "@/components/Button";
 import CustomOrderImageSheet from "@/components/BottomSheets/customOrder/CustomOrderImageSheet";
@@ -45,7 +45,7 @@ const CustomOrderCheckout = () => {
     useState<CustomOrderItemsProps | null>(null);
   const [itemId, setItemId] = useState<string>("");
   const [addressData, setAddressData] = useState({
-    deliveryAddressType: "home",
+    deliveryAddressType: "",
     deliveryAddressOtherAddressId: "",
     instructionInDelivery: "",
   });
@@ -271,7 +271,16 @@ const CustomOrderCheckout = () => {
               </Typo>
             </View>
 
-            <UserSelectedAddress />
+            <UserSelectedAddress
+              deliveryMode="Custom Order"
+              onSelect={(type: string, address: SelectedAddress) =>
+                setAddressData({
+                  ...addressData,
+                  deliveryAddressType: address.type,
+                  deliveryAddressOtherAddressId: address.otherId,
+                })
+              }
+            />
 
             <Instructions
               onChangeText={(data: string) =>

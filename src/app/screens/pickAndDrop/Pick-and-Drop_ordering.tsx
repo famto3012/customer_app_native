@@ -1,21 +1,11 @@
-import {
-  Alert,
-  AppState,
-  BackHandler,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  ToastAndroid,
-  View,
-} from "react-native";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import SchedulePicker from "@/components/common/SchedulePicker";
 import { scale, verticalScale } from "@/utils/styling";
 import Typo from "@/components/Typo";
 import { colors } from "@/constants/theme";
-import Address from "@/components/common/Address";
 import Instructions from "@/components/common/Instructions";
 import Button from "@/components/Button";
 import BottomSheet, {
@@ -29,11 +19,9 @@ import { PickAndDropItemProps } from "@/types";
 import { useMutation } from "@tanstack/react-query";
 import { addPickAndDropAddress } from "@/service/pickandDropService";
 import { router } from "expo-router";
-import { Audio, AVPlaybackStatusSuccess } from "expo-av";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-
-// Global audio reference - will ensure we only have one audio instance
-let GLOBAL_SOUND: Audio.Sound | null = null;
+import UserSelectedAddress from "@/components/common/UserSelectedAddress";
+import { forceAudioCleanup, playOrStopSound } from "@/utils/helpers";
+import { useAudioCleanup } from "@/hooks/useAudio";
 
 interface FormDataProps {
   pickUpAddressType: string;
@@ -46,6 +34,12 @@ interface FormDataProps {
   endDate?: string;
   time?: string;
 }
+
+type SelectedAddress = {
+  type: string;
+  otherId: string;
+  address: string;
+};
 
 const PickDropScreen = () => {
   const [formData, setFormData] = useState<FormDataProps>({
@@ -64,18 +58,20 @@ const PickDropScreen = () => {
     delivery: "",
   });
   const [item, setItem] = useState<PickAndDropItemProps | null>(null);
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [addressError, setAddressError] = useState(false);
+
+  const [selectedPickAddress, setSelectedPickAddress] =
+    useState<SelectedAddress>({ type: "", otherId: "", address: "" });
+  const [selectedDropAddress, setSelectedDropAddress] =
+    useState<SelectedAddress>({ type: "", otherId: "", address: "" });
 
   const scheduleSheetRef = useRef<BottomSheet>(null);
   const addItemSheetRef = useRef<BottomSheet>(null);
-  const isNavigatingRef = useRef(false);
 
   const scheduleSheetSnapPoints = useMemo(() => ["85%"], []);
   const addItemSheetSnapPoints = useMemo(() => ["60%"], []);
 
-  const navigation = useNavigation();
+  useAudioCleanup();
 
   const onPickVoice = (data: string) => {
     setVoiceInstruction({ ...voiceInstruction, pick: data });
@@ -85,232 +81,27 @@ const PickDropScreen = () => {
     setVoiceInstruction({ ...voiceInstruction, delivery: data });
   };
 
-  const forceAudioCleanup = async () => {
-    try {
-      // Force set our state regardless of what happens with the actual cleanup
-      setIsPlaying(false);
+  const handleSelectAddress = (type: string, address: SelectedAddress) => {
+    if (type === "pick") {
+      setSelectedPickAddress(address);
+      setFormData({
+        ...formData,
+        pickUpAddressType: address.type,
+        pickUpAddressOtherAddressId: address.otherId,
+      });
 
-      // If we have a reference to the global sound
-      if (GLOBAL_SOUND) {
-        try {
-          await GLOBAL_SOUND.pauseAsync().catch(() => {});
-
-          await GLOBAL_SOUND.stopAsync().catch(() => {});
-
-          await GLOBAL_SOUND.unloadAsync().catch(() => {});
-        } catch (e) {
-          console.log("Caught error during force cleanup:", e);
-        }
-
-        // Clear the global reference
-        GLOBAL_SOUND = null;
-      }
-
-      // Try to set volume to 0 on the Audio module directly (as a last resort)
-      try {
-        await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: false,
-          staysActiveInBackground: false,
-          shouldDuckAndroid: false,
-        });
-      } catch (e) {
-        console.log("Error setting audio mode:", e);
-      }
-    } catch (e) {
-      console.error("Critical error in force cleanup:", e);
+      return;
     }
-  };
+    if (type === "drop") {
+      setSelectedDropAddress(address);
+      setFormData({
+        ...formData,
+        deliveryAddressType: address.type,
+        deliveryAddressOtherAddressId: address.otherId,
+      });
 
-  const playOrStopSound = async () => {
-    try {
-      if (isPlaying) {
-        await forceAudioCleanup();
-      } else {
-        // Force cleanup first in case there's a lingering instance
-        await forceAudioCleanup();
-
-        // Create new sound
-        try {
-          const { sound: newSound } = await Audio.Sound.createAsync(
-            {
-              uri: "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FScheduled%20Order.mp3?alt=media&token=da59e122-08f8-4964-8b6f-bfebc8c32fbe",
-            },
-            { shouldPlay: true }
-          );
-
-          // Set our global reference
-          GLOBAL_SOUND = newSound;
-          setIsPlaying(true);
-
-          newSound.setOnPlaybackStatusUpdate((status) => {
-            if (
-              status.isLoaded &&
-              (status as AVPlaybackStatusSuccess).didJustFinish
-            ) {
-              forceAudioCleanup();
-            }
-          });
-        } catch (soundError) {
-          console.error("Error creating sound:", soundError);
-          forceAudioCleanup();
-        }
-      }
-    } catch (error) {
-      console.error("Critical error in playOrStopSound:", error);
-      forceAudioCleanup();
+      return;
     }
-  };
-
-  useEffect(() => {
-    const subscription = AppState.addEventListener("change", (nextAppState) => {
-      if (nextAppState !== "active") {
-        console.log("App going to background");
-        forceAudioCleanup();
-      }
-    });
-
-    return () => subscription.remove();
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      const onBackPress = () => {
-        forceAudioCleanup();
-        return false;
-      };
-
-      const backHandler = BackHandler.addEventListener(
-        "hardwareBackPress",
-        onBackPress
-      );
-
-      return () => backHandler.remove();
-    }, [])
-  );
-
-  // On navigation gestures
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("beforeRemove", () => {
-      forceAudioCleanup();
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
-  // On component unmount
-  useEffect(() => {
-    return () => {
-      forceAudioCleanup();
-    };
-  }, []);
-
-  // On screen focus change
-  useFocusEffect(
-    useCallback(() => {
-      // Cleanup when losing focus
-      return () => {
-        if (!isNavigatingRef.current) {
-          forceAudioCleanup();
-        }
-      };
-    }, [])
-  );
-
-  const handleSelectPickupAddress = (
-    type: string,
-    otherId?: string,
-    address?: string
-  ) => {
-    // Reset any previous errors
-    setAddressError(false);
-
-    // Validate if this would create a duplicate with delivery address
-    if (type !== "other" && type === formData.deliveryAddressType) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          "Pick and Delivery address cannot be same",
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert("Error", "Pick and Delivery address cannot be same");
-      }
-
-      return false;
-    }
-
-    if (
-      type === "other" &&
-      otherId === formData.deliveryAddressOtherAddressId &&
-      formData.deliveryAddressType === "other"
-    ) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          "Pick and Delivery address cannot be same",
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert("Error", "Pick and Delivery address cannot be same");
-      }
-      return false;
-    }
-
-    setFormData({
-      ...formData,
-      pickUpAddressType: type,
-      pickUpAddressOtherAddressId: otherId,
-    });
-    return true;
-  };
-
-  const handleSelectDeliveryAddress = (
-    type: string,
-    otherId?: string,
-    address?: string
-  ) => {
-    // Reset any previous errors
-    setAddressError(false);
-
-    // Validate if this would create a duplicate with pickup address
-    if (type !== "other" && type === formData.pickUpAddressType) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          "Pick and Delivery address cannot be same",
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert("Error", "Pick and Delivery address cannot be same");
-      }
-      setAddressError(true);
-      return false;
-    }
-
-    if (
-      type === "other" &&
-      otherId === formData.pickUpAddressOtherAddressId &&
-      formData.pickUpAddressType === "other"
-    ) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          "Pick and Delivery address cannot be same",
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert("Error", "Pick and Delivery address cannot be same");
-      }
-      setAddressError(true);
-      return false;
-    }
-
-    setFormData({
-      ...formData,
-      deliveryAddressType: type,
-      deliveryAddressOtherAddressId: otherId,
-    });
-    return true;
   };
 
   const handleAddAddressMutation = useMutation({
@@ -420,12 +211,13 @@ const PickDropScreen = () => {
             </Typo>
           </View>
 
-          <Address
-            alreadySelect={false}
-            onSelect={handleSelectPickupAddress}
-            addressType={formData.pickUpAddressType}
-            addressOtherId={formData.pickUpAddressOtherAddressId}
-            validateSelection={true}
+          <UserSelectedAddress
+            address={selectedDropAddress}
+            deliveryMode="Pick and Drop"
+            pick
+            onSelect={(type: string, address: any) =>
+              handleSelectAddress(type, address)
+            }
           />
 
           <Instructions
@@ -444,13 +236,13 @@ const PickDropScreen = () => {
                 </Typo>
               </View>
 
-              <Address
-                onSelect={handleSelectDeliveryAddress}
-                addressType={addressError ? "" : formData.deliveryAddressType}
-                addressOtherId={
-                  addressError ? "" : formData.deliveryAddressOtherAddressId
+              <UserSelectedAddress
+                address={selectedPickAddress}
+                deliveryMode="Pick and Drop"
+                drop
+                onSelect={(type: string, address: any) =>
+                  handleSelectAddress(type, address)
                 }
-                validateSelection={true}
               />
 
               <Instructions
@@ -481,15 +273,21 @@ const PickDropScreen = () => {
         enableDynamicSizing={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
-        onClose={() => forceAudioCleanup()}
+        onClose={() => forceAudioCleanup(setIsPlaying)}
       >
         <ScheduleSheet
           onPress={(startDate: string, endDate: string, time: string) => {
-            forceAudioCleanup();
+            forceAudioCleanup(setIsPlaying);
             scheduleSheetRef?.current?.close();
             setFormData({ ...formData, startDate, endDate, time });
           }}
-          playSound={playOrStopSound}
+          playSound={() =>
+            playOrStopSound(
+              "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FScheduled%20Order.mp3?alt=media&token=da59e122-08f8-4964-8b6f-bfebc8c32fbe",
+              isPlaying,
+              setIsPlaying
+            )
+          }
           isPlaying={isPlaying}
         />
       </BottomSheet>
@@ -516,7 +314,6 @@ export default PickDropScreen;
 
 const styles = StyleSheet.create({
   pickupRow: {
-    marginBottom: verticalScale(24),
     marginTop: verticalScale(10),
     marginHorizontal: scale(20),
     flexDirection: "row",

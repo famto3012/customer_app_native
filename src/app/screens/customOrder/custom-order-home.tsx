@@ -1,5 +1,5 @@
-import { Image, StyleSheet, View, AppState, BackHandler } from "react-native";
-import { useCallback, useMemo, useRef, useState, useEffect } from "react";
+import { Image, StyleSheet, View } from "react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import BottomSheet, {
@@ -14,124 +14,19 @@ import CustomOrderBottomSheet from "../../../components/BottomSheets/customOrder
 import CustomOrderLocationBottomSheet from "@/components/BottomSheets/customOrder/CustomOrderLocationBottomSheet";
 import { commonStyles } from "@/constants/commonStyles";
 import { customOrderDetails } from "@/utils/defaultData";
-import { Audio, AVPlaybackStatusSuccess } from "expo-av";
-import { useFocusEffect } from "expo-router";
-import { useNavigation } from "@react-navigation/native";
-
-// Global audio reference - will ensure we only have one audio instance
-let GLOBAL_SOUND: Audio.Sound | null = null;
+import { forceAudioCleanup, playOrStopSound } from "@/utils/helpers";
+import { useAudioCleanup } from "@/hooks/useAudio";
 
 const CustomOrderHome = () => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const infoSheetRef = useRef<BottomSheet>(null);
   const locationSheetRef = useRef<BottomSheet>(null);
-  const isNavigatingRef = useRef(false);
 
   const InfoSnapPoints = useMemo(() => ["55%"], []);
   const locationSnapPoints = useMemo(() => ["25%"], []);
-  const navigation = useNavigation();
 
-  // Ultra aggressive sound cleanup - works even if the component state is stale
-  const forceAudioCleanup = async () => {
-    try {
-      // Force set our state regardless of what happens with the actual cleanup
-      setIsPlaying(false);
-
-      // If we have a reference to the global sound
-      if (GLOBAL_SOUND) {
-        try {
-          await GLOBAL_SOUND.pauseAsync().catch(() => {});
-
-          await GLOBAL_SOUND.stopAsync().catch(() => {});
-
-          await GLOBAL_SOUND.unloadAsync().catch(() => {});
-        } catch (e) {
-          console.log("Caught error during force cleanup:", e);
-        }
-
-        // Clear the global reference
-        GLOBAL_SOUND = null;
-      }
-
-      // Try to set volume to 0 on the Audio module directly (as a last resort)
-      try {
-        await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: false,
-          staysActiveInBackground: false,
-          shouldDuckAndroid: false,
-        });
-      } catch (e) {
-        console.log("Error setting audio mode:", e);
-      }
-    } catch (e) {
-      console.error("Critical error in force cleanup:", e);
-    }
-  };
-
-  const playOrStopSound = async () => {
-    try {
-      if (isPlaying) {
-        await forceAudioCleanup();
-      } else {
-        // Force cleanup first in case there's a lingering instance
-        await forceAudioCleanup();
-
-        // Create new sound
-        try {
-          const { sound: newSound } = await Audio.Sound.createAsync(
-            {
-              uri: "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FCustom%20Order.mp3?alt=media&token=99e53808-0115-4960-bcbf-3189950f0624",
-            },
-            { shouldPlay: true }
-          );
-
-          // Set our global reference
-          GLOBAL_SOUND = newSound;
-          setIsPlaying(true);
-
-          newSound.setOnPlaybackStatusUpdate((status) => {
-            if (
-              status.isLoaded &&
-              (status as AVPlaybackStatusSuccess).didJustFinish
-            ) {
-              forceAudioCleanup();
-            }
-          });
-        } catch (soundError) {
-          console.error("Error creating sound:", soundError);
-          forceAudioCleanup();
-        }
-      }
-    } catch (error) {
-      console.error("Critical error in playOrStopSound:", error);
-      forceAudioCleanup();
-    }
-  };
-
-  // For navigation
-  const prepareForNavigation = async () => {
-    console.log("🚨 NAVIGATION PREPARATION STARTED");
-    isNavigatingRef.current = true;
-
-    // Force cleanup audio first
-    await forceAudioCleanup();
-
-    return true;
-  };
-
-  const closeInfo = () => infoSheetRef.current?.close();
-
-  const closeLocation = async () => {
-    await forceAudioCleanup();
-    locationSheetRef.current?.close();
-  };
-
-  const handleLocationPress = async () => {
-    if (await prepareForNavigation()) {
-      locationSheetRef.current?.expand();
-    }
-  };
+  useAudioCleanup();
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
@@ -144,65 +39,6 @@ const CustomOrderHome = () => {
       />
     ),
     []
-  );
-
-  // Setup all navigation and lifecycle handlers
-
-  // On app state change (background/foreground)
-  useEffect(() => {
-    const subscription = AppState.addEventListener("change", (nextAppState) => {
-      if (nextAppState !== "active") {
-        console.log("App going to background");
-        forceAudioCleanup();
-      }
-    });
-
-    return () => subscription.remove();
-  }, []);
-
-  // On hardware back button
-  useFocusEffect(
-    useCallback(() => {
-      const onBackPress = () => {
-        forceAudioCleanup();
-        return false;
-      };
-
-      const backHandler = BackHandler.addEventListener(
-        "hardwareBackPress",
-        onBackPress
-      );
-
-      return () => backHandler.remove();
-    }, [])
-  );
-
-  // On navigation gestures
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("beforeRemove", () => {
-      forceAudioCleanup();
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
-  // On component unmount
-  useEffect(() => {
-    return () => {
-      forceAudioCleanup();
-    };
-  }, []);
-
-  // On screen focus change
-  useFocusEffect(
-    useCallback(() => {
-      // Cleanup when losing focus
-      return () => {
-        if (!isNavigatingRef.current) {
-          forceAudioCleanup();
-        }
-      };
-    }, [])
   );
 
   return (
@@ -255,7 +91,10 @@ const CustomOrderHome = () => {
         </View>
 
         <View style={styles.button}>
-          <Button title="Place your order" onPress={handleLocationPress} />
+          <Button
+            title="Place your order"
+            onPress={() => locationSheetRef.current?.expand()}
+          />
         </View>
       </ScreenWrapper>
 
@@ -266,14 +105,20 @@ const CustomOrderHome = () => {
         enableDynamicSizing={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
-        onClose={() => forceAudioCleanup()}
+        onClose={() => forceAudioCleanup(setIsPlaying)}
       >
         <CustomOrderBottomSheet
           closeSheet={() => {
-            forceAudioCleanup();
+            forceAudioCleanup(setIsPlaying);
             infoSheetRef.current?.close();
           }}
-          playSound={playOrStopSound}
+          playSound={() =>
+            playOrStopSound(
+              "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FCustom%20Order.mp3?alt=media&token=99e53808-0115-4960-bcbf-3189950f0624",
+              isPlaying,
+              setIsPlaying
+            )
+          }
           isPlaying={isPlaying}
         />
       </BottomSheet>
@@ -285,9 +130,10 @@ const CustomOrderHome = () => {
         enableDynamicSizing={false}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
-        // onClose={() => forceAudioCleanup()}
       >
-        <CustomOrderLocationBottomSheet onPress={closeLocation} />
+        <CustomOrderLocationBottomSheet
+          onPress={() => locationSheetRef.current?.close()}
+        />
       </BottomSheet>
     </>
   );

@@ -31,14 +31,11 @@ const Instructions: FC<{
 
   // Function to stop and clean up all audio
   const cleanupAudio = useCallback(async () => {
-    console.log("Cleaning up audio resources");
-
     // Stop and unload sound
     if (sound) {
       try {
         const status = await sound.getStatusAsync();
         if (status.isLoaded) {
-          console.log("Stopping playback");
           await sound.stopAsync();
           await sound.unloadAsync();
         }
@@ -53,7 +50,6 @@ const Instructions: FC<{
     // Stop and unload recording
     if (voiceRecording) {
       try {
-        console.log("Stopping recording");
         await voiceRecording.stopAndUnloadAsync();
       } catch (error) {
         console.log(`Error cleaning up recording: ${error}`);
@@ -68,11 +64,9 @@ const Instructions: FC<{
   useFocusEffect(
     useCallback(() => {
       // Setup on focus
-      console.log("Screen focused");
 
       // Cleanup when screen loses focus
       return () => {
-        console.log("Screen unfocused - stopping audio");
         cleanupAudio();
       };
     }, [cleanupAudio])
@@ -81,7 +75,6 @@ const Instructions: FC<{
   // This runs when component unmounts
   useEffect(() => {
     return () => {
-      console.log("Component unmounting");
       cleanupAudio();
     };
   }, [cleanupAudio]);
@@ -134,7 +127,6 @@ const Instructions: FC<{
           }
         }
 
-        console.log("Creating new sound instance");
         const { sound: newSound } = await Audio.Sound.createAsync(
           { uri: voiceInstruction },
           { shouldPlay: false } // Don't play immediately
@@ -148,7 +140,6 @@ const Instructions: FC<{
 
         newSound.setOnPlaybackStatusUpdate((status) => {
           if (status.isLoaded && status.didJustFinish) {
-            console.log("Playback finished");
             setIsPlaying(false);
           }
         });
@@ -162,7 +153,6 @@ const Instructions: FC<{
   const stopPlayback = async () => {
     if (sound) {
       try {
-        console.log("Manually stopping playback");
         await sound.stopAsync();
         setIsPlaying(false);
       } catch (error) {

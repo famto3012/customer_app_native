@@ -53,7 +53,13 @@ const Home = () => {
 
   useEffect(() => {
     if (outsideGeofence) {
-      router.push("/(modals)/SelectAddress");
+      router.push({
+        pathname: "/(modals)/SelectAddress",
+        params: {
+          showActionButton: "false",
+          setAsUserAddress: "true",
+        },
+      });
     }
   }, [outsideGeofence]);
 
@@ -144,7 +150,15 @@ const Home = () => {
           >
             <View style={styles.overlayContainer}>
               <HomeHeader
-                onPress={() => router.push("/(modals)/SelectAddress")}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(modals)/SelectAddress",
+                    params: {
+                      setAsUserAddress: "true",
+                      showActionButton: "false",
+                    },
+                  })
+                }
               />
               <SearchView
                 placeholder="Search for dishes, restaurants & groceries"

@@ -39,6 +39,7 @@ export type ButtonProps = {
   style?: ViewStyle;
   isLoading?: boolean;
   labelColor?: string;
+  icon?: React.ReactNode;
 };
 
 export interface InputProps extends TextInputProps {
@@ -280,3 +281,9 @@ export type PickAndDropCartBill = {
   surgePrice: number | null;
   promoCodeUsed: string | null;
 } | null;
+
+export type SelectedAddress = {
+  type: string;
+  otherId: string;
+  address: string;
+};
