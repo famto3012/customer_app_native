@@ -2,11 +2,21 @@ import { appAxios } from "@/config/apiInterceptor";
 import { AddCustomStoreProps } from "@/types";
 import { Alert, Platform, ToastAndroid } from "react-native";
 
-export const addStoreDetail = async (data: AddCustomStoreProps) => {
+export const addStoreDetail = async (
+  data: AddCustomStoreProps
+): Promise<{
+  cartId: string;
+  shopName: string;
+  place: string;
+  distance: number | null;
+  duration: number | null;
+}> => {
   try {
     const res = await appAxios.post(`/customers/add-shop`, data);
 
-    return res.status === 200 ? res.data : null;
+    return res.status === 200
+      ? res.data
+      : { cartId: "", shopName: "", place: "", distance: null, duration: null };
   } catch (err) {
     console.error(`Error in adding store detail:`, err);
     if (Platform.OS === "android") {
@@ -18,7 +28,13 @@ export const addStoreDetail = async (data: AddCustomStoreProps) => {
     } else {
       Alert.alert("", "Something went wrong");
     }
-    return null;
+    return {
+      cartId: "",
+      shopName: "",
+      place: "",
+      distance: null,
+      duration: null,
+    };
   }
 };
 

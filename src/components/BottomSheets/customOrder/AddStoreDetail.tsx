@@ -5,11 +5,8 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Dimensions,
-  Alert,
-  ToastAndroid,
 } from "react-native";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { BottomSheetScrollView, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import Typo from "@/components/Typo";
 import { colors, spacingY } from "@/constants/theme";
@@ -20,11 +17,9 @@ import Input from "@/components/Input";
 import { useMutation } from "@tanstack/react-query";
 import { addStoreDetail } from "@/service/customOrderService";
 import { AddCustomStoreProps, AddStoreResponse } from "@/types";
-
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+import { useShowAlert } from "@/hooks/useShowAlert";
 
 const AddStoreDetail = ({
-  addStoreSheetRef,
   shopData,
 }: {
   addStoreSheetRef: any;
@@ -38,6 +33,8 @@ const AddStoreDetail = ({
     buyFromAnyWhere: false,
   });
 
+  const { showAlert } = useShowAlert();
+
   useEffect(() => {
     if (shopData) {
       setStoreData((prevState) => ({
@@ -50,91 +47,6 @@ const AddStoreDetail = ({
     }
   }, [shopData]);
 
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [dynamicSnapPoints, setDynamicSnapPoints] = useState(["38%"]); // Default snap points
-
-  // useEffect(() => {
-  //   const showSubscription = Keyboard.addListener(
-  //     "keyboardDidShow",
-  //     (event) => {
-  //       const height = event.endCoordinates.height;
-  //       setKeyboardHeight(height);
-
-  //       // Set new snap points when keyboard appears
-  //       const newSnapPoints = ["38%", `${SCREEN_HEIGHT - height - 40}px`];
-  //       setDynamicSnapPoints(newSnapPoints);
-
-  //       setTimeout(() => {
-  //         if (addStoreSheetRef?.current && newSnapPoints.length > 1) {
-  //           addStoreSheetRef.current.snapToIndex(1); // Move up only if valid snap points exist
-  //         }
-  //       }, 100);
-  //     }
-  //   );
-
-  //   const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
-  //     setKeyboardHeight(0);
-
-  //     // Reset snap points when keyboard is hidden
-  //     setDynamicSnapPoints(["38%"]);
-
-  //     setTimeout(() => {
-  //       if (addStoreSheetRef?.current) {
-  //         addStoreSheetRef.current.snapToIndex(0); // Move down
-  //       }
-  //     }, 100);
-  //   });
-
-  //   return () => {
-  //     showSubscription.remove();
-  //     hideSubscription.remove();
-  //   };
-  // }, []);
-
-  useEffect(() => {
-    let isProgrammaticUpdate = false; // Prevent triggering when shopData updates programmatically
-
-    const showSubscription = Keyboard.addListener(
-      "keyboardDidShow",
-      (event) => {
-        if (isProgrammaticUpdate) return; // Skip if triggered by programmatic updates
-
-        const height = event.endCoordinates.height;
-        setKeyboardHeight(height);
-
-        // Set new snap points when keyboard appears
-        if (!shopData) {
-          const newSnapPoints = ["38%", `${SCREEN_HEIGHT - height - 40}px`];
-          setDynamicSnapPoints(newSnapPoints);
-
-          setTimeout(() => {
-            if (addStoreSheetRef?.current && newSnapPoints.length > 1) {
-              addStoreSheetRef.current.snapToIndex(1); // Move up only if valid snap points exist
-            }
-          }, 100);
-        }
-      }
-    );
-
-    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
-      setKeyboardHeight(0);
-      if (!shopData) {
-        setDynamicSnapPoints(["38%"]); // Reset snap points
-
-        setTimeout(() => {
-          if (addStoreSheetRef?.current) {
-            addStoreSheetRef.current.snapToIndex(0); // Move down
-          }
-        }, 100);
-      }
-    });
-
-    return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
-    };
-  }, [shopData]); // ✅ Now correctly depends on shopData
-
   const handleAddStoreMutation = useMutation<
     AddStoreResponse | null,
     Error,
@@ -143,7 +55,7 @@ const AddStoreDetail = ({
     mutationKey: ["add-store"],
     mutationFn: () => addStoreDetail(storeData),
     onSuccess: (data) => {
-      if (data?.shopName) {
+      if (data?.shopName && data.cartId) {
         router.push({
           pathname: "/screens/customOrder/CustomOrderCheckout",
           params: {
@@ -158,29 +70,12 @@ const AddStoreDetail = ({
 
   const handleSave = () => {
     if (!storeData.latitude || !storeData.longitude) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          "Please select a location",
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert("Error", "Please select a location");
-      }
-
+      showAlert("Please select a location");
       return;
     }
-    if (!storeData.shopName || !storeData.place) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          "Please fill all details",
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert("Error", "Please fill all details");
-      }
 
+    if (!storeData.shopName || !storeData.place) {
+      showAlert("Please fill all details");
       return;
     }
 

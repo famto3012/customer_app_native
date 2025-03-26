@@ -30,7 +30,6 @@ const Merchants = () => {
   const [query, setQuery] = useState<string>("");
   const [debounceQuery, setDebounceQuery] = useState<string>("");
   const [refreshing, setRefreshing] = useState(false);
-  const [showEmptyState, setShowEmptyState] = useState(false);
 
   const { latitude, longitude } = useSafeLocation();
 
@@ -83,20 +82,9 @@ const Merchants = () => {
     }
   }, [data]);
 
-  useEffect(() => {
-    if (!isLoading) {
-      const timer = setTimeout(() => {
-        setShowEmptyState(true);
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else {
-      setShowEmptyState(false);
-    }
-  }, [isLoading]);
-
   const handleRefresh = async () => {
     setRefreshing(true);
-    await refetch(); // Fetch fresh data
+    await refetch();
     setRefreshing(false);
   };
 
@@ -178,25 +166,22 @@ const Merchants = () => {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          !showEmptyState && isLoading ? (
+          isLoading ? (
             <MerchantCardLoader />
-          ) : (
-            showEmptyState &&
-            merchants.length === 0 && (
-              <View
-                style={{
-                  flex: 1,
-                  height: SCREEN_HEIGHT - verticalScale(100),
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Typo size={16} color={colors.NEUTRAL800} fontFamily="SemiBold">
-                  Coming soon...!
-                </Typo>
-              </View>
-            )
-          )
+          ) : merchants.length === 0 ? (
+            <View
+              style={{
+                flex: 1,
+                height: SCREEN_HEIGHT - verticalScale(100),
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Typo size={16} color={colors.NEUTRAL800} fontFamily="SemiBold">
+                Coming soon...!
+              </Typo>
+            </View>
+          ) : null
         }
         ListFooterComponent={isFetchingNextPage ? <MerchantCardLoader /> : null}
         onEndReached={() => {
@@ -239,10 +224,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
-    elevation: 5, // for Android shadow
-    backgroundColor: "#fff", // Required for iOS shadow to be visible
-    borderRadius: 10, // Match Skeleton's border radius for consistency
-    padding: scale(5), // Optional padding to prevent clipping\
+    elevation: 5,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: scale(5),
     marginBottom: verticalScale(20),
     paddingVertical: verticalScale(10),
   },

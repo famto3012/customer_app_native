@@ -1,5 +1,5 @@
 import { colors } from "@/constants/theme";
-import { scale } from "@/utils/styling";
+import { scale, verticalScale } from "@/utils/styling";
 import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import React, { useRef, useEffect, FC } from "react";
 import {
@@ -9,46 +9,33 @@ import {
   Animated,
   ViewStyle,
   TextStyle,
+  ActivityIndicator,
 } from "react-native";
 import Typo from "../Typo";
+import { Portal } from "react-native-paper";
+import { useData } from "@/context/DataContext";
 
 interface AlertBoxProps {
-  isVisible: boolean;
-  onClose: () => void;
-  onConfirm?: () => void;
-  title?: string;
-  body: string;
-  confirmText?: string;
-  cancelText?: string;
+  onConfirm: () => void;
+  isLoading?: boolean;
   confirmButtonStyle?: ViewStyle;
   cancelButtonStyle?: ViewStyle;
-  titleStyle?: TextStyle;
-  bodyStyle?: TextStyle;
-  buttonTextStyle?: TextStyle;
 }
 
 const AlertBox: FC<AlertBoxProps> = ({
-  isVisible,
-  onClose,
   onConfirm,
-  title = "Alert",
-  body,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  isLoading,
   confirmButtonStyle,
   cancelButtonStyle,
-  titleStyle,
-  bodyStyle,
-  buttonTextStyle,
 }) => {
   // Animated value for fade and scale
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.5)).current;
 
-  // Animation effect
+  const { showAlert, setShowAlert, alertData, setAlertData } = useData();
+
   useEffect(() => {
-    if (isVisible) {
-      // Animate modal in
+    if (showAlert) {
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
@@ -63,7 +50,6 @@ const AlertBox: FC<AlertBoxProps> = ({
         }),
       ]).start();
     } else {
-      // Animate modal out
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 0,
@@ -77,73 +63,76 @@ const AlertBox: FC<AlertBoxProps> = ({
         }),
       ]).start();
     }
-  }, [isVisible]);
+  }, [showAlert]);
 
-  // If not visible, return null
-  if (!isVisible) return null;
+  if (!showAlert) return null;
 
   return (
-    <View style={styles.overlay}>
-      <Animated.View
-        style={[
-          styles.modalContainer,
-          {
-            opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
-      >
-        {title && (
+    <Portal>
+      <View style={styles.overlay}>
+        <Animated.View
+          style={[
+            styles.modalContainer,
+            {
+              opacity: fadeAnim,
+              transform: [{ scale: scaleAnim }],
+            },
+          ]}
+        >
+          {alertData?.title && (
+            <Typo
+              fontFamily="Medium"
+              color={colors.NEUTRAL700}
+              size={16}
+              style={styles.title}
+            >
+              {alertData.title}
+            </Typo>
+          )}
+
           <Typo
             fontFamily="Medium"
+            size={13}
             color={colors.NEUTRAL700}
-            size={16}
-            style={[styles.title, titleStyle]}
+            style={styles.body}
           >
-            {title}
+            {alertData.body}
           </Typo>
-        )}
 
-        <Typo
-          fontFamily="Medium"
-          size={14}
-          color={colors.NEUTRAL700}
-          style={[styles.body, bodyStyle]}
-        >
-          {body}
-        </Typo>
-
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.cancelButton, cancelButtonStyle]}
-            onPress={onClose}
-          >
-            <Typo
-              color={colors.WHITE}
-              fontFamily="Medium"
-              size={12}
-              style={buttonTextStyle}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.cancelButton, cancelButtonStyle]}
+              onPress={() => {
+                setShowAlert(false);
+                setAlertData({
+                  title: "",
+                  body: "",
+                  cancelText: "",
+                  confirmText: "",
+                });
+              }}
             >
-              {cancelText}
-            </Typo>
-          </TouchableOpacity>
+              <Typo color={colors.NEUTRAL800} fontFamily="Medium" size={12}>
+                {alertData.cancelText}
+              </Typo>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.confirmButton, confirmButtonStyle]}
-            onPress={onConfirm}
-          >
-            <Typo
-              color={colors.WHITE}
-              fontFamily="Medium"
-              size={12}
-              style={buttonTextStyle}
+            <TouchableOpacity
+              style={[styles.confirmButton, confirmButtonStyle]}
+              onPress={onConfirm}
             >
-              {confirmText}
-            </Typo>
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
-    </View>
+              {isLoading ? (
+                <ActivityIndicator size="small" color={colors.WHITE} />
+              ) : (
+                <Typo color={colors.WHITE} fontFamily="Medium" size={12}>
+                  {alertData.confirmText}
+                </Typo>
+              )}
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      </View>
+    </Portal>
   );
 };
 
@@ -154,28 +143,23 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.3)",
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 999,
   },
   modalContainer: {
-    width: SCREEN_WIDTH * 0.8,
+    width: Math.min(SCREEN_WIDTH * 0.8, scale(400)),
     backgroundColor: colors.WHITE,
     borderRadius: scale(10),
     padding: scale(20),
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
   },
   title: {
-    marginBottom: scale(20),
+    paddingBottom: scale(15),
+  },
+  body: {
+    textAlign: "center",
+    paddingBottom: verticalScale(5),
   },
   buttonContainer: {
     flexDirection: "row",

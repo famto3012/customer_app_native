@@ -31,7 +31,7 @@ const AddCartButton: FC<AddCartButtonProps> = ({
         <View style={styles.counterContainer}>
           {/* Decrement Button */}
           <Pressable onPress={onDecrement} style={styles.button}>
-            <Typo size={14} color={colors.PRIMARY} style={styles.text}>
+            <Typo size={20} color={colors.PRIMARY} style={styles.text}>
               -
             </Typo>
           </Pressable>
@@ -43,13 +43,20 @@ const AddCartButton: FC<AddCartButtonProps> = ({
 
           {/* Increment Button */}
           <Pressable onPress={onIncrement} style={styles.button}>
-            <Typo size={14} color={colors.PRIMARY} style={styles.text}>
+            <Typo size={20} color={colors.PRIMARY} style={styles.text}>
               +
             </Typo>
           </Pressable>
         </View>
       ) : (
-        <Pressable onPress={onPress}>
+        <Pressable
+          style={{
+            // backgroundColor: colors.RED,
+            height: "100%",
+            justifyContent: "center",
+          }}
+          onPress={onPress}
+        >
           <Typo
             size={inventory ? 14 : 13}
             color={inventory ? colors.WHITE : colors.NEUTRAL900}
@@ -67,10 +74,10 @@ export default AddCartButton;
 
 const styles = StyleSheet.create({
   container: {
-    height: verticalScale(35),
+    height: verticalScale(38),
     alignSelf: "center",
     justifyContent: "center",
-    width: "80%",
+    width: "85%",
     borderRadius: radius._6,
     position: "absolute",
     bottom: scale(-15),
@@ -85,7 +92,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    height: verticalScale(30),
+    height: "100%",
+    paddingHorizontal: scale(10),
   },
   text: {
     textAlign: "center",

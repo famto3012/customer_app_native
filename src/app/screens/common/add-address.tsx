@@ -38,6 +38,8 @@ import { useSafeLocation } from "@/utils/helpers";
 import MapDetailLoader from "@/components/Loader/MapDetailLoader";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAuthStore } from "@/store/store";
+import AlertBox from "@/components/global/AlertBox";
+import { useData } from "@/context/DataContext";
 
 const { MapView, Camera, RestApi, UserLocation } = MapplsGL;
 const defaultCoordinates = [76.938072, 8.528763];
@@ -54,12 +56,14 @@ const AddAddress = () => {
   const [mapReady, setMapReady] = useState(false);
   const [locationInitialized, setLocationInitialized] = useState(false);
 
-  const { token } = useAuthStore.getState();
   const cameraRef = useRef<any>(null);
   const mapRef = useRef<any>(null);
   const addAddressSheetRef = useRef<BottomSheet>(null);
 
   const addAddressSnapPoints = useMemo(() => ["58%"], []);
+
+  const { token } = useAuthStore.getState();
+  const { setAlertData, setShowAlert } = useData();
 
   // Initialize MapplsGL SDK only once
   useEffect(() => {
@@ -187,58 +191,6 @@ const AddAddress = () => {
     }
   };
 
-  // const requestLocationPermission = async () => {
-  //   try {
-  //     let { status } = await Location.getForegroundPermissionsAsync();
-
-  //     if (status !== "granted") {
-  //       const { status: newStatus } =
-  //         await Location.requestForegroundPermissionsAsync();
-  //       if (newStatus !== "granted") {
-  //         setMarkerCoordinates(defaultCoordinates);
-  //         setLocationInitialized(true);
-  //         return true;
-  //       }
-  //       status = newStatus;
-  //     }
-
-  //     setLoading(true);
-  //     const location = await Location.getCurrentPositionAsync({
-  //       accuracy: Location.Accuracy.High,
-  //       distanceInterval: 10,
-  //     }).catch(() => null);
-
-  //     if (!location) {
-  //       console.log("Location fetch failed");
-  //       setLoading(false);
-  //       return false;
-  //     }
-
-  //     const { latitude, longitude } = location.coords;
-  //     const newCoords = [longitude, latitude];
-  //     setMarkerCoordinates(newCoords);
-  //     setLocationInitialized(true);
-
-  //     // When getting current location, update camera position
-  //     if (cameraRef.current) {
-  //       cameraRef.current.setCamera({
-  //         centerCoordinate: newCoords,
-  //         zoomLevel: 15,
-  //         animationDuration: 1000,
-  //       });
-  //     }
-
-  //     reverseGeocode(newCoords);
-  //     return true;
-  //   } catch (error) {
-  //     console.error("Location error:", error);
-  //     setLoading(false);
-  //     return false;
-  //   }
-  // };
-
-  // Request location permission on mount
-
   const requestLocationPermission = async () => {
     try {
       let { status } = await Location.getForegroundPermissionsAsync();
@@ -339,18 +291,27 @@ const AddAddress = () => {
       if (data) {
         addAddressSheetRef.current?.expand();
       } else {
-        if (Platform.OS === "android") {
-          ToastAndroid.showWithGravity(
-            "Sorry we're not currently delivering to this location",
-            ToastAndroid.SHORT,
-            ToastAndroid.CENTER
-          );
-        } else {
-          Alert.alert(
-            "",
-            "Sorry we're not currently delivering to this location"
-          );
-        }
+        // if (Platform.OS === "android") {
+        //   ToastAndroid.showWithGravity(
+        //     "Sorry we're not currently delivering to this location",
+        //     ToastAndroid.SHORT,
+        //     ToastAndroid.CENTER
+        //   );
+        // } else {
+        //   Alert.alert(
+        //     "",
+        //     "Sorry we're not currently delivering to this location"
+        //   );
+        // }
+
+        setAlertData({
+          title: "Sorry!",
+          body: "Currently we don't deliver in this location",
+          cancelText: "Cancel",
+          confirmText: "Back",
+        });
+
+        setShowAlert(true);
       }
     },
   });
@@ -571,6 +532,18 @@ const AddAddress = () => {
           addressData={addressData}
         />
       </BottomSheet>
+
+      <AlertBox
+        onConfirm={() => {
+          setShowAlert(false);
+          setAlertData({
+            title: "",
+            body: "",
+            cancelText: "",
+            confirmText: "",
+          });
+        }}
+      />
     </>
   );
 };

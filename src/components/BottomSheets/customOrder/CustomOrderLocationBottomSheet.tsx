@@ -23,14 +23,17 @@ const CustomOrderLocationBottomSheet: FC<{ onPress: () => void }> = ({
   const handleAddStoreMutation = useMutation({
     mutationKey: ["add-store"],
     mutationFn: () => addStoreDetail(storeData),
-    onSuccess: () => {
-      onPress();
-      router.push({
-        pathname: "/screens/customOrder/CustomOrderCheckout",
-        params: {
-          storeName: "Buy from any store",
-        },
-      });
+    onSuccess: (data) => {
+      if (data.cartId) {
+        onPress();
+        router.push({
+          pathname: "/screens/customOrder/CustomOrderCheckout",
+          params: {
+            storeName: "Buy from any store",
+            cartId: data.cartId,
+          },
+        });
+      }
     },
   });
 

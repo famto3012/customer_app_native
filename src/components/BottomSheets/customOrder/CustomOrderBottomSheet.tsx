@@ -1,5 +1,5 @@
-import { Image, StyleSheet, Text, View } from "react-native";
-import React, { FC } from "react";
+import { Image, StyleSheet, View } from "react-native";
+import { FC } from "react";
 import { BottomSheetScrollView, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import Typo from "@/components/Typo";
 import { colors } from "@/constants/theme";

@@ -74,7 +74,7 @@ const Wallet = () => {
           >
             <View>
               <Typo size={24} fontFamily="Bold" color={colors.WHITE}>
-                ₹ {data?.walletBalance}
+                ₹ {data?.walletBalance || "0.00"}
               </Typo>
               <Typo size={14} color={colors.NEUTRAL350}>
                 Available balance
@@ -107,7 +107,7 @@ const Wallet = () => {
 
         <View style={styles.loyaltyContainer}>
           <Typo size={24} fontFamily="SemiBold" color={colors.NEUTRAL900}>
-            {data?.loyaltyPoints} Points
+            {data?.loyaltyPoints.toFixed(0) || "0"} Points
           </Typo>
           <Typo size={14} color={colors.NEUTRAL400}>
             Loyalty points left for redemption

@@ -18,6 +18,7 @@ import { useMutation } from "@tanstack/react-query";
 import { cancelOrder } from "@/service/universal";
 import dayjs from "dayjs";
 import AlertBox from "@/components/global/AlertBox";
+import { useData } from "@/context/DataContext";
 
 interface TemporaryOrderProps {
   orderId: string;
@@ -34,12 +35,15 @@ const TemporaryOrderSheet = ({
   onCancel: () => void;
 }) => {
   const [tempOrders, setTempOrders] = useState<TemporaryOrderProps[]>([]);
-  const [selected, setSelected] = useState<string>("");
-  const [isAlertVisible, setIsAlertVisible] = useState(false);
-  const [orderToCancel, setOrderToCancel] = useState<{
+  const [deletingOrder, setDeletingOrder] = useState<{
     orderId: string;
     deliveryMode: string;
-  } | null>(null);
+  }>({
+    orderId: "",
+    deliveryMode: "",
+  });
+
+  const { setShowAlert, setAlertData } = useData();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -73,32 +77,18 @@ const TemporaryOrderSheet = ({
         if (remainingOrders.length === 0) {
           onClose();
         }
+
+        setDeletingOrder({ orderId: "", deliveryMode: "" });
+        setShowAlert(false);
+        setAlertData({
+          title: "",
+          body: "",
+          cancelText: "",
+          confirmText: "",
+        });
       }
-      setSelected("");
-      setOrderToCancel(null);
-    },
-    onError: () => {
-      // Reset selection states in case of error
-      setSelected("");
-      setOrderToCancel(null);
     },
   });
-
-  const initiateCancelOrder = (item: TemporaryOrderProps) => {
-    setOrderToCancel({
-      orderId: item.orderId,
-      deliveryMode: item.deliveryMode,
-    });
-    setIsAlertVisible(true);
-  };
-
-  const confirmCancelOrder = () => {
-    if (orderToCancel) {
-      setSelected(orderToCancel.orderId);
-      handleCancelOrderMutation.mutate(orderToCancel);
-      setIsAlertVisible(false);
-    }
-  };
 
   const renderTemporary = ({ item }: { item: TemporaryOrderProps }) => {
     return (
@@ -118,10 +108,23 @@ const TemporaryOrderSheet = ({
         </View>
 
         <Pressable
-          onPress={() => initiateCancelOrder(item)}
+          onPress={() => {
+            setDeletingOrder({
+              orderId: item.orderId,
+              deliveryMode: item.deliveryMode,
+            });
+            setAlertData({
+              title: "Sure?",
+              body: "Are you sure that you want to cancel the order?",
+              cancelText: "No",
+              confirmText: "Yes, Cancel",
+            });
+            setShowAlert(true);
+          }}
           style={styles.cancelBtn}
         >
-          {item.orderId === selected && handleCancelOrderMutation.isPending ? (
+          {item.orderId === deletingOrder.orderId &&
+          handleCancelOrderMutation.isPending ? (
             <ActivityIndicator size="small" color={colors.WHITE} />
           ) : (
             <Typo size={13} color={colors.WHITE}>
@@ -153,13 +156,13 @@ const TemporaryOrderSheet = ({
       </BottomSheetScrollView>
 
       <AlertBox
-        isVisible={isAlertVisible}
-        onClose={() => setIsAlertVisible(false)}
-        onConfirm={confirmCancelOrder}
-        title="Cancel Order"
-        body="Are you sure you want to cancel this order?"
-        confirmText="Yes, Cancel"
-        cancelText="No, Keep"
+        onConfirm={() =>
+          handleCancelOrderMutation.mutate({
+            orderId: deletingOrder.orderId,
+            deliveryMode: deletingOrder.deliveryMode,
+          })
+        }
+        isLoading={handleCancelOrderMutation.isPending}
       />
     </>
   );
