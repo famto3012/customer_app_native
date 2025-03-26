@@ -1,4 +1,4 @@
-import { Alert, Pressable, ToastAndroid, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius } from "@/constants/theme";
 import { CaretRight, House } from "phosphor-react-native";
@@ -6,7 +6,7 @@ import Typo from "../Typo";
 import { useAuthStore } from "@/store/store";
 import { router } from "expo-router";
 import { FC, useEffect, useState } from "react";
-import { UserAddressProps, SelectedAddress } from "@/types";
+import { SelectedAddress } from "@/types";
 import { useData } from "@/context/DataContext";
 import { useShowAlert } from "@/hooks/useShowAlert";
 
@@ -106,22 +106,7 @@ const UserSelectedAddress: FC<UserSelectedAddressProps> = ({
 
       {deliveryMode !== "Pick and Drop" ? (
         <View style={{ flex: 1, marginLeft: scale(10) }}>
-          {!userAddress.type ? (
-            <Typo size={14} color={colors.NEUTRAL800} fontFamily="SemiBold">
-              Select a Delivery address
-            </Typo>
-          ) : !selectedAddress.type ? (
-            <>
-              <Typo size={14} color={colors.NEUTRAL800} fontFamily="Medium">
-                Delivery at{" "}
-                {userAddress?.type?.charAt(0)?.toUpperCase() +
-                  userAddress?.type?.slice(1)}
-              </Typo>
-              <Typo size={11} color={colors.NEUTRAL500}>
-                {userAddress?.address}
-              </Typo>
-            </>
-          ) : (
+          {selectedAddress.type && (
             <>
               <Typo size={14} color={colors.NEUTRAL800} fontFamily="Medium">
                 Delivery at{" "}
@@ -132,6 +117,25 @@ const UserSelectedAddress: FC<UserSelectedAddressProps> = ({
                 {selectedAddress?.address}
               </Typo>
             </>
+          )}
+
+          {!selectedAddress.type && userAddress.type && (
+            <>
+              <Typo size={14} color={colors.NEUTRAL800} fontFamily="Medium">
+                Delivery at{" "}
+                {userAddress?.type?.charAt(0)?.toUpperCase() +
+                  userAddress?.type?.slice(1)}
+              </Typo>
+              <Typo size={11} color={colors.NEUTRAL500}>
+                {userAddress?.address}
+              </Typo>
+            </>
+          )}
+
+          {!userAddress.type && !selectedAddress.type && (
+            <Typo size={14} color={colors.NEUTRAL800} fontFamily="SemiBold">
+              Select a Delivery address
+            </Typo>
           )}
         </View>
       ) : (

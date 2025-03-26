@@ -203,7 +203,7 @@ const CustomOrderCheckout = () => {
             Add Items to buy
           </Typo>
 
-          {cartItem.length > 0 ? (
+          {cartItem?.length > 0 ? (
             <FlatList
               data={cartItem || []}
               renderItem={({ item }) => (
@@ -224,7 +224,7 @@ const CustomOrderCheckout = () => {
               }
               ListEmptyComponent={
                 <View>
-                  {isLoading && cartItem.length === 0 ? (
+                  {isLoading && cartItem?.length === 0 ? (
                     <ActivityIndicator size="large" color={colors.PRIMARY} />
                   ) : null}
                 </View>
@@ -263,7 +263,7 @@ const CustomOrderCheckout = () => {
           )}
         </View>
 
-        {cartItem.length > 0 && (
+        {cartItem?.length > 0 && (
           <View>
             <View style={styles.addressContainer}>
               <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">

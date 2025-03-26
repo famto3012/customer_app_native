@@ -19,7 +19,7 @@ const BusinessCategories: FC<{ query: string }> = ({ query }) => {
   const { latitude, longitude } = useSafeLocation();
 
   const { data } = useQuery({
-    queryKey: ["business-category"],
+    queryKey: ["business-category", latitude, longitude],
     queryFn: () => getBusinessCategories(latitude, longitude, query),
     enabled: !!latitude && !!longitude,
   });
