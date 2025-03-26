@@ -116,12 +116,13 @@ const PickDropScreen = () => {
             cartId,
           },
         });
+
         addItemSheetRef.current?.close();
       }
     },
   });
 
-  const handleOnConfirm = (data: PickAndDropItemProps) => {
+  const handleOnConfirm = (data: PickAndDropItemProps): boolean => {
     try {
       setItem(data);
 
@@ -160,8 +161,11 @@ const PickDropScreen = () => {
       }
 
       handleAddAddressMutation.mutate(formDataObject);
+
+      return handleAddAddressMutation.isSuccess;
     } catch (err) {
       console.log(`Error in handling confirm: ${err}`);
+      return false;
     }
   };
 

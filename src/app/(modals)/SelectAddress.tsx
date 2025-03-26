@@ -1,14 +1,35 @@
-import { Pressable, View } from "react-native";
+import { BackHandler, Pressable, View } from "react-native";
+import { useEffect } from "react";
 import { scale, verticalScale } from "@/utils/styling";
 import { CaretLeft } from "phosphor-react-native";
 import { colors, radius } from "@/constants/theme";
-import { FC } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import UserSavedAddress from "../screens/user/UserSavedAddress";
 
-const SelectAddress: FC<{ onCloseModal: () => void }> = ({ onCloseModal }) => {
-  const { setAsUserAddress, showActionButton, addressFor } =
+const SelectAddress = () => {
+  const { setAsUserAddress, showActionButton, addressFor, mustSelectAddress } =
     useLocalSearchParams();
+
+  const handleBackPress = () => {
+    if (mustSelectAddress === "true") {
+      console.log("mustSelectAddress is true, exiting app...");
+      BackHandler.exitApp();
+      return true;
+    } else if (router.canGoBack()) {
+      router.back();
+      return true;
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleBackPress
+    );
+
+    return () => backHandler.remove();
+  }, [mustSelectAddress]);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.WHITE }}>
@@ -18,23 +39,29 @@ const SelectAddress: FC<{ onCloseModal: () => void }> = ({ onCloseModal }) => {
           marginTop: verticalScale(30),
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          style={{
-            padding: scale(5),
-            backgroundColor: colors.WHITE,
-            alignSelf: "flex-start",
-            borderRadius: radius._3,
-          }}
-        >
-          <CaretLeft size={scale(20)} color={colors.PRIMARY} weight="bold" />
-        </Pressable>
+        {mustSelectAddress !== "true" && (
+          <Pressable
+            onPress={handleBackPress}
+            style={{
+              padding: scale(5),
+              backgroundColor: colors.WHITE,
+              alignSelf: "flex-start",
+              borderRadius: radius._3,
+            }}
+          >
+            <CaretLeft size={scale(20)} color={colors.PRIMARY} weight="bold" />
+          </Pressable>
+        )}
       </View>
 
       <UserSavedAddress
         showActionButton={showActionButton === "true"}
         setAsUserAddress={setAsUserAddress === "true"}
-        addressFor={addressFor as string}
+        addressFor={
+          ["pick", "drop"].includes(addressFor as string)
+            ? (addressFor as "pick" | "drop")
+            : undefined
+        }
       />
     </View>
   );

@@ -25,6 +25,7 @@ import {
   getVehicleDetails,
 } from "@/service/pickandDropService";
 import VehicleLoader from "@/components/Loader/VehicleLoader";
+import { useShowAlert } from "@/hooks/useShowAlert";
 
 interface DataProps {
   vehicleType: string;
@@ -44,6 +45,7 @@ const PickAndDropDetail = () => {
   });
 
   const { item, cartId } = useLocalSearchParams();
+  const { showAlert } = useShowAlert();
 
   const addItemSheetRef = useRef<BottomSheet>(null);
   const editItemSheetRef = useRef<BottomSheet>(null);
@@ -98,6 +100,11 @@ const PickAndDropDetail = () => {
   });
 
   const handleProceed = () => {
+    if (items.length === 0) {
+      showAlert("At-least one item is required to proceed the order");
+      return;
+    }
+
     const formattedItems: PickAndDropItemProps[] =
       items?.map((item) => ({
         itemName: item.itemName,
@@ -240,6 +247,7 @@ const PickAndDropDetail = () => {
           onConfirm={(data: PickAndDropItemProps) => {
             setItems([...items, data]);
             addItemSheetRef.current?.close();
+            return true;
           }}
           isLoading={false}
         />
@@ -264,6 +272,8 @@ const PickAndDropDetail = () => {
 
             setSelectedItem(null);
             editItemSheetRef.current?.close();
+
+            return true;
           }}
           isLoading={false}
           itemData={selectedItem?.item?.itemName ? selectedItem.item : null}

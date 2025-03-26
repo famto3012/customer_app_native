@@ -205,7 +205,12 @@ const ProductItem: FC<ProductItemProps> = memo(
             {product.productName}
           </Typo>
 
-          <View style={styles.priceContainer}>
+          <View
+            style={[
+              styles.priceContainer,
+              { display: product.inventory ? "flex" : "none" },
+            ]}
+          >
             {product.discountPrice && (
               <Typo
                 size={14}
