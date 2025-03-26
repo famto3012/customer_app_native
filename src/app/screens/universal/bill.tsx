@@ -35,6 +35,7 @@ import { commonStyles } from "@/constants/commonStyles";
 import AppliedPromoCode from "@/components/common/AppliedPromoCode";
 import { addOrder } from "@/localDB/controller/orderController";
 import { useData } from "@/context/DataContext";
+import { clearCart } from "@/localDB/controller/cartController";
 
 const Bill = () => {
   const [selectedPaymentMode, setSelectedPaymentMode] =
@@ -94,6 +95,8 @@ const Bill = () => {
 
           router.replace({ pathname: "/(tabs)" });
 
+          clearCart();
+
           setProductCounts({});
 
           useAuthStore.setState({
@@ -112,14 +115,18 @@ const Bill = () => {
     mutationKey: ["verify-universal-payment"],
     mutationFn: ({ orderId, amount }: { orderId: string; amount: number }) =>
       verifyPayment(orderId, amount),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data) {
-        addOrder(
+        await addOrder(
           data?.orderId,
           data?.createdAt,
           "Universal",
           data?.merchantName
         );
+
+        router.replace({ pathname: "/(tabs)" });
+
+        clearCart();
 
         setProductCounts({});
 
@@ -130,8 +137,6 @@ const Bill = () => {
             cartId: "",
           },
         });
-
-        router.replace({ pathname: "/(tabs)" });
       }
     },
   });

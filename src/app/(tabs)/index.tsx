@@ -58,6 +58,7 @@ const Home = () => {
         params: {
           showActionButton: "false",
           setAsUserAddress: "true",
+          mustSelectAddress: "true",
         },
       });
     }

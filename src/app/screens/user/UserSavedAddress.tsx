@@ -12,7 +12,7 @@ import { useAuthStore } from "@/store/store";
 import { UserAddressProps } from "@/types";
 import { colors, radius } from "@/constants/theme";
 import { commonStyles } from "@/constants/commonStyles";
-import { scale, verticalScale } from "@/utils/styling";
+import { scale, SCREEN_HEIGHT, verticalScale } from "@/utils/styling";
 import Typo from "@/components/Typo";
 import { router } from "expo-router";
 import Button from "@/components/Button";
@@ -81,6 +81,7 @@ const UserSavedAddress: FC<NewAddressUIProps> = ({
             latitude: variables.latitude,
             longitude: variables.longitude,
           },
+          outsideGeofence: false,
         });
 
         queryClient.cancelQueries();
@@ -334,7 +335,14 @@ const UserSavedAddress: FC<NewAddressUIProps> = ({
           >
             <Button
               title="Add new Address"
-              onPress={() => router.push("/screens/common/add-address")}
+              onPress={() => {
+                if (!token) {
+                  router.push("/auth");
+                  return;
+                }
+
+                router.push("/screens/common/add-address");
+              }}
               icon={
                 <MapPin size={scale(16)} color={colors.WHITE} weight="fill" />
               }
@@ -351,7 +359,7 @@ const UserSavedAddress: FC<NewAddressUIProps> = ({
             {!home?.coordinates && !work?.coordinates && other.length === 0 && (
               <View
                 style={{
-                  flex: 1,
+                  height: SCREEN_HEIGHT * 0.75,
                   marginTop: verticalScale(20),
                   alignItems: "center",
                   justifyContent: "center",
