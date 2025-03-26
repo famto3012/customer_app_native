@@ -88,7 +88,7 @@ const Bill = () => {
         if (data?.success && data?.orderId) {
           await addOrder(
             data?.orderId,
-            data?.createdAt,
+            new Date().toISOString(),
             "Universal",
             data?.merchantName
           );

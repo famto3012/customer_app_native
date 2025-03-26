@@ -3,7 +3,7 @@ import { colors, radius, spacingY } from "@/constants/theme";
 import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
 import Typo from "../Typo";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useState, useRef, useCallback } from "react";
 import { router } from "expo-router";
 import {
   getAllOrder,
@@ -20,60 +20,130 @@ const FloatingPreparingOrder: FC<{
     { orderId: string; createdAt: string }[]
   >([]);
   const [timeLeftMap, setTimeLeftMap] = useState<{ [key: string]: number }>({});
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const orderImage = showCountDown
     ? require("@/assets/images/confirming-order.webp")
     : require("@/assets/images/preparing-order.gif");
 
-  // Fetch orders from local DB
+  // Precise time calculation method
+  const calculateRemainingTime = useCallback((createdAt: string) => {
+    const orderCreatedTime = new Date(createdAt).getTime();
+    const currentTime = Date.now();
+    const elapsedTime = (currentTime - orderCreatedTime) / 1000; // Convert to seconds
+
+    // Ensure we always start with 60 seconds and subtract elapsed time
+    const remainingTime = Math.max(60 - Math.floor(elapsedTime), 0);
+
+    return remainingTime;
+  }, []);
+
+  // Fetch and initialize orders
   useEffect(() => {
     const fetchOrders = async () => {
-      const orders = await getAllOrder();
-      setTempOrders(orders);
+      try {
+        const orders = await getAllOrder();
+
+        if (orders.length > 0) {
+          setTempOrders(orders);
+
+          // Initialize timeLeftMap with calculated remaining time
+          const initialTimeLeftMap: { [key: string]: number } = {};
+          orders.forEach((order) => {
+            const remainingTime = calculateRemainingTime(order.createdAt);
+            initialTimeLeftMap[order.orderId] = remainingTime;
+          });
+
+          setTimeLeftMap(initialTimeLeftMap);
+          setShowCountDown(true);
+        } else {
+          setShowCountDown(false);
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
     };
 
     fetchOrders();
-  }, []);
+  }, [calculateRemainingTime]);
 
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const orders = await getAllOrder();
+
+      // Update tempOrders state with fresh data
+      setTempOrders(orders);
+
+      if (orders.length > 0) {
+        // Reinitialize timer for all orders
+        const initialTimeLeftMap: any = {};
+        orders.forEach((order) => {
+          // For existing orders, preserve current time if available
+          initialTimeLeftMap[order.orderId] = timeLeftMap[order.orderId] || 60;
+        });
+
+        setTimeLeftMap(initialTimeLeftMap);
+        setShowCountDown(true);
+      } else {
+        setShowCountDown(false);
+      }
+    };
+
+    // Fetch orders whenever countUpdate changes
+    fetchOrders();
+  }, [countUpdate]);
+
+  // Countdown interval effect
   useEffect(() => {
     if (tempOrders.length <= 0) {
       setShowCountDown(false);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
       return;
     }
 
     setShowCountDown(true);
 
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setTimeLeftMap((prev) => {
         const updatedTimeLeftMap = { ...prev };
+        const ordersToRemove: string[] = [];
 
         tempOrders.forEach((order) => {
-          const createdAt = new Date(order.createdAt).getTime();
-          const now = Date.now();
+          const currentTimeLeft = prev[order.orderId] || 0;
+          const newTimeLeft = Math.max(currentTimeLeft - 1, 0);
 
           const timeLeft = Math.max(
             60 - Math.floor((now - createdAt) / 1000),
             0
           );
 
-          if (timeLeft === 0) {
-            removeOrderById(order.orderId);
+        // Remove completed orders
+        if (ordersToRemove.length > 0) {
+          // Remove from DB
+          ordersToRemove.forEach((orderId) => {
+            removeOrderById(orderId);
+          });
 
-            setTempOrders((prevOrders) =>
-              prevOrders.filter((o) => o.orderId !== order.orderId)
-            );
-            refetchOngoingOrder();
-          } else {
-            updatedTimeLeftMap[order.orderId] = timeLeft;
-          }
-        });
+          // Update state
+          setTempOrders((prev) =>
+            prev.filter((o) => !ordersToRemove.includes(o.orderId))
+          );
+          refetchOngoingOrder();
+        }
 
         return updatedTimeLeftMap;
       });
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, [tempOrders]);
+    // Cleanup interval on unmount or when tempOrders changes
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [tempOrders, refetchOngoingOrder]);
 
   const lastOrder = tempOrders.length
     ? tempOrders[tempOrders.length - 1]
@@ -94,6 +164,7 @@ const FloatingPreparingOrder: FC<{
         },
       ]}
     >
+      {/* Rest of the component remains the same */}
       <Image
         source={orderImage}
         style={{ width: scale(50), height: scale(50) }}
@@ -139,6 +210,7 @@ const FloatingPreparingOrder: FC<{
 
 export default FloatingPreparingOrder;
 
+// Styles remain the same as in previous example
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.WHITE,

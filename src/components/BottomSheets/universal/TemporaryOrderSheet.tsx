@@ -17,6 +17,7 @@ import { scale, verticalScale } from "@/utils/styling";
 import { useMutation } from "@tanstack/react-query";
 import { cancelOrder } from "@/service/universal";
 import dayjs from "dayjs";
+import AlertBox from "@/components/global/AlertBox";
 
 interface TemporaryOrderProps {
   orderId: string;
@@ -34,6 +35,11 @@ const TemporaryOrderSheet = ({
 }) => {
   const [tempOrders, setTempOrders] = useState<TemporaryOrderProps[]>([]);
   const [selected, setSelected] = useState<string>("");
+  const [isAlertVisible, setIsAlertVisible] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState<{
+    orderId: string;
+    deliveryMode: string;
+  } | null>(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -68,8 +74,31 @@ const TemporaryOrderSheet = ({
           onClose();
         }
       }
+      setSelected("");
+      setOrderToCancel(null);
+    },
+    onError: () => {
+      // Reset selection states in case of error
+      setSelected("");
+      setOrderToCancel(null);
     },
   });
+
+  const initiateCancelOrder = (item: TemporaryOrderProps) => {
+    setOrderToCancel({
+      orderId: item.orderId,
+      deliveryMode: item.deliveryMode,
+    });
+    setIsAlertVisible(true);
+  };
+
+  const confirmCancelOrder = () => {
+    if (orderToCancel) {
+      setSelected(orderToCancel.orderId);
+      handleCancelOrderMutation.mutate(orderToCancel);
+      setIsAlertVisible(false);
+    }
+  };
 
   const renderTemporary = ({ item }: { item: TemporaryOrderProps }) => {
     return (
@@ -89,13 +118,7 @@ const TemporaryOrderSheet = ({
         </View>
 
         <Pressable
-          onPress={() => {
-            setSelected(item.orderId);
-            handleCancelOrderMutation.mutate({
-              orderId: item.orderId,
-              deliveryMode: item.deliveryMode,
-            });
-          }}
+          onPress={() => initiateCancelOrder(item)}
           style={styles.cancelBtn}
         >
           {item.orderId === selected && handleCancelOrderMutation.isPending ? (
@@ -111,22 +134,34 @@ const TemporaryOrderSheet = ({
   };
 
   return (
-    <BottomSheetScrollView style={styles.container}>
-      <Typo size={18} color={colors.PRIMARY} fontFamily="SemiBold">
-        Orders
-      </Typo>
+    <>
+      <BottomSheetScrollView style={styles.container}>
+        <Typo size={18} color={colors.PRIMARY} fontFamily="SemiBold">
+          Orders
+        </Typo>
 
-      <FlatList
-        data={tempOrders}
-        renderItem={renderTemporary}
-        keyExtractor={(item) => item.orderId}
-        scrollEnabled={false}
-        contentContainerStyle={{ marginTop: verticalScale(20) }}
-        ItemSeparatorComponent={() => (
-          <View style={{ marginVertical: verticalScale(10) }} />
-        )}
+        <FlatList
+          data={tempOrders}
+          renderItem={renderTemporary}
+          keyExtractor={(item) => item.orderId}
+          scrollEnabled={false}
+          contentContainerStyle={{ marginTop: verticalScale(20) }}
+          ItemSeparatorComponent={() => (
+            <View style={{ marginVertical: verticalScale(10) }} />
+          )}
+        />
+      </BottomSheetScrollView>
+
+      <AlertBox
+        isVisible={isAlertVisible}
+        onClose={() => setIsAlertVisible(false)}
+        onConfirm={confirmCancelOrder}
+        title="Cancel Order"
+        body="Are you sure you want to cancel this order?"
+        confirmText="Yes, Cancel"
+        cancelText="No, Keep"
       />
-    </BottomSheetScrollView>
+    </>
   );
 };
 
