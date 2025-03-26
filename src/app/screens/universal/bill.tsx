@@ -73,7 +73,7 @@ const Bill = () => {
   const placeOrderMutation = useMutation({
     mutationKey: ["place-universal-order"],
     mutationFn: () => placeUniversalOrder(selectedPaymentMode),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (selectedPaymentMode === "Online-payment") {
         const { orderId, amount } = data;
 
@@ -85,12 +85,14 @@ const Bill = () => {
         }
       } else {
         if (data?.success && data?.orderId) {
-          addOrder(
+          await addOrder(
             data?.orderId,
-            data?.createdAt,
+            new Date().toISOString(),
             "Universal",
             data?.merchantName
           );
+
+          router.replace({ pathname: "/(tabs)" });
 
           setProductCounts({});
 
@@ -101,8 +103,6 @@ const Bill = () => {
               cartId: "",
             },
           });
-
-          router.replace({ pathname: "/(tabs)" });
         }
       }
     },
