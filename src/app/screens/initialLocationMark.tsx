@@ -60,6 +60,7 @@ const InitialLocationMark = () => {
           </Typo>
         </Pressable>
         <Pressable
+          onPress={() => router.push("/screens/common/add-address")}
           style={[
             styles.button,
             { borderWidth: 1, borderColor: colors.PRIMARY },
