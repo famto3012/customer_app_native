@@ -1,5 +1,4 @@
 import {
-  ActivityIndicator,
   Alert,
   Platform,
   Pressable,
@@ -8,19 +7,12 @@ import {
   ToastAndroid,
   View,
 } from "react-native";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import MapplsGL from "mappls-map-react-native";
 import MapplsUIWidgets from "mappls-search-widgets-react-native";
 import * as Location from "expo-location";
 import { LocationAddressProps } from "@/types";
-import { useAuthStore } from "@/store/store";
 import { colors } from "@/constants/theme";
 import { scale } from "@/utils/styling";
 import BottomSheet, {
@@ -44,8 +36,11 @@ import { useMutation } from "@tanstack/react-query";
 import { verifyCustomerAddressLocation } from "@/service/userService";
 import { useSafeLocation } from "@/utils/helpers";
 import MapDetailLoader from "@/components/Loader/MapDetailLoader";
+import { router, useLocalSearchParams } from "expo-router";
+import { useAuthStore } from "@/store/store";
 
 const { MapView, Camera, RestApi, UserLocation } = MapplsGL;
+const defaultCoordinates = [76.938072, 8.528763];
 
 const AddAddress = () => {
   const { latitude, longitude } = useSafeLocation();
@@ -59,6 +54,7 @@ const AddAddress = () => {
   const [mapReady, setMapReady] = useState(false);
   const [locationInitialized, setLocationInitialized] = useState(false);
 
+  const { token } = useAuthStore.getState();
   const cameraRef = useRef<any>(null);
   const mapRef = useRef<any>(null);
   const addAddressSheetRef = useRef<BottomSheet>(null);
@@ -73,6 +69,7 @@ const AddAddress = () => {
       await MapplsGL.setAtlasClientId(MAPPLS_CLIENT_ID);
       await MapplsGL.setAtlasClientSecret(MAPPLS_CLIENT_SECRET_KEY);
     };
+
     initMapSDK();
   }, []);
 
@@ -190,6 +187,58 @@ const AddAddress = () => {
     }
   };
 
+  // const requestLocationPermission = async () => {
+  //   try {
+  //     let { status } = await Location.getForegroundPermissionsAsync();
+
+  //     if (status !== "granted") {
+  //       const { status: newStatus } =
+  //         await Location.requestForegroundPermissionsAsync();
+  //       if (newStatus !== "granted") {
+  //         setMarkerCoordinates(defaultCoordinates);
+  //         setLocationInitialized(true);
+  //         return true;
+  //       }
+  //       status = newStatus;
+  //     }
+
+  //     setLoading(true);
+  //     const location = await Location.getCurrentPositionAsync({
+  //       accuracy: Location.Accuracy.High,
+  //       distanceInterval: 10,
+  //     }).catch(() => null);
+
+  //     if (!location) {
+  //       console.log("Location fetch failed");
+  //       setLoading(false);
+  //       return false;
+  //     }
+
+  //     const { latitude, longitude } = location.coords;
+  //     const newCoords = [longitude, latitude];
+  //     setMarkerCoordinates(newCoords);
+  //     setLocationInitialized(true);
+
+  //     // When getting current location, update camera position
+  //     if (cameraRef.current) {
+  //       cameraRef.current.setCamera({
+  //         centerCoordinate: newCoords,
+  //         zoomLevel: 15,
+  //         animationDuration: 1000,
+  //       });
+  //     }
+
+  //     reverseGeocode(newCoords);
+  //     return true;
+  //   } catch (error) {
+  //     console.error("Location error:", error);
+  //     setLoading(false);
+  //     return false;
+  //   }
+  // };
+
+  // Request location permission on mount
+
   const requestLocationPermission = async () => {
     try {
       let { status } = await Location.getForegroundPermissionsAsync();
@@ -198,6 +247,20 @@ const AddAddress = () => {
         const { status: newStatus } =
           await Location.requestForegroundPermissionsAsync();
         if (newStatus !== "granted") {
+          console.log("Permission denied. Using fallback location.");
+
+          setMarkerCoordinates(defaultCoordinates);
+          setLocationInitialized(true);
+
+          if (cameraRef.current) {
+            cameraRef.current.setCamera({
+              centerCoordinate: defaultCoordinates,
+              zoomLevel: 15,
+              animationDuration: 1000,
+            });
+          }
+
+          reverseGeocode(defaultCoordinates);
           return false;
         }
         status = newStatus;
@@ -210,8 +273,21 @@ const AddAddress = () => {
       }).catch(() => null);
 
       if (!location) {
-        console.log("Location fetch failed");
-        setLoading(false);
+        console.log("Location fetch failed. Using fallback location.");
+
+        // Set fallback location if location fetching fails
+        setMarkerCoordinates(defaultCoordinates);
+        setLocationInitialized(true);
+
+        if (cameraRef.current) {
+          cameraRef.current.setCamera({
+            centerCoordinate: defaultCoordinates,
+            zoomLevel: 15,
+            animationDuration: 1000,
+          });
+        }
+
+        reverseGeocode(defaultCoordinates);
         return false;
       }
 
@@ -220,7 +296,6 @@ const AddAddress = () => {
       setMarkerCoordinates(newCoords);
       setLocationInitialized(true);
 
-      // When getting current location, update camera position
       if (cameraRef.current) {
         cameraRef.current.setCamera({
           centerCoordinate: newCoords,
@@ -233,12 +308,25 @@ const AddAddress = () => {
       return true;
     } catch (error) {
       console.error("Location error:", error);
+
+      // Set fallback location in case of error
+      setMarkerCoordinates(defaultCoordinates);
+      setLocationInitialized(true);
+
+      if (cameraRef.current) {
+        cameraRef.current.setCamera({
+          centerCoordinate: defaultCoordinates,
+          zoomLevel: 15,
+          animationDuration: 1000,
+        });
+      }
+
+      reverseGeocode(defaultCoordinates);
       setLoading(false);
       return false;
     }
   };
 
-  // Request location permission on mount
   useEffect(() => {
     requestLocationPermission();
   }, []);
@@ -280,9 +368,7 @@ const AddAddress = () => {
     []
   );
 
-  const handleMapReady = () => {
-    setMapReady(true);
-  };
+  const handleMapReady = () => setMapReady(true);
 
   return (
     <>
@@ -438,12 +524,31 @@ const AddAddress = () => {
                         : ""}
                     </Typo>
                   )}
-                  <Button
-                    title="Confirm Location"
-                    style={{ marginTop: scale(10) }}
-                    isLoading={verifyLocationMutation.isPending}
-                    onPress={() => verifyLocationMutation.mutate()}
-                  />
+
+                  {token ? (
+                    <Button
+                      title="Confirm Location"
+                      style={{ marginTop: scale(10) }}
+                      isLoading={verifyLocationMutation.isPending}
+                      onPress={() => verifyLocationMutation.mutate()}
+                    />
+                  ) : (
+                    <Button
+                      title="Confirm Location"
+                      style={{ marginTop: scale(10) }}
+                      isLoading={verifyLocationMutation.isPending}
+                      onPress={() => {
+                        useAuthStore.setState({
+                          location: {
+                            latitude: markerCoordinates[1],
+                            longitude: markerCoordinates[0],
+                          },
+                        });
+
+                        router.replace("/(tabs)");
+                      }}
+                    />
+                  )}
                 </>
               ) : (
                 <MapDetailLoader />

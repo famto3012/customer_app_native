@@ -68,5 +68,4 @@ export const clearOrders = async () => {
   await database.write(async () => {
     await database.get<Order>("order").query().destroyAllPermanently();
   });
-  // console.log("Order cleared");
 };
