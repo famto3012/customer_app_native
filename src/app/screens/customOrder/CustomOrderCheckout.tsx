@@ -38,6 +38,7 @@ import {
 import Instructions from "@/components/common/Instructions";
 import { commonStyles } from "@/constants/commonStyles";
 import UserSelectedAddress from "@/components/common/UserSelectedAddress";
+import { useAuthStore } from "@/store/store";
 
 const CustomOrderCheckout = () => {
   const [cartItem, setCartItem] = useState<CustomOrderItemsProps[]>([]);
@@ -53,6 +54,7 @@ const CustomOrderCheckout = () => {
   const [voiceInstruction, setVoiceInstruction] = useState<string | null>(null);
 
   const { storeName, location, cartId } = useLocalSearchParams();
+  const userAddress = useAuthStore((state) => state.userAddress);
 
   const addItemSheetRef = useRef<BottomSheet>(null);
   const editItemSheetRef = useRef<BottomSheet>(null);
@@ -61,6 +63,14 @@ const CustomOrderCheckout = () => {
   const addItemSnapPoints = useMemo(() => ["55%"], []);
   const editItemSnapPoints = useMemo(() => ["55%"], []);
   const itemImageSnapPoints = useMemo(() => ["40%"], []);
+
+  useEffect(() => {
+    setAddressData({
+      ...addressData,
+      deliveryAddressType: userAddress.type,
+      deliveryAddressOtherAddressId: userAddress.otherId,
+    });
+  }, [userAddress]);
 
   const handleAddingItem = (data: CustomOrderItemsProps[]) => {
     setCartItem(data);
@@ -82,7 +92,7 @@ const CustomOrderCheckout = () => {
     itemImageSheetRef.current?.snapToIndex(0);
   };
 
-  const { data, isLoading, isError } = useQuery<CustomOrderItemsProps[]>({
+  const { data, isLoading } = useQuery<CustomOrderItemsProps[]>({
     queryKey: ["custom-order-items"],
     queryFn: () => fetchCustomOrderItems(cartId.toString()),
     enabled: !!cartId,

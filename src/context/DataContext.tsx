@@ -2,10 +2,17 @@ import { ProductProps, SelectedAddress } from "@/types";
 import { createContext, FC, ReactNode, useContext, useState } from "react";
 
 // Define the type for product counts with optional variantTypeId
-interface ProductCountType {
+type ProductCountType = {
   count: number;
   variantTypeId?: string; // ✅ Make variantTypeId optional
-}
+};
+
+type AlertDataType = {
+  title?: string;
+  body: string;
+  cancelText: string;
+  confirmText: string;
+};
 
 // Define the type for the context value
 interface DataContextType {
@@ -23,6 +30,10 @@ interface DataContextType {
   setPickAddress: React.Dispatch<React.SetStateAction<SelectedAddress>>;
   dropAddress: SelectedAddress;
   setDropAddress: React.Dispatch<React.SetStateAction<SelectedAddress>>;
+  showAlert: boolean;
+  setShowAlert: React.Dispatch<React.SetStateAction<boolean>>;
+  alertData: AlertDataType;
+  setAlertData: React.Dispatch<React.SetStateAction<AlertDataType>>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -44,6 +55,13 @@ export const DataProvider: FC<{ children: ReactNode }> = ({ children }) => {
     otherId: "",
     address: "",
   });
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [alertData, setAlertData] = useState<AlertDataType>({
+    title: undefined,
+    body: "",
+    cancelText: "Cancel",
+    confirmText: "Confirm",
+  });
 
   return (
     <DataContext.Provider
@@ -60,6 +78,10 @@ export const DataProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setPickAddress,
         dropAddress,
         setDropAddress,
+        showAlert,
+        setShowAlert,
+        alertData,
+        setAlertData,
       }}
     >
       {children}

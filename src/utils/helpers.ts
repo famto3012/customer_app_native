@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/store/store";
 import * as Location from "expo-location";
-import { Audio, AVPlaybackStatusSuccess } from "expo-av";
+import { Audio } from "expo-av";
 import { Alert, Linking, PermissionsAndroid, Platform } from "react-native";
 import messaging from "@react-native-firebase/messaging";
 import SpInAppUpdates, {
@@ -9,8 +9,6 @@ import SpInAppUpdates, {
 } from "sp-react-native-in-app-updates";
 import DeviceInfo from "react-native-device-info";
 import { getCustomerAppUpdateType } from "@/service/userService";
-import { useNavigation } from "expo-router";
-import { useEffect } from "react";
 
 const APP_STORE_ID = "YOUR_APP_ID";
 const APP_STORE_URL = `itms-apps://apps.apple.com/app/id${APP_STORE_ID}`;
@@ -32,11 +30,10 @@ export const requestLocationPermission = async () => {
     }
 
     let location = null;
-    const maxRetries = 10; // Max attempts
+    const maxRetries = 2; // Max attempts
     let attempt = 0;
 
     while (!location && attempt < maxRetries) {
-      console.log(`Attempt ${attempt + 1} to get location...`);
       location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
         distanceInterval: 10,
@@ -52,8 +49,6 @@ export const requestLocationPermission = async () => {
       console.log("Failed to get location after multiple attempts");
       return false;
     }
-
-    console.log("location:", location);
 
     const { latitude, longitude } = location.coords;
     setLocation({ latitude, longitude });
@@ -191,54 +186,6 @@ export const toggleNotificationPermission = async (enable: boolean) => {
     }
   } catch (error) {
     console.log("Error toggling notification permission:", error);
-  }
-};
-
-export const playOrStopScheduleSound = async (
-  sound: Audio.Sound | null,
-  isPlaying: boolean,
-  setSound: (data: Audio.Sound | null) => void,
-  setIsPlaying: (data: boolean) => void,
-  stopSound: () => void
-) => {
-  try {
-    if (sound && isPlaying) {
-      await stopSound();
-    } else {
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        {
-          uri: "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FScheduled%20Order.mp3?alt=media&token=da59e122-08f8-4964-8b6f-bfebc8c32fbe",
-        },
-        { shouldPlay: true }
-      );
-
-      setSound(newSound);
-      setIsPlaying(true);
-
-      newSound.setOnPlaybackStatusUpdate((status) => {
-        if (
-          status.isLoaded &&
-          (status as AVPlaybackStatusSuccess).didJustFinish
-        ) {
-          stopSound();
-        }
-      });
-    }
-  } catch (error) {
-    console.error("Error playing/stopping sound:", error);
-  }
-};
-
-export const stopScheduleSound = async (
-  sound: Audio.Sound | null,
-  setSound: (data: Audio.Sound | null) => void,
-  setIsPlaying: (data: boolean) => void
-) => {
-  if (sound) {
-    await sound.stopAsync();
-    await sound.unloadAsync();
-    setSound(null);
-    setIsPlaying(false);
   }
 };
 
