@@ -20,7 +20,7 @@ import { commonStyles } from "@/constants/commonStyles";
 interface PickAndDropItemSheetProps {
   heading: string;
   buttonLabel: string;
-  onConfirm: (data: PickAndDropItemProps) => void;
+  onConfirm: (data: PickAndDropItemProps) => boolean;
   isLoading: boolean;
   itemData?: PickAndDropItemProps | null;
 }
@@ -152,7 +152,19 @@ const PickAndDropItemSheet: FC<PickAndDropItemSheetProps> = ({
         <View style={styles.buttonContainer}>
           <Button
             title={buttonLabel}
-            onPress={() => onConfirm(item)}
+            onPress={() => {
+              const added = onConfirm(item);
+              if (added) {
+                setItem({
+                  itemName: "",
+                  length: "",
+                  width: "",
+                  height: "",
+                  unit: "",
+                  weight: "",
+                });
+              }
+            }}
             isLoading={isLoading}
           />
         </View>
