@@ -33,7 +33,7 @@ export const profileOptions: {
   {
     label: "Saved Address",
     route: {
-      pathName: "/screens/user/new-address-ui",
+      pathName: "/screens/user/UserSavedAddress",
       params: { showSelection: "false", showActionButton: "true" },
     },
     image: require("@/assets/icons/book-square.webp"),

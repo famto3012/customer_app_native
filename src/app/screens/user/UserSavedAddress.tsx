@@ -3,7 +3,11 @@ import { FC, useEffect, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchUserAddress, updateUserAddress } from "@/service/userService";
+import {
+  fetchUserAddress,
+  setGeofenceForUser,
+  updateUserAddress,
+} from "@/service/userService";
 import { useAuthStore } from "@/store/store";
 import { UserAddressProps } from "@/types";
 import { colors, radius } from "@/constants/theme";
@@ -19,7 +23,7 @@ import { useData } from "@/context/DataContext";
 interface NewAddressUIProps {
   showActionButton?: boolean;
   setAsUserAddress?: boolean;
-  addressFor?: string;
+  addressFor?: "pick" | "drop";
 }
 
 const UserSavedAddress: FC<NewAddressUIProps> = ({
@@ -30,14 +34,9 @@ const UserSavedAddress: FC<NewAddressUIProps> = ({
   const [home, setHome] = useState<UserAddressProps | null>(null);
   const [work, setWork] = useState<UserAddressProps | null>(null);
   const [other, setOther] = useState<UserAddressProps[]>([]);
-  const [selectedAddress, setSelectedAddress] = useState<{
-    type: string;
-    otherId: string;
-    address: string;
-  }>({ type: "", otherId: "", address: "" });
 
   const { setPickAddress, setDropAddress } = useData();
-  const { token, setLocation, setUserAddress } = useAuthStore.getState();
+  const { token } = useAuthStore.getState();
   const queryClient = useQueryClient();
   const userSelectedAddress = useAuthStore((state) => state.userAddress);
 
@@ -55,6 +54,44 @@ const UserSavedAddress: FC<NewAddressUIProps> = ({
     }
   }, [data]);
 
+  const handleSetUserGeofence = useMutation({
+    mutationKey: ["set-user-geofence"],
+    mutationFn: ({
+      latitude,
+      longitude,
+      type,
+      otherId,
+      address,
+    }: {
+      latitude: number;
+      longitude: number;
+      type: string;
+      otherId: string;
+      address: string;
+    }) => setGeofenceForUser(latitude, longitude),
+    onSuccess: (data, variables) => {
+      if (data.success) {
+        useAuthStore.setState({
+          userAddress: {
+            type: variables.type,
+            otherId: variables.otherId,
+            address: variables.address,
+          },
+          location: {
+            latitude: variables.latitude,
+            longitude: variables.longitude,
+          },
+        });
+
+        queryClient.cancelQueries();
+
+        if (router.canGoBack()) {
+          router.back();
+        }
+      }
+    },
+  });
+
   const handleSelectAddress = (
     type: string,
     otherId: string,
@@ -64,26 +101,31 @@ const UserSavedAddress: FC<NewAddressUIProps> = ({
     if (!coordinates) return;
 
     if (type === "other") {
-      setSelectedAddress({ type, otherId, address });
       if (setAsUserAddress && !showActionButton) {
-        setLocation({ latitude: coordinates[0], longitude: coordinates[1] });
-        setUserAddress({ type, otherId, address });
+        handleSetUserGeofence.mutate({
+          latitude: coordinates[0],
+          longitude: coordinates[1],
+          type,
+          otherId,
+          address,
+        });
       }
     } else {
-      setSelectedAddress({ type, otherId: "", address });
       if (setAsUserAddress && !showActionButton) {
-        setLocation({ latitude: coordinates[0], longitude: coordinates[1] });
-        setUserAddress({ type, otherId: "", address });
+        handleSetUserGeofence.mutate({
+          latitude: coordinates[0],
+          longitude: coordinates[1],
+          type,
+          otherId,
+          address,
+        });
       }
     }
 
-    if (addressFor === "pick") {
-      setPickAddress({ type, otherId, address });
-    } else if (addressFor === "drop") {
-      setDropAddress({ type, otherId, address });
-    }
+    if (addressFor === "pick") setPickAddress({ type, otherId, address });
+    else if (addressFor === "drop") setDropAddress({ type, otherId, address });
 
-    !showActionButton && router.back();
+    !showActionButton && !handleSetUserGeofence.isPending && router.back();
   };
 
   const handleDeleteAddressMutation = useMutation({

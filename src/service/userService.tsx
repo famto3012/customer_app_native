@@ -571,3 +571,25 @@ export const getCustomerAppUpdateType = async (): Promise<IAUUpdateKind> => {
     return IAUUpdateKind.IMMEDIATE;
   }
 };
+
+export const setGeofenceForUser = async (
+  latitude: number,
+  longitude: number
+): Promise<{
+  success: boolean;
+  message: string;
+}> => {
+  try {
+    const res = await appAxios.post(`/customers/set-geofence`, {
+      latitude,
+      longitude,
+    });
+
+    return res.status === 200
+      ? res.data
+      : { success: false, message: "Failed" };
+  } catch (err) {
+    console.log(`Error in setting geofence`);
+    return { success: false, message: "Failed" };
+  }
+};

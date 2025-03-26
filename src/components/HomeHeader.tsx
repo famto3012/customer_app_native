@@ -1,5 +1,5 @@
 import { View, Pressable, Image } from "react-native";
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 import { CaretDown, MapPin } from "phosphor-react-native";
 import { scale, verticalScale } from "@/utils/styling";
 import Typo from "./Typo";

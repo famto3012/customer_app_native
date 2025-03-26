@@ -24,6 +24,7 @@ import {
   addPickAndDropItems,
   getVehicleDetails,
 } from "@/service/pickandDropService";
+import VehicleLoader from "@/components/Loader/VehicleLoader";
 
 interface DataProps {
   vehicleType: string;
@@ -67,7 +68,7 @@ const PickAndDropDetail = () => {
     }
   }, [item]);
 
-  const { data: vehicleData } = useQuery({
+  const { data: vehicleData, isLoading: vehicleLoading } = useQuery({
     queryKey: ["vehicle-detail"],
     queryFn: () => getVehicleDetails(cartId.toString()),
   });
@@ -191,17 +192,21 @@ const PickAndDropDetail = () => {
                     </Typo>
                   </View>
 
-                  <VehicleCard
-                    data={vehicleData?.length > 0 ? vehicleData : []}
-                    onVehicleSelect={(
-                      vehicleType: string,
-                      deliveryCharges: number
-                    ) => setData({ ...data, vehicleType, deliveryCharges })}
-                    onViewVehicle={(data: string) => {
-                      setViewVehicle(data);
-                      vehicleSheetRef.current?.expand();
-                    }}
-                  />
+                  {vehicleLoading ? (
+                    <VehicleLoader />
+                  ) : (
+                    <VehicleCard
+                      data={vehicleData?.length > 0 ? vehicleData : []}
+                      onVehicleSelect={(
+                        vehicleType: string,
+                        deliveryCharges: number
+                      ) => setData({ ...data, vehicleType, deliveryCharges })}
+                      onViewVehicle={(data: string) => {
+                        setViewVehicle(data);
+                        vehicleSheetRef.current?.expand();
+                      }}
+                    />
+                  )}
                 </>
               }
             />
