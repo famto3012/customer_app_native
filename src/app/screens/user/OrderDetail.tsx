@@ -115,20 +115,23 @@ const OrderDetail = () => {
           {/* Table Row */}
           <View style={styles.tableRow}>
             <Typo size={13} color={colors.NEUTRAL900} style={styles.tableCell}>
-              {item?.itemName}
+              {item?.itemName || "-"}
             </Typo>
             <Typo size={13} color={colors.NEUTRAL900} style={styles.tableCell}>
               {data?.deliveryMode !== "Custom Order"
-                ? `${item?.length} x ${item?.width} x ${item?.height} ${item?.unit}` ||
-                  "N/A"
-                : `${item?.quantity} ${item?.unit}`}
+                ? item?.length && item?.width && item?.height && item?.unit
+                  ? `${item.length} x ${item.width} x ${item.height} ${item.unit}`
+                  : "-"
+                : item?.quantity && item?.unit
+                ? `${item.quantity} ${item.unit}`
+                : "-"}
             </Typo>
             <Typo size={13} color={colors.NEUTRAL900} style={styles.tableCell}>
               {data?.deliveryMode !== "Custom Order"
                 ? item?.weight
                   ? `${item.weight} kg`
-                  : "N/A"
-                : `${item?.numOfUnits}`}
+                  : "-"
+                : item?.numOfUnits ?? "-"}
             </Typo>
           </View>
         </View>

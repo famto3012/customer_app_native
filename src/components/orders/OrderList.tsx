@@ -150,8 +150,6 @@ const OrderList = () => {
 
     useEffect(() => {
       if (item.orderStatus === "On-going") {
-        console.log("orderTime", item);
-
         const interval = setInterval(() => {
           const now = new Date();
 

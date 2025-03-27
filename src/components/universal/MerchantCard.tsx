@@ -1,4 +1,12 @@
-import { Image, Pressable, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  Image,
+  Platform,
+  Pressable,
+  StyleSheet,
+  ToastAndroid,
+  View,
+} from "react-native";
 import { memo, useEffect, useState } from "react";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius, spacingX } from "@/constants/theme";
@@ -50,6 +58,20 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
       onPress={() => {
         if (!item.status) return null;
 
+        if (item.redirectable === false) {
+          if (Platform.OS === "android") {
+            ToastAndroid.showWithGravity(
+              "Merchant currently unavailable",
+              ToastAndroid.SHORT,
+              ToastAndroid.CENTER
+            );
+            return;
+          } else {
+            Alert.alert("Error", "Merchant currently unavailable");
+            return;
+          }
+        }
+
         setSelectedMerchant(item.id, item.merchantName);
 
         router.push({
@@ -57,6 +79,7 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
           params: { merchantId: item.id },
         });
       }}
+      // disabled={!item?.redirectable}
     >
       <View style={{ position: "relative" }}>
         {!item.status ? (

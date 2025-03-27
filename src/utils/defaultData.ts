@@ -1,7 +1,7 @@
 export const merchantFilters = [
   { label: "All", value: "all" },
   { label: "Veg", value: "Veg" },
-  { label: "Rating 4.0+", value: "Rating" },
+  // { label: "Rating 4.0+", value: "Rating" },
   { label: "Nearest", value: "Nearby" },
 ];
 

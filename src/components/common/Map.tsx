@@ -603,7 +603,7 @@ const Map = ({ pickupLocation, deliveryLocation, orderId }: MapProps) => {
                     style={{
                       iconImage: ["get", "icon"],
                       iconSize: 0.15,
-                      iconAllowOverlap: false,
+                      iconAllowOverlap: true,
                       iconIgnorePlacement: false,
                     }}
                   />
@@ -615,7 +615,7 @@ const Map = ({ pickupLocation, deliveryLocation, orderId }: MapProps) => {
                     style={{
                       iconImage: ["get", "icon"],
                       iconSize: 0.15,
-                      iconAllowOverlap: false,
+                      iconAllowOverlap: true,
                       iconIgnorePlacement: false,
                     }}
                   />

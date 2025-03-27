@@ -77,7 +77,7 @@ const Transaction = () => {
     return (
       <ScreenWrapper>
         <Header title="Transaction History" />
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color={colors.PRIMARY} />
       </ScreenWrapper>
     );
   }
@@ -115,7 +115,7 @@ const Transaction = () => {
         onEndReachedThreshold={0.5}
         ListFooterComponent={
           isFetchingNextPage ? (
-            <ActivityIndicator size="small" color="#0000ff" />
+            <ActivityIndicator size="small" color={colors.PRIMARY} />
           ) : null
         }
         ListEmptyComponent={
