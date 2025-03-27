@@ -22,13 +22,16 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { getReferralCode } from "@/service/userService";
 import * as Clipboard from "expo-clipboard";
+import { playOrStopSound } from "@/utils/helpers";
+import { useAudioCleanup } from "@/hooks/useAudio";
 
-interface ReferralProps {
+type ReferralProps = {
   appLink: string;
   referralCode: string;
-}
+};
 
 const Referral = () => {
+  const [isPlaying, setIsPlaying] = useState(false);
   const [enabled, setEnabled] = useState<boolean>(false);
   const [referralCode, setReferralCode] = useState<string>("");
 
@@ -38,14 +41,14 @@ const Referral = () => {
     enabled,
   });
 
+  useAudioCleanup();
+
   useEffect(() => {
     if (data?.referralCode) {
       setReferralCode(data.referralCode);
     }
   }, [data]);
 
-  // const link =
-  //   "Your referral code is: " + data?.referralCode + "\n" + data?.appLink;
   const link = `https://famto.in/ref/customer-app?code=${referralCode}`;
 
   const copyToClipboard = async () => {
@@ -75,7 +78,22 @@ const Referral = () => {
 
   return (
     <ScreenWrapper>
-      <Header title="Refer & Earn" />
+      <Header
+        title="Refer & Earn"
+        showRightIcon
+        icon={
+          isPlaying
+            ? require("@/assets/icons/volume-slash.webp")
+            : require("@/assets/icons/volume-high.webp")
+        }
+        onPress={() =>
+          playOrStopSound(
+            "https://firebasestorage.googleapis.com/v0/b/famto-aa73e.appspot.com/o/voices%2FReferandEarn.mp3?alt=media&token=c4eba3f0-4811-457a-b6e8-88726693c38d",
+            isPlaying,
+            setIsPlaying
+          )
+        }
+      />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Top Section */}
