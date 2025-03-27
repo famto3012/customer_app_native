@@ -11,7 +11,8 @@ export const addOrder = async (
     await database.write(async () => {
       await database.get<Order>("order").create((order) => {
         order.orderId = orderId;
-        order.createdAt = createdAt;
+        // order.createdAt = createdAt;
+        order.createdAt = new Date().toISOString();
         order.deliveryMode = deliveryMode;
         order.merchantName = merchantName || "";
       });
