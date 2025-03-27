@@ -77,7 +77,7 @@ const CustomOrderBill = () => {
           },
         });
 
-        router.push({
+        router.replace({
           pathname: "/(tabs)",
           params: { orderId: data.orderId },
         });

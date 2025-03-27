@@ -115,7 +115,7 @@ const PickAndDropCheckout = () => {
           },
         });
 
-        router.push({
+        router.replace({
           pathname: "/(tabs)",
         });
       }

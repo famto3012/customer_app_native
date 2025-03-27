@@ -36,6 +36,7 @@ const WalletRecharge: FC<{ onClose: () => void }> = ({ onClose }) => {
       verifyWalletPayment(orderId, amount),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["loyalty-and-famto-cash"] });
+      setSelectedAmount(null);
       onClose();
     },
   });

@@ -1,5 +1,12 @@
 import { FC, memo, useMemo, useState } from "react";
-import { View, Pressable, StyleSheet } from "react-native";
+import {
+  View,
+  Pressable,
+  StyleSheet,
+  Platform,
+  ToastAndroid,
+  Alert,
+} from "react-native";
 import FastImage from "react-native-fast-image";
 import { Heart } from "phosphor-react-native";
 import { Grayscale } from "react-native-color-matrix-image-filters";
@@ -131,6 +138,20 @@ const ProductItem: FC<ProductItemProps> = memo(
     return (
       <Pressable
         onPress={() => {
+          if (!product?.redirectable) {
+            if (Platform.OS === "android") {
+              ToastAndroid.showWithGravity(
+                "Merchant currently unavailable",
+                ToastAndroid.SHORT,
+                ToastAndroid.CENTER
+              );
+              return;
+            } else {
+              Alert.alert("Error", "Merchant currently unavailable");
+              return;
+            }
+          }
+
           navigateToMerchant &&
             router.push({
               pathname: "/screens/universal/products",
@@ -138,6 +159,7 @@ const ProductItem: FC<ProductItemProps> = memo(
             });
         }}
         style={styles.productContainer}
+        // disabled={!product?.redirectable}
       >
         <View>
           <Pressable
@@ -145,6 +167,7 @@ const ProductItem: FC<ProductItemProps> = memo(
               setProduct(product);
               openDetail?.();
             }}
+            disabled={navigateToMerchant}
           >
             {!product.inventory ? (
               <Grayscale>

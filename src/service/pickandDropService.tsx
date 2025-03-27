@@ -204,6 +204,8 @@ export const verifyPickAndDropPayment = async (
       name: "Famto",
       description: "Order Payment",
       order_id: orderId,
+      image:
+        "https://res.cloudinary.com/dcfj1j1ku/image/upload/v1743054538/Group_427320859_y8jszt.svg",
       prefill: {
         name: "",
         email: "",

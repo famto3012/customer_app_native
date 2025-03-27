@@ -344,7 +344,7 @@ const UserSavedAddress: FC<NewAddressUIProps> = ({
                 router.push("/screens/common/add-address");
               }}
               icon={
-                <MapPin size={scale(16)} color={colors.WHITE} weight="fill" />
+                <MapPin size={scale(19)} color={colors.WHITE} weight="fill" />
               }
             />
           </View>

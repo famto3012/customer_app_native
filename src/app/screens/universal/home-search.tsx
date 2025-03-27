@@ -61,7 +61,7 @@ const HomeSearch = () => {
 
   // Handle item rendering
   const renderItem = ({ item }: { item: any }) => {
-    if (item?.type === "dish") {
+    if (item?.type !== "merchant") {
       return (
         <Pressable
           onPress={() => {

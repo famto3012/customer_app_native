@@ -79,6 +79,7 @@ export type MerchantCardProps = {
   preOrderStatus: boolean;
   isFavorite: boolean;
   rating: number | 0;
+  redirectable: boolean;
 };
 
 export type MerchantDataProps = {
@@ -118,6 +119,7 @@ export type ProductProps = {
   inventory: boolean;
   variantAvailable: boolean;
   cartCount?: number;
+  redirectable?: boolean;
 };
 
 export type AddCartButtonProps = {
