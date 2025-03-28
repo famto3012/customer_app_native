@@ -31,14 +31,15 @@ const UserSelectedAddress: FC<UserSelectedAddressProps> = ({
     address: "",
   });
 
-  const { pickAddress, dropAddress } = useData();
+  const { pickAddress, dropAddress, setDropAddress, setPickAddress } =
+    useData();
   const { showAlert } = useShowAlert();
 
   useEffect(() => {
     if (!address?.type && !pickAddress.type && !dropAddress.type) return;
 
     if (deliveryMode === "Pick and Drop") {
-      if (pick) {
+      if (pick && pickAddress.type) {
         if (address?.type === "other") {
           if (address.otherId === pickAddress.otherId) {
             showAlert("Pick and drop address cannot be same");
@@ -51,10 +52,11 @@ const UserSelectedAddress: FC<UserSelectedAddressProps> = ({
 
         setSelectedAddress(pickAddress);
         onSelect("pick", pickAddress);
+        setPickAddress({ type: "", otherId: "", address: "" });
         return;
       }
 
-      if (drop) {
+      if (drop && dropAddress.type) {
         if (address?.type === "other") {
           if (address.otherId === dropAddress.otherId) {
             showAlert("Pick and drop address cannot be same");
@@ -67,13 +69,15 @@ const UserSelectedAddress: FC<UserSelectedAddressProps> = ({
 
         setSelectedAddress(dropAddress);
         onSelect("drop", dropAddress);
+        setDropAddress({ type: "", otherId: "", address: "" });
         return;
       }
     }
 
-    if (deliveryMode !== "Pick and Drop") {
+    if (deliveryMode !== "Pick and Drop" && dropAddress.type) {
       setSelectedAddress(dropAddress);
       onSelect("drop", dropAddress);
+      setDropAddress({ type: "", otherId: "", address: "" });
     }
   }, [pickAddress, dropAddress]);
 
