@@ -13,6 +13,7 @@ import {
 import { SocketProvider } from "@/service/socketProvider";
 import { DataProvider } from "@/context/DataContext";
 import { resetAndNavigate } from "@/utils/navigation";
+import { migrateData } from "@/utils/flutterMigration";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,6 +56,10 @@ const Layout = () => {
 
 const RootLayout = () => {
   const router = useRouter();
+
+  useEffect(() => {
+    migrateData();
+  }, []);
 
   useEffect(() => {
     const handleDeepLink = (event: { url: string }) => {
