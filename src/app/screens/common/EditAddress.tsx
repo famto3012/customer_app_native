@@ -39,6 +39,11 @@ import MapDetailLoader from "@/components/Loader/MapDetailLoader";
 
 const { MapView, Camera, RestApi, UserLocation } = MapplsGL;
 
+MapplsGL.setMapSDKKey(MAPPLS_REST_API_KEY);
+MapplsGL.setRestAPIKey(MAPPLS_REST_API_KEY);
+MapplsGL.setAtlasClientId(MAPPLS_CLIENT_ID);
+MapplsGL.setAtlasClientSecret(MAPPLS_CLIENT_SECRET_KEY);
+
 const EditAddress = () => {
   const { address, addressType }: { address: any; addressType: string } =
     useLocalSearchParams();
@@ -75,12 +80,6 @@ const EditAddress = () => {
   const editAddressSnapPoints = useMemo(() => ["58%"], []);
 
   // Initialize MapplsGL
-  useEffect(() => {
-    MapplsGL.setMapSDKKey(MAPPLS_REST_API_KEY);
-    MapplsGL.setRestAPIKey(MAPPLS_REST_API_KEY);
-    MapplsGL.setAtlasClientId(MAPPLS_CLIENT_ID);
-    MapplsGL.setAtlasClientSecret(MAPPLS_CLIENT_SECRET_KEY);
-  }, []);
 
   // Parse address and set initial marker coordinates
   useEffect(() => {

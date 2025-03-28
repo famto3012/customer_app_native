@@ -123,7 +123,7 @@ const Home = () => {
   const handleOrderCancel = useCallback(async () => {
     // First set to false to trigger state change
     setShowCount((prev) => prev + 1);
-
+    console.log("Here");
     // Add timeout to ensure state updates properly
     const hasOrders = await checkTemporaryOrders();
     if (!hasOrders) {

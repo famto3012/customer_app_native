@@ -37,7 +37,7 @@ const CustomOrderBill = () => {
 
   const customBillSheetRef = useRef<BottomSheet>(null);
 
-  const customBillSnapPoints = useMemo(() => ["45%"], []);
+  const customBillSnapPoints = useMemo(() => ["35%"], []);
 
   const queryClient = useQueryClient();
 

@@ -157,8 +157,8 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
       const minHours = minimumSelectableTime.getHours();
       const minMinutes = minimumSelectableTime.getMinutes();
 
-      console.log(`Selected Time: ${hours}:${minutes}`);
-      console.log(`Minimum Allowed Time: ${minHours}:${minMinutes}`);
+      // console.log(`Selected Time: ${hours}:${minutes}`);
+      // console.log(`Minimum Allowed Time: ${minHours}:${minMinutes}`);
 
       // Handle time comparison properly, including rollover past midnight
       if (
@@ -166,7 +166,7 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
           (hours < minHours || (hours === minHours && minutes < minMinutes))) ||
         (now.getHours() > minHours && hours < minHours)
       ) {
-        alert("Selected time must be at least 1 hour 30 minutes ahead.");
+        // alert("Selected time must be at least 1 hour 30 minutes ahead.");
         return false;
       }
 
@@ -226,7 +226,7 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
       return;
     }
 
-    if (!selectedTime.hours || !selectedTime.minutes) {
+    if (selectedTime.hours == null || selectedTime.minutes == null) {
       if (Platform.OS === "android") {
         ToastAndroid.showWithGravity(
           "Please select a time for your order",
