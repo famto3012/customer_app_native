@@ -28,7 +28,8 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const scale = useSharedValue(1);
 
-  const { selectedBusiness, setSelectedMerchant } = useAuthStore.getState();
+  const { selectedBusiness, setSelectedMerchant, setSelectedBusiness } =
+    useAuthStore.getState();
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -73,7 +74,9 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
         }
 
         setSelectedMerchant(item.id, item.merchantName);
-
+        if (item?.businessCategoryId != null) {
+          setSelectedBusiness(item.businessCategoryId);
+        }
         router.push({
           pathname: "/screens/universal/products",
           params: { merchantId: item.id },

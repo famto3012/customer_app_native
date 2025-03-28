@@ -99,7 +99,7 @@ const CustomBillDetail: FC<{ data: CustomCartBill }> = ({ data }) => {
             marginTop: verticalScale(15),
           }}
         >
-          <Image
+          {/* <Image
             source={require("@/assets/icons/hand-arrow.webp")}
             style={{
               width: scale(24),
@@ -110,8 +110,8 @@ const CustomBillDetail: FC<{ data: CustomCartBill }> = ({ data }) => {
           <Typo size={12} style={{ flex: 1, textAlign: "justify" }}>
             Delivery charge is the fixed amount as per distance between delivery
             location and store. Store bill will be shared once the delivery
-            rider confirms the the items with the store
-          </Typo>
+            rider confirms the items with the store
+          </Typo> */}
         </View>
       </View>
     </BottomSheetScrollView>

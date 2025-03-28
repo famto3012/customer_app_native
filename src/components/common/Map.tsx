@@ -38,7 +38,7 @@ const CONFIG = {
 };
 
 // Default coordinates for safety
-const DEFAULT_COORDINATES = [77.209, 28.6139]; // Delhi coordinates as fallback
+const DEFAULT_COORDINATES = [76.936967, 8.529635]; // Delhi coordinates as fallback
 
 // Define image assets outside component to prevent recreation
 const MARKER_IMAGES = {

@@ -80,6 +80,7 @@ export type MerchantCardProps = {
   isFavorite: boolean;
   rating: number | 0;
   redirectable: boolean;
+  businessCategoryId: string;
 };
 
 export type MerchantDataProps = {
@@ -120,6 +121,7 @@ export type ProductProps = {
   variantAvailable: boolean;
   cartCount?: number;
   redirectable?: boolean;
+  businessCategoryId?: string | null;
 };
 
 export type AddCartButtonProps = {

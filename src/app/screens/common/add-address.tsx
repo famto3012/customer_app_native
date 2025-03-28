@@ -44,6 +44,11 @@ import { useData } from "@/context/DataContext";
 const { MapView, Camera, RestApi, UserLocation } = MapplsGL;
 const defaultCoordinates = [76.938072, 8.528763];
 
+MapplsGL.setMapSDKKey(MAPPLS_REST_API_KEY);
+MapplsGL.setRestAPIKey(MAPPLS_REST_API_KEY);
+MapplsGL.setAtlasClientId(MAPPLS_CLIENT_ID);
+MapplsGL.setAtlasClientSecret(MAPPLS_CLIENT_SECRET_KEY);
+
 const AddAddress = () => {
   const { latitude, longitude } = useSafeLocation();
   const [markerCoordinates, setMarkerCoordinates] = useState<number[]>([0, 0]);
@@ -66,16 +71,16 @@ const AddAddress = () => {
   const { setAlertData, setShowAlert } = useData();
 
   // Initialize MapplsGL SDK only once
-  useEffect(() => {
-    const initMapSDK = async () => {
-      await MapplsGL.setMapSDKKey(MAPPLS_REST_API_KEY);
-      await MapplsGL.setRestAPIKey(MAPPLS_REST_API_KEY);
-      await MapplsGL.setAtlasClientId(MAPPLS_CLIENT_ID);
-      await MapplsGL.setAtlasClientSecret(MAPPLS_CLIENT_SECRET_KEY);
-    };
+  // useEffect(() => {
+  //   const initMapSDK = async () => {
+  //     await MapplsGL.setMapSDKKey(MAPPLS_REST_API_KEY);
+  //     await MapplsGL.setRestAPIKey(MAPPLS_REST_API_KEY);
+  //     await MapplsGL.setAtlasClientId(MAPPLS_CLIENT_ID);
+  //     await MapplsGL.setAtlasClientSecret(MAPPLS_CLIENT_SECRET_KEY);
+  //   };
 
-    initMapSDK();
-  }, []);
+  //   initMapSDK();
+  // }, []);
 
   // Update marker coordinates only after we have valid location
   useEffect(() => {

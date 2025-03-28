@@ -35,7 +35,8 @@ const ProductItem: FC<ProductItemProps> = memo(
     const [isFavorite, setIsFavorite] = useState<boolean>(product.isFavorite);
 
     // Remove local count state and use productCounts instead
-    const { token, selectedMerchant } = useAuthStore.getState();
+    const { token, selectedMerchant, setSelectedBusiness } =
+      useAuthStore.getState();
     const { productCounts, setProduct, setProductCounts } = useData();
     const queryClient = useQueryClient();
 
@@ -138,7 +139,7 @@ const ProductItem: FC<ProductItemProps> = memo(
     return (
       <Pressable
         onPress={() => {
-          if (!product?.redirectable) {
+          if (product?.redirectable === false) {
             if (Platform.OS === "android") {
               ToastAndroid.showWithGravity(
                 "Merchant currently unavailable",
@@ -152,11 +153,13 @@ const ProductItem: FC<ProductItemProps> = memo(
             }
           }
 
-          navigateToMerchant &&
+          if (navigateToMerchant) {
+            setSelectedBusiness(product?.businessCategoryId);
             router.push({
               pathname: "/screens/universal/products",
               params: { merchantId: product.merchantId },
             });
+          }
         }}
         style={styles.productContainer}
         // disabled={!product?.redirectable}

@@ -74,7 +74,33 @@ const FloatingPreparingOrder: FC<{
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [tempOrders, countUpdate]);
+  }, [tempOrders]);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const orders = await getAllOrder();
+
+      // Update tempOrders state with fresh data
+      setTempOrders(orders);
+
+      if (orders.length > 0) {
+        // Reinitialize timer for all orders
+        const initialTimeLeftMap: any = {};
+        orders.forEach((order) => {
+          // For existing orders, preserve current time if available
+          initialTimeLeftMap[order.orderId] = timeLeftMap[order.orderId] || 60;
+        });
+
+        setTimeLeftMap(initialTimeLeftMap);
+        setShowCountDown(true);
+      } else {
+        setShowCountDown(false);
+      }
+    };
+
+    // Fetch orders whenever countUpdate changes
+    fetchOrders();
+  }, [countUpdate]);
 
   const lastOrder = tempOrders.length
     ? tempOrders[tempOrders.length - 1]
