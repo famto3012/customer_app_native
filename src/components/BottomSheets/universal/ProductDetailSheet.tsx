@@ -37,24 +37,27 @@ const ProductDetailSheet: FC<{}> = () => {
           <Typo size={18} color={colors.NEUTRAL900} fontFamily="SemiBold">
             {product?.productName}
           </Typo>
-
-          <View style={styles.priceContainer}>
-            {product?.discountPrice && (
-              <Typo
-                size={16}
-                color={colors.NEUTRAL400}
-                style={{
-                  textDecorationLine: "line-through",
-                }}
-              >
-                ₹ {product?.price}
+          {product?.inventory && (
+            <View style={styles.priceContainer}>
+              {product?.discountPrice && (
+                <Typo
+                  size={16}
+                  color={colors.NEUTRAL400}
+                  style={{
+                    textDecorationLine: "line-through",
+                  }}
+                >
+                  ₹ {product?.price}
+                </Typo>
+              )}
+              <Typo size={16} color={colors.NEUTRAL900} fontFamily="SemiBold">
+                ₹{" "}
+                {product?.discountPrice
+                  ? product?.discountPrice
+                  : product?.price}
               </Typo>
-            )}
-            <Typo size={16} color={colors.NEUTRAL900} fontFamily="SemiBold">
-              ₹{" "}
-              {product?.discountPrice ? product?.discountPrice : product?.price}
-            </Typo>
-          </View>
+            </View>
+          )}
 
           {product?.inventory ? (
             <View style={styles.inStockBadge}>
