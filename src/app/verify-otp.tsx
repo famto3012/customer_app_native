@@ -12,11 +12,13 @@ import { StyleSheet } from "react-native";
 import { signIn } from "@/service/authService";
 import { useSafeLocation } from "@/utils/helpers";
 import auth from "@react-native-firebase/auth";
+import { useShowAlert } from "@/hooks/useShowAlert";
 
 const VerifyOTP = () => {
   const [count, setCount] = useState(30);
   const [otp, setOtp] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [otpVerificationId, setVerificationId] = useState<string>("");
 
   const {
     verificationId,
@@ -26,6 +28,11 @@ const VerifyOTP = () => {
     useLocalSearchParams();
 
   const { latitude, longitude } = useSafeLocation();
+  const { showAlert } = useShowAlert();
+
+  useEffect(() => {
+    setVerificationId(verificationId);
+  }, [verificationId]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -38,21 +45,17 @@ const VerifyOTP = () => {
   }, [count]);
 
   const handleVerifyOTP = async (otp: string) => {
-    if (!verificationId) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          "Verification ID is missing. Please try again.",
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert("Error", "Verification ID is missing. Please try again.");
-      }
+    if (!otpVerificationId) {
+      showAlert("Verification ID is missing. Please try again.");
+      return;
     }
 
     setIsLoading(true);
     try {
-      const credential = auth.PhoneAuthProvider.credential(verificationId, otp);
+      const credential = auth.PhoneAuthProvider.credential(
+        otpVerificationId,
+        otp
+      );
       const userCredential = await auth().signInWithCredential(credential);
 
       if (userCredential.user) {
@@ -67,18 +70,32 @@ const VerifyOTP = () => {
         await signIn(payload);
       }
     } catch (error: any) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          "Something went wrong. Please try again.",
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert(
-          "Authentication Failed",
-          "Something went wrong. Please try again."
-        );
+      let errorMessage = "Something went wrong. Please try again.";
+
+      switch (error.code) {
+        case "auth/invalid-verification-code":
+          errorMessage = "Incorrect OTP entered. Please try again.";
+          break;
+        case "auth/invalid-verification-id":
+          errorMessage = "OTP has expired. Please request a new one.";
+          break;
+        case "auth/code-expired":
+          errorMessage = "OTP expired. Please request a new one.";
+          break;
+        case "auth/user-disabled":
+          errorMessage =
+            "This phone number has been disabled. Please contact support.";
+          break;
+        case "auth/network-request-failed":
+          errorMessage =
+            "Network error. Please check your internet connection.";
+          break;
+        default:
+          errorMessage = "Something went wrong. Please try again.";
+          break;
       }
+
+      showAlert(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -86,19 +103,56 @@ const VerifyOTP = () => {
 
   const handleResendSMS = async () => {
     try {
-      await auth().signInWithPhoneNumber(phoneNumber);
-      setCount(30);
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          "OTP sent again!",
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert("Success", "OTP sent again!");
+      const fullPhoneNumber = `+91${phoneNumber}`;
+
+      const confirmation = await auth().signInWithPhoneNumber(fullPhoneNumber);
+
+      if (confirmation.verificationId) {
+        setVerificationId(confirmation.verificationId);
+        setCount(30);
+
+        showAlert("OTP sent again!");
       }
     } catch (error: any) {
-      // Alert.alert("Error", error.message);
+      let errorMessage = "Something went wrong. Please try again.";
+
+      switch (error.code) {
+        case "auth/invalid-phone-number":
+          errorMessage = "Invalid phone number. Please enter a valid number.";
+          break;
+        case "auth/too-many-requests":
+          errorMessage = "Too many requests. Please try again later.";
+          break;
+        case "auth/quota-exceeded":
+          errorMessage =
+            "OTP verification limit exceeded. Please try again later.";
+          break;
+        case "auth/user-disabled":
+          errorMessage =
+            "This phone number has been disabled. Please contact support.";
+          break;
+        case "auth/sms-quota-exceeded":
+          errorMessage = "SMS quota exceeded. Please try again later.";
+          break;
+        case "auth/invalid-verification-code":
+          errorMessage = "Incorrect OTP entered. Please try again.";
+          break;
+        case "auth/invalid-verification-id":
+          errorMessage = "OTP has expired. Please request a new one.";
+          break;
+        case "auth/network-request-failed":
+          errorMessage =
+            "Network error. Please check your internet connection.";
+          break;
+        case "auth/code-expired":
+          errorMessage = "OTP expired. Please request a new one.";
+          break;
+        default:
+          errorMessage = "Something went wrong. Please try again.";
+          break;
+      }
+
+      showAlert(errorMessage);
     }
   };
 
