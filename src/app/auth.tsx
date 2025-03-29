@@ -56,19 +56,18 @@ const Auth = () => {
 
       const fullPhoneNumber = `+91${phoneNumberRef.current}`;
 
-      // const confirmation = await auth().signInWithPhoneNumber(fullPhoneNumber);
+      const confirmation = await auth().signInWithPhoneNumber(fullPhoneNumber);
 
-      // if (confirmation.verificationId) {
-      router.push({
-        pathname: "/verify-otp",
-        params: {
-          phoneNumber: phoneNumberRef.current,
-          referralCode: referral,
-          // verificationId: confirmation.verificationId,
-          verificationId: "",
-        },
-      });
-      // }
+      if (confirmation.verificationId) {
+        router.push({
+          pathname: "/verify-otp",
+          params: {
+            phoneNumber: phoneNumberRef.current,
+            referralCode: referral,
+            verificationId: confirmation.verificationId,
+          },
+        });
+      }
     } catch (error: any) {
       if (Platform.OS === "android") {
         ToastAndroid.showWithGravity(
