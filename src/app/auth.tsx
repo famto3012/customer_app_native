@@ -17,6 +17,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { requestLocationPermission } from "@/utils/helpers";
 import { resetAndNavigate } from "@/utils/navigation";
 import auth from "@react-native-firebase/auth";
+import { useShowAlert } from "@/hooks/useShowAlert";
 
 const Auth = () => {
   const phoneNumberRef = useRef<string>("");
@@ -24,7 +25,9 @@ const Auth = () => {
   const [showReferral, setShowReferral] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isGeneratingOTP, setIsGeneratingOTP] = useState<boolean>(false);
+
   const { showSkip, code } = useLocalSearchParams();
+  const { showAlert } = useShowAlert();
 
   useEffect(() => {
     if (code) {
@@ -39,15 +42,7 @@ const Auth = () => {
 
   const sendOTP = async () => {
     if (!/^\d{10}$/.test(phoneNumberRef.current)) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          "Please enter a valid phone number",
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert("Error", "Please enter a valid phone number");
-      }
+      showAlert("Please enter a valid phone number");
       return;
     }
 
@@ -69,15 +64,45 @@ const Auth = () => {
         });
       }
     } catch (error: any) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          error.message,
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert("Error", error.message);
+      let errorMessage = "Something went wrong. Please try again.";
+
+      switch (error.code) {
+        case "auth/invalid-phone-number":
+          errorMessage = "Invalid phone number. Please enter a valid number.";
+          break;
+        case "auth/too-many-requests":
+          errorMessage = "Too many requests. Please try again later.";
+          break;
+        case "auth/quota-exceeded":
+          errorMessage =
+            "OTP verification limit exceeded. Please try again later.";
+          break;
+        case "auth/user-disabled":
+          errorMessage =
+            "This phone number has been disabled. Please contact support.";
+          break;
+        case "auth/sms-quota-exceeded":
+          errorMessage = "SMS quota exceeded. Please try again later.";
+          break;
+        case "auth/invalid-verification-code":
+          errorMessage = "Incorrect OTP entered. Please try again.";
+          break;
+        case "auth/invalid-verification-id":
+          errorMessage = "OTP has expired. Please request a new one.";
+          break;
+        case "auth/network-request-failed":
+          errorMessage =
+            "Network error. Please check your internet connection.";
+          break;
+        case "auth/code-expired":
+          errorMessage = "OTP expired. Please request a new one.";
+          break;
+        default:
+          errorMessage = "Something went wrong. Please try again.";
+          break;
       }
+
+      showAlert(errorMessage);
     } finally {
       setIsGeneratingOTP(false);
     }
