@@ -38,33 +38,34 @@ const VerifyOTP = () => {
   }, [count]);
 
   const handleVerifyOTP = async (otp: string) => {
-    // if (!verificationId) {
-    // if (Platform.OS === "android") {
-    //         ToastAndroid.showWithGravity(
-    //           "Verification ID is missing. Please try again.",
-    //           ToastAndroid.SHORT,
-    //           ToastAndroid.CENTER
-    //         );
-    //       } else {
-    //         Alert.alert("Error", "Verification ID is missing. Please try again.");
-    //       }
+    if (!verificationId) {
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "Verification ID is missing. Please try again.",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert("Error", "Verification ID is missing. Please try again.");
+      }
+    }
 
     setIsLoading(true);
     try {
-      // const credential = auth.PhoneAuthProvider.credential(verificationId, otp);
-      // const userCredential = await auth().signInWithCredential(credential);
+      const credential = auth.PhoneAuthProvider.credential(verificationId, otp);
+      const userCredential = await auth().signInWithCredential(credential);
 
-      // if (userCredential.user) {
-      const payload = {
-        phoneNumber: phoneNumber.toString(),
-        latitude: latitude || 0,
-        longitude: longitude || 0,
-        platform: Platform.OS,
-        referralCode,
-      };
+      if (userCredential.user) {
+        const payload = {
+          phoneNumber: phoneNumber.toString(),
+          latitude: latitude || 0,
+          longitude: longitude || 0,
+          platform: Platform.OS,
+          referralCode,
+        };
 
-      await signIn(payload);
-      // }
+        await signIn(payload);
+      }
     } catch (error: any) {
       if (Platform.OS === "android") {
         ToastAndroid.showWithGravity(
@@ -198,5 +199,7 @@ const VerifyOTP = () => {
 export default VerifyOTP;
 
 const styles = StyleSheet.create({
-  otpContainer: { marginTop: verticalScale(10) },
+  otpContainer: {
+    marginTop: verticalScale(10),
+  },
 });
