@@ -59,7 +59,7 @@ const Auth = () => {
           params: {
             phoneNumber: phoneNumberRef.current,
             referralCode: referral,
-            verificationId: confirmation.verificationId,
+            verificationId: JSON.stringify(confirmation),
           },
         });
       }
