@@ -13,7 +13,7 @@
     "generate-apk": "cd android && gradlew.bat assembleRelease && adb install -r app/build/outputs/apk/release/app-release.apk",
     "generate-clean-debug": "cd android && gradlew.bat clean && gradlew.bat assembleDebug && adb uninstall com.famto.customerapp.debug && adb install -r app/build/outputs/apk/debug/app-debug.apk",
     "install-debug": "adb install -r app/build/outputs/apk/debug/app-debug.apk",
-    "generate-bundle": "cd android && gradlew.bat assembleBundle"
+    "generate-bundle": "cd android && gradlew.bat bundleRelease"
   },
   "jest": {
     "preset": "jest-expo"
@@ -78,6 +78,7 @@
     "react-native-shared-preferences": "^1.0.2",
     "react-native-simple-toast": "^3.3.2",
     "react-native-skeleton-placeholder": "^5.2.4",
+    "react-native-sms-retriever": "^1.1.1",
     "react-native-svg": "15.8.0",
     "react-native-ui-datepicker": "^3.0.0",
     "react-native-webview": "13.12.5",

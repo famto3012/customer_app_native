@@ -593,3 +593,18 @@ export const setGeofenceForUser = async (
     return { success: false, message: "Failed" };
   }
 };
+
+export const fetchVisibilityOfLoyaltyOrReferral = async (
+  query: string
+): Promise<{ status: boolean }> => {
+  try {
+    const res = await appAxios.get(`/customers/visibility-status`, {
+      params: { query },
+    });
+
+    return res.status === 200 ? res.data : { status: false };
+  } catch (err) {
+    console.log(`Error in getting visibility: ${err}`);
+    return { status: false };
+  }
+};
