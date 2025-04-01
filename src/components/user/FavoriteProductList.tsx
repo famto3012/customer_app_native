@@ -8,6 +8,8 @@ import { scale, verticalScale } from "@/utils/styling";
 import ProductItem from "@/components/universal/ProductScreen/ProductItem";
 import ProductCategoryLoader from "@/components/Loader/ProductCategoryLoader";
 import { commonStyles } from "@/constants/commonStyles";
+import { colors } from "@/constants/theme";
+import Typo from "../Typo";
 
 const FavoriteProductList = () => {
   const [refreshing, setRefreshing] = useState(false);
@@ -54,6 +56,10 @@ const FavoriteProductList = () => {
                 source={require("@/assets/images/favorite-list.webp")}
                 style={commonStyles.emptyFavoriteListImage}
               />
+
+              <Typo size={15} fontFamily="SemiBold" color={colors.NEUTRAL900}>
+                Your favourite list is empty
+              </Typo>
             </View>
           ) : null
         }

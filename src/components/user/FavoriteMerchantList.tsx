@@ -9,6 +9,8 @@ import { scale, verticalScale } from "@/utils/styling";
 import MerchantCardLoader from "@/components/Loader/MerchantCardLoader";
 import { commonStyles } from "@/constants/commonStyles";
 import { MerchantCardProps } from "@/types";
+import Typo from "../Typo";
+import { colors } from "@/constants/theme";
 
 const FavoriteMerchantList = () => {
   const [refreshing, setRefreshing] = useState(false);
@@ -56,6 +58,10 @@ const FavoriteMerchantList = () => {
                 source={require("@/assets/images/favorite-list.webp")}
                 style={commonStyles.emptyFavoriteListImage}
               />
+
+              <Typo size={15} fontFamily="SemiBold" color={colors.NEUTRAL900}>
+                Your favourite list is empty
+              </Typo>
             </View>
           ) : null
         }

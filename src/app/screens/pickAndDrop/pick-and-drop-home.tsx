@@ -29,6 +29,7 @@ import { initializePickAndDrop } from "@/service/pickandDropService";
 import { forceAudioCleanup, playOrStopSound } from "@/utils/helpers";
 import { useAudioCleanup } from "@/hooks/useAudio";
 import { useData } from "@/context/DataContext";
+import { useAuthStore } from "@/store/store";
 
 const PickAndDropHome = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -43,6 +44,7 @@ const PickAndDropHome = () => {
   const InfoSnapPoints = useMemo(() => ["55%"], []);
 
   const { setPickAddress, setDropAddress } = useData();
+  const { token } = useAuthStore.getState();
 
   useAudioCleanup();
 
@@ -168,7 +170,9 @@ const PickAndDropHome = () => {
 
         <Button
           title="Place your order"
-          onPress={() => initializeMutation.mutate()}
+          onPress={() => {
+            token ? initializeMutation.mutate() : router.push("/auth");
+          }}
           isLoading={initializeMutation.isPending}
           style={styles.button}
         />

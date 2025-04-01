@@ -14,7 +14,10 @@ import { colors, radius, spacingY } from "@/constants/theme";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import { fetchLoyaltyAndFamtoCash } from "@/service/userService";
+import {
+  fetchLoyaltyAndFamtoCash,
+  fetchVisibilityOfLoyaltyOrReferral,
+} from "@/service/userService";
 import { useAuthStore } from "@/store/store";
 import BottomSheet, {
   BottomSheetBackdrop,
@@ -42,6 +45,13 @@ const Wallet = () => {
     enabled: !!token,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
+  });
+
+  const { data: loyaltyStatus } = useQuery({
+    queryKey: ["get-visibility"],
+    queryFn: () => fetchVisibilityOfLoyaltyOrReferral("loyalty-point"),
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
   const renderBackdrop = useCallback(
@@ -105,14 +115,16 @@ const Wallet = () => {
           </LinearGradient>
         </View>
 
-        <View style={styles.loyaltyContainer}>
-          <Typo size={24} fontFamily="SemiBold" color={colors.NEUTRAL900}>
-            {data?.loyaltyPoints.toFixed(0) || "0"} Points
-          </Typo>
-          <Typo size={14} color={colors.NEUTRAL400}>
-            Loyalty points left for redemption
-          </Typo>
-        </View>
+        {loyaltyStatus?.status && (
+          <View style={styles.loyaltyContainer}>
+            <Typo size={24} fontFamily="SemiBold" color={colors.NEUTRAL900}>
+              {data?.loyaltyPoints.toFixed(0) || "0"} Points
+            </Typo>
+            <Typo size={14} color={colors.NEUTRAL400}>
+              Loyalty points left for redemption
+            </Typo>
+          </View>
+        )}
 
         <View style={styles.pressableContainer}>
           <Pressable

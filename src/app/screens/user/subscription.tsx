@@ -151,24 +151,26 @@ const Subscription = () => {
         </View>
       )}
 
-      <FlatList
-        data={data?.allSubscriptionPlans}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.planId}
-        contentContainerStyle={{
-          paddingHorizontal: scale(20),
-          marginTop: verticalScale(30),
-          gap: spacingY._20,
-        }}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <View>
-            <Typo size={15} color={colors.NEUTRAL900} fontFamily="Medium">
-              Other Plans for you
-            </Typo>
-          </View>
-        }
-      />
+      {data?.allSubscriptionPlans?.length > 0 ? (
+        <FlatList
+          data={data?.allSubscriptionPlans}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.planId}
+          contentContainerStyle={{
+            paddingHorizontal: scale(20),
+            marginTop: verticalScale(30),
+            gap: spacingY._20,
+          }}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <View>
+              <Typo size={15} color={colors.NEUTRAL900} fontFamily="Medium">
+                Other Plans for you
+              </Typo>
+            </View>
+          }
+        />
+      ) : null}
     </ScreenWrapper>
   );
 };

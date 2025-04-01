@@ -95,51 +95,56 @@ const Transaction = () => {
     <ScreenWrapper style={{ gap: spacingY._15 }}>
       <Header title="Transaction History" />
 
-      <FlatList
-        data={transactions}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: scale(20),
-          paddingBottom: verticalScale(20),
-        }}
-        refreshControl={
-          <RefreshControl refreshing={isLoading} onRefresh={refetch} />
-        }
-        onEndReached={() => {
-          if (hasNextPage) {
-            fetchNextPage();
+      {transactions.length > 0 ? (
+        <FlatList
+          data={transactions}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => index.toString()}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingHorizontal: scale(20),
+            paddingBottom: verticalScale(20),
+          }}
+          refreshControl={
+            <RefreshControl refreshing={isLoading} onRefresh={refetch} />
           }
-        }}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          isFetchingNextPage ? (
-            <ActivityIndicator size="small" color={colors.PRIMARY} />
-          ) : null
-        }
-        ListEmptyComponent={
-          <View
-            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-          >
-            <Image
-              source={require("@/assets/images/transactions.webp")}
-              style={{
-                height: verticalScale(249),
-                width: scale(273),
-                resizeMode: "cover",
-                marginBottom: verticalScale(30),
-              }}
-            />
-            <Typo size={15} fontFamily="SemiBold" color={colors.NEUTRAL900}>
-              No transactions found
-            </Typo>
-            <Typo size={13} color={colors.NEUTRAL400}>
-              Transaction history is empty!
-            </Typo>
-          </View>
-        }
-      />
+          onEndReached={() => {
+            if (hasNextPage) {
+              fetchNextPage();
+            }
+          }}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <ActivityIndicator size="small" color={colors.PRIMARY} />
+            ) : null
+          }
+        />
+      ) : (
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Image
+            source={require("@/assets/images/transactions.webp")}
+            style={{
+              height: verticalScale(249),
+              width: scale(273),
+              resizeMode: "cover",
+              marginBottom: verticalScale(30),
+            }}
+          />
+          <Typo size={15} fontFamily="SemiBold" color={colors.NEUTRAL900}>
+            No transactions found
+          </Typo>
+          <Typo size={13} color={colors.NEUTRAL400}>
+            Transaction history is empty!
+          </Typo>
+        </View>
+      )}
     </ScreenWrapper>
   );
 };

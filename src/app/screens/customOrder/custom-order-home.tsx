@@ -16,6 +16,8 @@ import { commonStyles } from "@/constants/commonStyles";
 import { customOrderDetails } from "@/utils/defaultData";
 import { forceAudioCleanup, playOrStopSound } from "@/utils/helpers";
 import { useAudioCleanup } from "@/hooks/useAudio";
+import { useAuthStore } from "@/store/store";
+import { router } from "expo-router";
 
 const CustomOrderHome = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -25,6 +27,8 @@ const CustomOrderHome = () => {
 
   const InfoSnapPoints = useMemo(() => ["55%"], []);
   const locationSnapPoints = useMemo(() => ["25%"], []);
+
+  const { token } = useAuthStore.getState();
 
   useAudioCleanup();
 
@@ -93,7 +97,9 @@ const CustomOrderHome = () => {
         <View style={styles.button}>
           <Button
             title="Place your order"
-            onPress={() => locationSheetRef.current?.expand()}
+            onPress={() => {
+              token ? locationSheetRef.current?.expand() : router.push("/auth");
+            }}
           />
         </View>
       </ScreenWrapper>

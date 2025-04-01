@@ -1,11 +1,4 @@
-import {
-  ActivityIndicator,
-  Alert,
-  Platform,
-  Pressable,
-  ToastAndroid,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, View } from "react-native";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import Button from "@/components/Button";
@@ -18,6 +11,8 @@ import { requestLocationPermission } from "@/utils/helpers";
 import { resetAndNavigate } from "@/utils/navigation";
 import auth from "@react-native-firebase/auth";
 import { useShowAlert } from "@/hooks/useShowAlert";
+import { useQuery } from "@tanstack/react-query";
+import { fetchVisibilityOfLoyaltyOrReferral } from "@/service/userService";
 
 const Auth = () => {
   const phoneNumberRef = useRef<string>("");
@@ -40,6 +35,12 @@ const Auth = () => {
     requestLocationPermission();
   }, []);
 
+  const { data: referralStatus } = useQuery({
+    queryKey: ["get-visibility"],
+    queryFn: () => fetchVisibilityOfLoyaltyOrReferral("referral"),
+    refetchOnWindowFocus: true,
+  });
+
   const sendOTP = async () => {
     if (!/^\d{10}$/.test(phoneNumberRef.current)) {
       showAlert("Please enter a valid phone number");
@@ -58,7 +59,7 @@ const Auth = () => {
           pathname: "/verify-otp",
           params: {
             phoneNumber: phoneNumberRef.current,
-            referralCode: referral,
+            referralCode: referralStatus?.status ? referral : "",
             verificationId: JSON.stringify(confirmation),
           },
         });
@@ -199,28 +200,34 @@ const Auth = () => {
           />
         </View>
 
-        {showReferral ? (
-          <View style={{ flexDirection: "row", marginTop: verticalScale(20) }}>
-            <Input
-              placeholder="Referral code"
-              onChangeText={(value: string) => setReferral(value)}
-              value={referral}
-            />
+        {referralStatus?.status && (
+          <View>
+            {showReferral ? (
+              <View
+                style={{ flexDirection: "row", marginTop: verticalScale(20) }}
+              >
+                <Input
+                  placeholder="Referral code"
+                  onChangeText={(value: string) => setReferral(value)}
+                  value={referral}
+                />
+              </View>
+            ) : (
+              <Pressable
+                onPress={() => setShowReferral(true)}
+                style={{ marginTop: verticalScale(20) }}
+              >
+                <Typo
+                  size={16}
+                  color={colors.PRIMARY}
+                  fontFamily="SemiBold"
+                  style={{ textDecorationLine: "underline" }}
+                >
+                  Have a referral code?
+                </Typo>
+              </Pressable>
+            )}
           </View>
-        ) : (
-          <Pressable
-            onPress={() => setShowReferral(true)}
-            style={{ marginTop: verticalScale(20) }}
-          >
-            <Typo
-              size={16}
-              color={colors.PRIMARY}
-              fontFamily="SemiBold"
-              style={{ textDecorationLine: "underline" }}
-            >
-              Have a referral code?
-            </Typo>
-          </Pressable>
         )}
       </View>
 
