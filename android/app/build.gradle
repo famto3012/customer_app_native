@@ -166,6 +166,8 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
     // implementation("com.google.firebase:firebase-auth")
+    implementation 'com.google.android.gms:play-services-auth:21.3.0'
+    implementation 'com.google.android.gms:play-services-auth-api-phone:18.2.0'
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";

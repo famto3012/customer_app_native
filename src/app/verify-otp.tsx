@@ -61,22 +61,24 @@ const VerifyOTP = () => {
   useEffect(() => {
     const startSmsListener = async () => {
       try {
-        await SmsRetriever.startSmsRetriever(); // Start listening
+        console.log("Here");
+
+        await SmsRetriever.startSmsRetriever();
 
         SmsRetriever.addSmsListener((event) => {
-          const message = event.message; // The received SMS message
+          const message = event.message;
           console.log("Received SMS:", message);
 
           // Extract OTP (6-digit code)
           if (message) {
             const otpFromMessage = message.match(/\b\d{6}\b/);
             if (otpFromMessage) {
-              setOtp(otpFromMessage[0]); // Auto-fill OTP field
-              handleVerifyOTP(otpFromMessage[0]); // Auto-submit OTP
+              setOtp(otpFromMessage[0]);
+              handleVerifyOTP(otpFromMessage[0]);
             }
           }
 
-          SmsRetriever.removeSmsListener(); // Stop listening after OTP is received
+          SmsRetriever.removeSmsListener();
         });
       } catch (error) {
         console.log("Error starting SMS retriever:", error);
@@ -86,7 +88,7 @@ const VerifyOTP = () => {
     startSmsListener();
 
     return () => {
-      SmsRetriever.removeSmsListener(); // Clean up listener when unmounting
+      SmsRetriever.removeSmsListener();
     };
   }, []);
 
@@ -108,7 +110,8 @@ const VerifyOTP = () => {
   };
 
   const handleVerifyOTP = async (otpCode: string) => {
-    if (otpVerified.current) return; // Prevent multiple verification attempts
+    if (otpVerified.current) return;
+
     if (!otpVerificationId) {
       showAlert("Verification ID is missing. Please try again.");
       return;

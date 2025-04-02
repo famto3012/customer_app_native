@@ -34,3 +34,10 @@
 -keep class okhttp3.** { *; }
 -keep class com.mappls.sdk.** { *; }
 -keep interface com.mappls.sdk.** { *; }
+
+-keep class com.google.android.gms.auth.api.credentials.** { *; }
+-keep class me.furtado.smsretriever.** { *; }
+-dontwarn com.google.android.gms.auth.api.credentials.Credential
+-dontwarn com.google.android.gms.auth.api.credentials.CredentialsApi
+-dontwarn com.google.android.gms.auth.api.credentials.HintRequest$Builder
+-dontwarn com.google.android.gms.auth.api.credentials.HintRequest
