@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Stack, useRouter } from "expo-router";
 import * as Linking from "expo-linking";
 import {
@@ -14,6 +14,7 @@ import { SocketProvider } from "@/service/socketProvider";
 import { DataProvider } from "@/context/DataContext";
 import { resetAndNavigate } from "@/utils/navigation";
 import { migrateData } from "@/utils/flutterMigration";
+import NetInfo from "@react-native-community/netinfo";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,11 +56,33 @@ const Layout = () => {
 };
 
 const RootLayout = () => {
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
+
   const router = useRouter();
 
   useEffect(() => {
     migrateData();
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsConnected(state.isConnected);
+    });
+
+    // Check the initial network state
+    NetInfo.fetch().then((state) => {
+      setIsConnected(state.isConnected);
+      if (!state.isConnected) resetAndNavigate("/screens/user/no-internet");
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (isConnected === false) {
+      resetAndNavigate("/screens/user/no-internet");
+    }
+  }, [isConnected]);
 
   useEffect(() => {
     const handleDeepLink = (event: { url: string }) => {

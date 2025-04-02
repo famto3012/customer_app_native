@@ -1,5 +1,6 @@
 import {
   Image,
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -24,6 +25,7 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import LogoutSheet from "@/components/BottomSheets/user/LogoutSheet";
 import { commonStyles } from "@/constants/commonStyles";
+import { Platform } from "react-native";
 
 const Profile = () => {
   const { token } = useAuthStore.getState();
@@ -42,6 +44,22 @@ const Profile = () => {
   const handleLogout = () => {
     queryClient.clear();
     logout();
+  };
+
+  const PLAY_STORE_URL = "market://details?id=com.famto.customerapp";
+  const APP_STORE_URL = "https://apps.apple.com/app/idYOUR_APP_ID";
+
+  const openStore = () => {
+    const url = Platform.OS === "android" ? PLAY_STORE_URL : APP_STORE_URL;
+
+    Linking.openURL(url).catch(() => {
+      // Fallback in case `market://` fails (Android)
+      if (Platform.OS === "android") {
+        Linking.openURL(
+          `https://play.google.com/store/apps/details?id=com.famto.customerapp`
+        );
+      }
+    });
   };
 
   const renderBackdrop = useCallback(
@@ -134,6 +152,11 @@ const Profile = () => {
                     !["Rate Us", "About Us"].includes(option.label)
                   ) {
                     router.push({ pathname: "/auth", params: { showSkip: 0 } });
+                    return;
+                  }
+
+                  if (option.label === "Rate Us") {
+                    openStore();
                     return;
                   }
 
