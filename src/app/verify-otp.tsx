@@ -13,7 +13,6 @@ import { signIn } from "@/service/authService";
 import { useSafeLocation } from "@/utils/helpers";
 import auth from "@react-native-firebase/auth";
 import { useShowAlert } from "@/hooks/useShowAlert";
-import SmsRetriever from "react-native-sms-retriever";
 
 type SearchParam = {
   verificationId: string;
@@ -57,40 +56,6 @@ const VerifyOTP = () => {
 
     return () => clearInterval(interval);
   }, [count]);
-
-  useEffect(() => {
-    const startSmsListener = async () => {
-      try {
-        console.log("Here");
-
-        await SmsRetriever.startSmsRetriever();
-
-        SmsRetriever.addSmsListener((event) => {
-          const message = event.message;
-          console.log("Received SMS:", message);
-
-          // Extract OTP (6-digit code)
-          if (message) {
-            const otpFromMessage = message.match(/\b\d{6}\b/);
-            if (otpFromMessage) {
-              setOtp(otpFromMessage[0]);
-              handleVerifyOTP(otpFromMessage[0]);
-            }
-          }
-
-          SmsRetriever.removeSmsListener();
-        });
-      } catch (error) {
-        console.log("Error starting SMS retriever:", error);
-      }
-    };
-
-    startSmsListener();
-
-    return () => {
-      SmsRetriever.removeSmsListener();
-    };
-  }, []);
 
   const handleSuccessfulAuth = async () => {
     try {
