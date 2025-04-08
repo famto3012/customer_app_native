@@ -17,24 +17,24 @@ import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius, spacingY } from "@/constants/theme";
 import { useAuthStore } from "@/store/store";
 import { applyUniversalPromoCode } from "@/service/universal";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Grayscale } from "react-native-color-matrix-image-filters";
 import { applyCustomOrderTipAndPromoCode } from "@/service/customOrderService";
 import { addPickAndDropTipAndPromoCode } from "@/service/pickandDropService";
-
-interface PromoCodeProps {
-  id: string;
-  imageURL: string;
-  promoCode: string;
-  validUpTo: string;
-  minOrderAmount: number;
-  status: boolean;
-}
+import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
+import PromoDetail from "@/components/BottomSheets/common/PromoDetail";
+import { PromoCodeProps } from "@/types";
 
 const PromoCodeList = () => {
   const { deliveryMode, merchantId, orderAmount } = useLocalSearchParams();
   const [query, setQuery] = useState<string>("");
   const [debounceQuery, setDebounceQuery] = useState<string>("");
+  const [selectedPromoCode, setSelectedPromoCode] =
+    useState<PromoCodeProps | null>(null);
+
+  const detailSheetRef = useRef<BottomSheet>(null);
+
+  const detailSheetSnapPoints = useMemo(() => ["40%"], []);
 
   const queryClient = useQueryClient();
 
@@ -108,7 +108,13 @@ const PromoCodeList = () => {
 
   const renderItem = ({ item }: { item: PromoCodeProps }) => {
     return (
-      <View style={styles.container}>
+      <Pressable
+        onPress={() => {
+          setSelectedPromoCode(item);
+          detailSheetRef.current?.expand();
+        }}
+        style={styles.container}
+      >
         {!item.status || Number(orderAmount) < item.minOrderAmount ? (
           <Grayscale>
             <Image source={{ uri: item.imageURL }} style={styles.image} />
@@ -137,42 +143,63 @@ const PromoCodeList = () => {
             style={styles.actionImage}
           />
         </Pressable>
-      </View>
+      </Pressable>
     );
   };
 
   return (
-    <ScreenWrapper>
-      <Header title="Apply promo code" />
+    <>
+      <ScreenWrapper>
+        <Header title="Apply promo code" />
 
-      <Search
-        placeHolder="Search promo code"
-        onChangeText={(data) => setDebounceQuery(data)}
-        capitalize
-      />
+        <Search
+          placeHolder="Search promo code"
+          onChangeText={(data) => setDebounceQuery(data)}
+          capitalize
+        />
 
-      <FlatList
-        data={data || []}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ marginVertical: verticalScale(25) }}
-        ListEmptyComponent={
-          isLoading ? (
-            <ActivityIndicator size="large" color={colors.PRIMARY} />
-          ) : !data || data.length === 0 ? (
-            <View
-              style={{
-                flex: 1,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Typo>No promo codes available</Typo>
-            </View>
-          ) : null
-        }
-      />
-    </ScreenWrapper>
+        <FlatList
+          data={data || []}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ marginVertical: verticalScale(25) }}
+          ListEmptyComponent={
+            isLoading ? (
+              <ActivityIndicator size="large" color={colors.PRIMARY} />
+            ) : !data || data.length === 0 ? (
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Typo>No promo codes available</Typo>
+              </View>
+            ) : null
+          }
+        />
+      </ScreenWrapper>
+
+      <BottomSheet
+        ref={detailSheetRef}
+        index={-1}
+        snapPoints={detailSheetSnapPoints}
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        backdropComponent={(props) => (
+          <BottomSheetBackdrop
+            {...props}
+            appearsOnIndex={0}
+            disappearsOnIndex={-1}
+            opacity={0.6}
+          />
+        )}
+        onClose={() => setSelectedPromoCode(null)}
+      >
+        <PromoDetail data={selectedPromoCode!} />
+      </BottomSheet>
+    </>
   );
 };
 

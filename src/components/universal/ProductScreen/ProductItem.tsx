@@ -93,12 +93,16 @@ const ProductItem: FC<ProductItemProps> = memo(
           },
         }));
 
+        const price = product.discountPrice
+          ? product.discountPrice
+          : product.price;
+
         updateCart(
           selectedMerchant?.merchantId || "",
           product.productId,
           product.productName,
-          product.price,
-          updatedQuantity
+          price,
+          newQuantity
         );
       }
     };
@@ -126,11 +130,15 @@ const ProductItem: FC<ProductItemProps> = memo(
           },
         }));
 
+        const price = product.discountPrice
+          ? product.discountPrice
+          : product.price;
+
         updateCart(
           selectedMerchant?.merchantId || "",
           product.productId,
           product.productName,
-          product.price,
+          price,
           newQuantity
         );
       }
@@ -154,7 +162,7 @@ const ProductItem: FC<ProductItemProps> = memo(
           }
 
           if (navigateToMerchant) {
-            setSelectedBusiness(product?.businessCategoryId);
+            setSelectedBusiness(product?.businessCategoryId as string);
             router.push({
               pathname: "/screens/universal/products",
               params: { merchantId: product.merchantId },
@@ -212,6 +220,7 @@ const ProductItem: FC<ProductItemProps> = memo(
 
           {showAddCart && (
             <AddCartButton
+              customizable={product.variantAvailable}
               onDecrement={handleDecrement}
               onIncrement={handleIncrement}
               onPress={handleIncrement}

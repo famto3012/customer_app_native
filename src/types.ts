@@ -130,6 +130,7 @@ export type AddCartButtonProps = {
   onPress: () => void;
   count: number;
   inventory: boolean;
+  customizable: boolean;
 };
 
 export type Variant = {
@@ -290,4 +291,17 @@ export type SelectedAddress = {
   type: string;
   otherId: string;
   address: string;
+};
+
+export type PromoCodeProps = {
+  id: string;
+  imageURL: string;
+  promoCode: string;
+  validUpTo: string;
+  minOrderAmount: number;
+  status: boolean;
+  promoType: string;
+  discount: number;
+  description?: string;
+  maxDiscountValue: number;
 };
