@@ -168,7 +168,7 @@ const Merchants = () => {
         ListEmptyComponent={
           isLoading ? (
             <MerchantCardLoader />
-          ) : merchants.length === 0 ? (
+          ) : !isLoading && merchants.length === 0 ? (
             <View
               style={{
                 flex: 1,

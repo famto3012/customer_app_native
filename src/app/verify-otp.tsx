@@ -40,6 +40,7 @@ const VerifyOTP = () => {
     const unsubscribe = auth().onAuthStateChanged((user) => {
       if (user && !otpVerified.current) {
         otpVerified.current = true;
+        setOtp("123456");
         handleSuccessfulAuth();
       }
     });
@@ -237,7 +238,9 @@ const VerifyOTP = () => {
           autoFocus
           hideStick
           blurOnFilled
+          secureTextEntry={true}
           type="numeric"
+          placeholder={otp}
           focusStickBlinkingDuration={500}
           onTextChange={(text) => setOtp(text)}
           onFilled={(text) => {
@@ -247,6 +250,7 @@ const VerifyOTP = () => {
           }}
           textInputProps={{
             accessibilityLabel: "One-Time Password",
+            secureTextEntry: true,
           }}
           theme={{
             containerStyle: styles.otpContainer,

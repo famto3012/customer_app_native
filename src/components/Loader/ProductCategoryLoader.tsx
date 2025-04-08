@@ -10,6 +10,7 @@ const ProductCategoryLoader = () => {
         gap: spacingY._20,
         paddingHorizontal: scale(20),
         width: SCREEN_WIDTH - 40,
+        marginVertical: verticalScale(20),
       }}
     >
       {[1, 2, 3].map((_, index) => (

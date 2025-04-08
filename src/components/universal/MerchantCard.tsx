@@ -57,7 +57,7 @@ const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
     <Pressable
       style={styles.container}
       onPress={() => {
-        if (!item.status) return null;
+        // if (!item.status) return null;
 
         if (item.redirectable === false) {
           if (Platform.OS === "android") {
