@@ -1,4 +1,11 @@
-import { Alert, Image, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  Image,
+  Platform,
+  StyleSheet,
+  ToastAndroid,
+  View,
+} from "react-native";
 import React, { useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { scale, verticalScale } from "@/utils/styling";
@@ -24,7 +31,15 @@ const NoInternet = () => {
         ? resetAndNavigate("/notification-permission")
         : resetAndNavigate("/auth");
     } else {
-      Alert.alert("", "No internet connection. Please try again.");
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          "No internet connection. Please try again.",
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert("", "No internet connection. Please try again.");
+      }
     }
 
     setChecking(false);

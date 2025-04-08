@@ -116,7 +116,7 @@ const VariantSheet: FC<{
     <View style={styles.wrapper}>
       <BottomSheetScrollView style={styles.container}>
         <View style={styles.productData}>
-          <View>
+          <View style={{ width: "70%" }}>
             <Typo size={15} color={colors.PRIMARY} fontFamily="SemiBold">
               {product?.productName}
             </Typo>
