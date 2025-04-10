@@ -72,7 +72,8 @@ const CustomOrderBill = () => {
 
         useAuthStore.setState({
           promoCode: {
-            ...useAuthStore.getState().promoCode,
+            universal: null,
+            pickAndDrop: null,
             customOrder: null,
           },
         });

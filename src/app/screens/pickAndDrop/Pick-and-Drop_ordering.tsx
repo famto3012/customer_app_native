@@ -140,7 +140,7 @@ const PickDropScreen = () => {
 
       if (voiceInstruction.pick) {
         const fileName = voiceInstruction.pick.split("/").pop();
-        const fileType = fileName?.split(".").pop() || "mp3";
+        const fileType = fileName?.split(".").pop() || "m4a";
 
         formDataObject.append("voiceInstructionInPickup", {
           uri: voiceInstruction.pick,
@@ -151,7 +151,7 @@ const PickDropScreen = () => {
 
       if (voiceInstruction.delivery) {
         const fileName = voiceInstruction.delivery.split("/").pop();
-        const fileType = fileName?.split(".").pop() || "mp3";
+        const fileType = fileName?.split(".").pop() || "m4a";
 
         formDataObject.append("voiceInstructionInDelivery", {
           uri: voiceInstruction.delivery,

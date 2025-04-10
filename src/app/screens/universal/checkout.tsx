@@ -239,9 +239,7 @@ const Checkout = () => {
     const formDataObject = new FormData();
 
     function appendFormData(value: any, key: string) {
-      if (value instanceof File) {
-        formDataObject.append(key, value);
-      } else if (Array.isArray(value)) {
+      if (Array.isArray(value)) {
         value.forEach((item, index) => {
           appendFormData(item, `${key}[${index}]`);
         });
@@ -257,6 +255,28 @@ const Checkout = () => {
     Object.entries(data).forEach(([key, value]) => {
       appendFormData(value, key);
     });
+
+    if (data.voiceInstructionToAgent) {
+      const fileName = data.voiceInstructionToAgent.split("/").pop();
+      const fileType = fileName?.split(".").pop() || "m4a";
+
+      formDataObject.append("voiceInstructionToAgent", {
+        uri: data.voiceInstructionToAgent,
+        name: `agent-instruction.${fileType}`,
+        type: `audio/${fileType}`,
+      } as any);
+    }
+
+    if (data.voiceInstructionToMerchant) {
+      const fileName = data.voiceInstructionToMerchant.split("/").pop();
+      const fileType = fileName?.split(".").pop() || "m4a";
+
+      formDataObject.append("voiceInstructionToMerchant", {
+        uri: data.voiceInstructionToMerchant,
+        name: `merchant-instruction.${fileType}`,
+        type: `audio/${fileType}`,
+      } as any);
+    }
 
     handleConfirmOrderMutation.mutate(formDataObject);
   };
@@ -332,6 +352,7 @@ const Checkout = () => {
                 setFormData({ ...formData, voiceInstructionToAgent: data })
               }
               onAgentInstruction={(data) => {
+                console.log(data);
                 setFormData({ ...formData, instructionToDeliveryAgent: data });
               }}
               onMerchantVoice={(data) =>

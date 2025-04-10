@@ -383,8 +383,12 @@ const UserSavedAddress: FC<NewAddressUIProps> = ({
               </View>
             )}
 
-            {home?.coordinates?.length && renderAddress({ address: home })}
-            {work?.coordinates?.length && renderAddress({ address: work })}
+            {home?.coordinates?.length
+              ? renderAddress({ address: home })
+              : null}
+            {work?.coordinates?.length
+              ? renderAddress({ address: work })
+              : null}
             {other?.map((address) => (
               <View key={address.id}>{renderAddress({ address })}</View>
             ))}

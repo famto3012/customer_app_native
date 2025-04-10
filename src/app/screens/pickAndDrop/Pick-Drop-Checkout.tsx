@@ -74,8 +74,6 @@ const PickAndDropCheckout = () => {
     mutationKey: ["confirm-pick-and-drop-order"],
     mutationFn: () => confirmPickAndDropOrder(selectedPaymentMode),
     onSuccess: (data) => {
-      console.log("data", data);
-      console.log("selectedPaymentMode", selectedPaymentMode);
       if (selectedPaymentMode === "Online-payment") {
         handleVerifyPaymentMutation.mutate({
           orderId: data.orderId,
@@ -87,8 +85,9 @@ const PickAndDropCheckout = () => {
 
           useAuthStore.setState({
             promoCode: {
-              ...useAuthStore.getState().promoCode,
+              universal: null,
               pickAndDrop: null,
+              customOrder: null,
             },
           });
 

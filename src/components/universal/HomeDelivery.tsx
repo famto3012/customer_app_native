@@ -42,7 +42,10 @@ const HomeDelivery: FC<HomeDeliveryProps> = ({
 
       <Instructions
         placeholder="Instructions (if any)"
-        onRecordComplete={(data) => onAgentVoice(data)}
+        onRecordComplete={(data) => {
+          console.log(`Agent recording: ${data}`);
+          onAgentVoice(data);
+        }}
         onChangeText={(data) => onAgentInstruction(data)}
       />
 
