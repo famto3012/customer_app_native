@@ -170,7 +170,10 @@ const Instructions: FC<{
   return (
     <View style={styles.container}>
       <View style={styles.instructionContainer}>
-        <Input placeholder={placeholder} />
+        <Input
+          placeholder={placeholder}
+          onChangeText={(value) => onChangeText(value)}
+        />
         <TouchableOpacity
           onPress={isRecording ? stopRecording : startRecording}
           style={styles.micContainer}

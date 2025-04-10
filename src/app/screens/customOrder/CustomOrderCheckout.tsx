@@ -157,7 +157,7 @@ const CustomOrderCheckout = () => {
 
     if (voiceInstruction) {
       const fileName = voiceInstruction.split("/").pop();
-      const fileType = fileName?.split(".").pop() || "mp3";
+      const fileType = fileName?.split(".").pop() || "m4a";
 
       formDataObject.append("voiceInstructionToDeliveryAgent", {
         uri: voiceInstruction,

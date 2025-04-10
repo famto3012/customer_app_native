@@ -105,6 +105,11 @@ const Bill = () => {
               merchant: "",
               cartId: "",
             },
+            promoCode: {
+              universal: null,
+              pickAndDrop: null,
+              customOrder: null,
+            },
           });
         }
       }
