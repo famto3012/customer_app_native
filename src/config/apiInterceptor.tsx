@@ -9,8 +9,9 @@ export const appAxios = axios.create({
 
 // Handle token refresh logic
 const refreshAccessToken = async () => {
-  const { refreshToken, setToken } = useAuthStore.getState();
   try {
+    const { refreshToken, setToken, setRefreshToken } = useAuthStore.getState();
+
     if (!refreshToken) {
       logout();
       return null;
@@ -20,25 +21,34 @@ const refreshAccessToken = async () => {
       refreshToken,
     });
 
-    const { newToken } = response.data;
+    const { newToken, newRefreshToken } = response.data;
+
     setToken(newToken);
+    if (newRefreshToken) {
+      setRefreshToken(newRefreshToken);
+    }
 
     return newToken;
   } catch (err) {
     console.log(`Error in getting new token: ${err}`);
+    logout();
+    return null;
   }
 };
 
 // Axios request interceptor
-appAxios.interceptors.request.use(async (config) => {
-  const { token } = useAuthStore.getState();
+appAxios.interceptors.request.use(
+  async (config) => {
+    const token = useAuthStore((state) => state.token);
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
-  return config;
-});
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Axios response interceptor
 appAxios.interceptors.response.use(
