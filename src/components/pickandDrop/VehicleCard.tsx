@@ -73,7 +73,7 @@ const VehicleCard: FC<VehicleCardProps> = ({
               </Typo>
               <Pressable
                 style={{ padding: scale(5) }}
-                onPress={() => onViewVehicle("Scooter")}
+                onPress={() => onViewVehicle(vehicle.vehicleType)}
               >
                 <Info size={scale(16)} />
               </Pressable>
