@@ -42,7 +42,7 @@ const VehicleDetail: FC<VehicleDetailProps> = ({ data }) => {
         />
 
         <Typo size={16} color={colors.NEUTRAL900} fontFamily="Medium">
-          Scooter
+          {data.name}
         </Typo>
       </View>
 

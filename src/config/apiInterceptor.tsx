@@ -37,18 +37,15 @@ const refreshAccessToken = async () => {
 };
 
 // Axios request interceptor
-appAxios.interceptors.request.use(
-  async (config) => {
-    const token = useAuthStore((state) => state.token);
+appAxios.interceptors.request.use(async (config) => {
+  const { token } = useAuthStore.getState();
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
 
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+  return config;
+});
 
 // Axios response interceptor
 appAxios.interceptors.response.use(
