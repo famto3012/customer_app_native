@@ -30,6 +30,7 @@ const Merchants = () => {
   const [query, setQuery] = useState<string>("");
   const [debounceQuery, setDebounceQuery] = useState<string>("");
   const [refreshing, setRefreshing] = useState(false);
+  const [isDataReady, setIsDataReady] = useState(false);
 
   const { latitude, longitude } = useSafeLocation();
 
@@ -79,6 +80,7 @@ const Merchants = () => {
           ? newMerchants
           : prev;
       });
+      setIsDataReady(true);
     }
   }, [data]);
 
@@ -166,9 +168,9 @@ const Merchants = () => {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          isLoading ? (
+          isLoading || !isDataReady ? (
             <MerchantCardLoader />
-          ) : !isLoading && merchants.length === 0 ? (
+          ) : merchants.length === 0 ? (
             <View
               style={{
                 flex: 1,

@@ -7,7 +7,6 @@ import Typo from "@/components/Typo";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  applyCustomOrderTipAndPromoCode,
   confirmCustomOrder,
   fetchCustomCartBill,
 } from "@/service/customOrderService";
@@ -27,11 +26,12 @@ import { CustomCartBill } from "@/types";
 import { useAuthStore } from "@/store/store";
 import AppliedPromoCode from "@/components/common/AppliedPromoCode";
 import { addOrder } from "@/localDB/controller/orderController";
+import { updateTip } from "@/service/userService";
 
 const CustomOrderBill = () => {
   const [promoCodeUsed, setPromoCodeUsed] = useState<string>("");
 
-  const { cartId } = useLocalSearchParams();
+  const { cartId }: { cartId: string } = useLocalSearchParams();
 
   const { promoCode } = useAuthStore.getState();
 
@@ -54,12 +54,10 @@ const CustomOrderBill = () => {
   });
 
   const handleAddTipMutation = useMutation({
-    mutationKey: ["custom-order-tip"],
-    mutationFn: (addedTip: number) => applyCustomOrderTipAndPromoCode(addedTip),
+    mutationKey: ["order-tip"],
+    mutationFn: (tip: number) => updateTip(cartId, "Custom Order", tip),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["custom-order-bill", cartId],
-      });
+      queryClient.invalidateQueries({ queryKey: ["custom-order-bill"] });
     },
   });
 
@@ -132,7 +130,11 @@ const CustomOrderBill = () => {
 
               <View style={styles.separator} />
 
-              <PromoCode deliveryMode="Custom Order" orderAmount={200} />
+              <PromoCode
+                deliveryMode="Custom Order"
+                orderAmount={cartBill?.grandTotal as number}
+                cartId={cartId}
+              />
             </View>
           </View>
 

@@ -608,3 +608,53 @@ export const fetchVisibilityOfLoyaltyOrReferral = async (
     return { status: false };
   }
 };
+
+export const updateTip = async (
+  cartId: string,
+  deliveryMode: string,
+  tip: number
+): Promise<{ status: boolean }> => {
+  try {
+    const res = await appAxios.post(`/customers/update-tip`, {
+      cartId,
+      deliveryMode,
+      tip,
+    });
+
+    return res.status === 200 ? res.data : { status: false };
+  } catch (err: any) {
+    console.log(`Error in updating tip: ${JSON.stringify(err.response.data)}`);
+    return { status: false };
+  }
+};
+
+export const applyPromo = async (
+  cartId: string,
+  promoCode: string,
+  deliveryMode: string
+): Promise<{ success: boolean }> => {
+  try {
+    const res = await appAxios.post(`/customers/apply-promo`, {
+      cartId,
+      promoCode,
+      deliveryMode,
+    });
+
+    return res.status === 200 ? res.data : { success: false };
+  } catch (err: any) {
+    console.log(`Error in applying tip: ${JSON.stringify(err.response.data)}`);
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        err.response.data.message || "Failed to apply promo code",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert(
+        "Error",
+        err.response.data.message || "Failed to apply promo code"
+      );
+    }
+    return { success: false };
+  }
+};

@@ -1,5 +1,6 @@
 import { appAxios } from "@/config/apiInterceptor";
 import { useData } from "@/context/DataContext";
+import { DeliveryOptionType } from "@/types";
 import { Alert, Platform, ToastAndroid } from "react-native";
 import RazorpayCheckout from "react-native-razorpay";
 
@@ -384,17 +385,15 @@ export const getCustomerCart = async () => {
   }
 };
 
-export const getMerchantDeliveryOption = async (merchantId: string) => {
+export const getMerchantDeliveryOption = async (
+  merchantId: string
+): Promise<DeliveryOptionType> => {
   try {
     const res = await appAxios.get(
       `/customers/merchant/${merchantId}/delivery-option`
     );
 
-    if (res.status === 200) {
-      return res.data.data !== "On-demand";
-    }
-
-    return true; // Default to true if status is not 200
+    return res.data.data;
   } catch (err) {
     console.error(`Error in getting merchant delivery option:`, err);
     if (Platform.OS === "android") {
@@ -406,7 +405,8 @@ export const getMerchantDeliveryOption = async (merchantId: string) => {
     } else {
       Alert.alert("", "Something went wrong");
     }
-    return false; // Ensure a boolean is returned
+
+    return "On-demand";
   }
 };
 
@@ -509,8 +509,30 @@ export const applyUniversalPromoCode = async (promoCode: string) => {
     });
 
     return res.status === 200 ? res.data : null;
-  } catch (err) {
-    console.error(`Error in applying promo code:`, err);
+  } catch (err: any) {
+    const message = err?.response?.data?.message;
+
+    if (
+      err?.response?.status === 400 &&
+      message === "Promo code is not applicable for this merchant"
+    ) {
+      // Gracefully handle business logic failure
+      if (Platform.OS === "android") {
+        ToastAndroid.showWithGravity(
+          message,
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        Alert.alert("", message);
+      }
+
+      return null;
+    }
+
+    // For actual unexpected errors
+    console.error("Unexpected error in applying promo code:", err);
+
     if (Platform.OS === "android") {
       ToastAndroid.showWithGravity(
         "Something went wrong",
@@ -520,6 +542,7 @@ export const applyUniversalPromoCode = async (promoCode: string) => {
     } else {
       Alert.alert("", "Something went wrong");
     }
+
     return null;
   }
 };

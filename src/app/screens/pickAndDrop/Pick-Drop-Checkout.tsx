@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import ItemSpecification from "@/components/pickandDrop/ItemSpecification";
 import AddTip from "@/components/common/AddTip";
 import Typo from "@/components/Typo";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { colors, radius, spacingX } from "@/constants/theme";
 import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
@@ -21,7 +21,6 @@ import { PickAndDropCartBill } from "@/types";
 import { useAuthStore } from "@/store/store";
 import AppliedPromoCode from "@/components/common/AppliedPromoCode";
 import {
-  addPickAndDropTipAndPromoCode,
   confirmPickAndDropOrder,
   getPickAndDropBill,
   verifyPickAndDropPayment,
@@ -30,15 +29,17 @@ import BillSheet from "@/components/pickandDrop/BillSheet";
 import { CaretUp } from "phosphor-react-native";
 import PaymentOptionSheet from "@/components/BottomSheets/common/PaymentOptionSheet";
 import { addOrder } from "@/localDB/controller/orderController";
+import { updateTip } from "@/service/userService";
 
 const PickAndDropCheckout = () => {
   const [promoCodeUsed, setPromoCodeUsed] = useState<string>("");
   const [selectedPaymentMode, setSelectedPaymentMode] =
     useState<string>("Online-payment");
 
-  const { cartId, items } = useLocalSearchParams();
+  const { cartId, items }: { cartId: string; items: string } =
+    useLocalSearchParams();
 
-  const { promoCode } = useAuthStore.getState();
+  const promoCode = useAuthStore((state) => state.promoCode.pickAndDrop);
 
   const billSheetRef = useRef<BottomSheet>(null);
   const paymentSheetRef = useRef<BottomSheet>(null);
@@ -49,8 +50,25 @@ const PickAndDropCheckout = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    setPromoCodeUsed(promoCode?.pickAndDrop?.toString() ?? "");
-  }, [promoCode?.pickAndDrop]);
+    setPromoCodeUsed(promoCode?.toString() ?? "");
+  }, [promoCode]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (promoCode || promoCodeUsed) {
+        useAuthStore.setState({
+          promoCode: { customOrder: "", pickAndDrop: "", universal: "" },
+        });
+        setPromoCodeUsed("");
+      }
+
+      if (cartBill?.addedTip) {
+        handleAddTipMutation.mutate(0);
+      }
+
+      return () => null;
+    }, [])
+  );
 
   const { data: cartBill } = useQuery<PickAndDropCartBill>({
     queryKey: ["pick-and-drop-bill", cartId],
@@ -58,14 +76,11 @@ const PickAndDropCheckout = () => {
     enabled: !!cartId,
   });
 
-  // Mutation to apply tip
   const handleAddTipMutation = useMutation({
-    mutationKey: ["pick-and-drop-tip"],
-    mutationFn: (addedTip: number) => addPickAndDropTipAndPromoCode(addedTip),
+    mutationKey: ["order-tip"],
+    mutationFn: (tip: number) => updateTip(cartId, "Pick and Drop", tip),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["pick-and-drop-bill"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["pick-and-drop-bill"] });
     },
   });
 
@@ -162,7 +177,8 @@ const PickAndDropCheckout = () => {
 
               <PromoCode
                 deliveryMode="Pick and Drop"
-                orderAmount={cartBill?.grandTotal || 0}
+                orderAmount={cartBill?.grandTotal as number}
+                cartId={cartId}
               />
             </View>
           </View>
