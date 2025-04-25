@@ -10,23 +10,30 @@ import { router, useLocalSearchParams } from "expo-router";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
 import Search from "@/components/Search";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAvailablePromoCodes } from "@/service/userService";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { applyPromo, getAvailablePromoCodes } from "@/service/userService";
 import Typo from "@/components/Typo";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius, spacingY } from "@/constants/theme";
 import { useAuthStore } from "@/store/store";
-import { applyUniversalPromoCode } from "@/service/universal";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Grayscale } from "react-native-color-matrix-image-filters";
-import { applyCustomOrderTipAndPromoCode } from "@/service/customOrderService";
-import { addPickAndDropTipAndPromoCode } from "@/service/pickandDropService";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import PromoDetail from "@/components/BottomSheets/common/PromoDetail";
 import { PromoCodeProps } from "@/types";
 
 const PromoCodeList = () => {
-  const { deliveryMode, merchantId, orderAmount } = useLocalSearchParams();
+  const {
+    deliveryMode,
+    merchantId,
+    orderAmount,
+    cartId,
+  }: {
+    deliveryMode: string;
+    merchantId: string;
+    orderAmount: string;
+    cartId: string;
+  } = useLocalSearchParams();
   const [query, setQuery] = useState<string>("");
   const [debounceQuery, setDebounceQuery] = useState<string>("");
   const [selectedPromoCode, setSelectedPromoCode] =
@@ -54,56 +61,51 @@ const PromoCodeList = () => {
     }, 500);
   }, [debounceQuery]);
 
+  const applyPromoMutation = useMutation({
+    mutationKey: ["apply-promo-code"],
+    mutationFn: ({
+      cartId,
+      promoCode,
+      deliveryMode,
+    }: {
+      cartId: string;
+      promoCode: string;
+      deliveryMode: string;
+    }) => applyPromo(cartId, promoCode, deliveryMode),
+    onSuccess: ({ success }, variables) => {
+      if (success) {
+        queryClient.clear();
+
+        useAuthStore.setState({
+          promoCode: {
+            ...useAuthStore.getState().promoCode,
+            universal: ["Take Away", "Home Delivery"].includes(
+              variables.deliveryMode
+            )
+              ? variables.promoCode
+              : null,
+            customOrder:
+              variables.deliveryMode === "Custom Order"
+                ? variables.promoCode
+                : null,
+            pickAndDrop:
+              variables.deliveryMode === "Pick and Drop"
+                ? variables.promoCode
+                : null,
+          },
+        });
+
+        router.back();
+      }
+    },
+  });
+
   const handleApplyPromoCode = (item: PromoCodeProps) => {
-    if (deliveryMode === "Home Delivery") {
-      if (Number(orderAmount) < item.minOrderAmount) return;
-
-      // Apply promo code mutation before navigating back
-      applyUniversalPromoCode(item.promoCode).then(() => {
-        queryClient.invalidateQueries({ queryKey: ["universal-bill"] });
-        useAuthStore.setState({
-          promoCode: {
-            ...useAuthStore.getState().promoCode,
-            universal: item.promoCode,
-          },
-        });
-        router.back();
-      });
-
-      return;
-    }
-
-    if (deliveryMode === "Custom Order") {
-      // Apply promo code mutation before navigating back
-      applyCustomOrderTipAndPromoCode(null, item.promoCode).then(() => {
-        queryClient.invalidateQueries({ queryKey: ["custom-order-bill"] });
-        useAuthStore.setState({
-          promoCode: {
-            ...useAuthStore.getState().promoCode,
-            customOrder: item.promoCode,
-          },
-        });
-
-        router.back();
-      });
-
-      return;
-    }
-
-    if (deliveryMode === "Pick and Drop") {
-      addPickAndDropTipAndPromoCode(null, item.promoCode).then(() => {
-        queryClient.invalidateQueries({ queryKey: ["pick-and-drop-bill"] });
-        useAuthStore.setState({
-          promoCode: {
-            ...useAuthStore.getState().promoCode,
-            pickAndDrop: item.promoCode,
-          },
-        });
-        router.back();
-      });
-
-      return;
-    }
+    applyPromoMutation.mutate({
+      cartId: cartId,
+      promoCode: item.promoCode,
+      deliveryMode: deliveryMode,
+    });
   };
 
   const renderItem = ({ item }: { item: PromoCodeProps }) => {

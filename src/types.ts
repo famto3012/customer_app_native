@@ -8,6 +8,8 @@ import {
   ViewStyle,
 } from "react-native";
 
+export type DeliveryOptionType = "On-demand" | "Scheduled" | "Both";
+
 export type ScreenWrapperProps = {
   style?: ViewStyle;
   children: React.ReactNode;

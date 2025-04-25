@@ -22,11 +22,12 @@ import BottomSheet, {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addUniversalTip,
+  applyUniversalPromoCode,
   getCartBill,
   placeUniversalOrder,
   verifyPayment,
 } from "@/service/universal";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CaretUp } from "phosphor-react-native";
 import PaymentOptionSheet from "@/components/BottomSheets/common/PaymentOptionSheet";
@@ -36,6 +37,7 @@ import AppliedPromoCode from "@/components/common/AppliedPromoCode";
 import { addOrder } from "@/localDB/controller/orderController";
 import { useData } from "@/context/DataContext";
 import { clearCart } from "@/localDB/controller/cartController";
+import { removeAppliedPromoCode, updateTip } from "@/service/userService";
 
 const Bill = () => {
   const [selectedPaymentMode, setSelectedPaymentMode] =
@@ -46,21 +48,43 @@ const Bill = () => {
 
   const paymentSheetSnapPoints = useMemo(() => ["40%"], []);
 
-  const { cartId, merchantId, deliveryMode } = useLocalSearchParams();
-  const { promoCode } = useAuthStore.getState();
+  const {
+    cartId,
+    merchantId,
+    deliveryMode,
+  }: { cartId: string; merchantId: string; deliveryMode: string } =
+    useLocalSearchParams();
+  const promoCode = useAuthStore((state) => state.promoCode.universal);
   const { setProductCounts } = useData();
 
   const queryClient = useQueryClient();
 
+  useFocusEffect(
+    useCallback(() => {
+      if (promoCode || promoCodeUsed) {
+        useAuthStore.setState({
+          promoCode: { customOrder: "", pickAndDrop: "", universal: "" },
+        });
+        setPromoCodeUsed("");
+      }
+
+      if (data?.addedTip) {
+        handleAddTipMutation.mutate(0);
+      }
+
+      return () => null;
+    }, [])
+  );
+
   useEffect(() => {
-    if (promoCode?.universal?.toString()) {
-      setPromoCodeUsed(promoCode?.universal?.toString() || "");
+    if (promoCode?.toString()) {
+      setPromoCodeUsed(promoCode || "");
     }
-  }, [promoCode?.universal]);
+  }, [promoCode]);
 
   const handleAddTipMutation = useMutation({
-    mutationKey: ["universal-tip"],
-    mutationFn: (tip: number) => addUniversalTip(tip),
+    mutationKey: ["order-tip"],
+    mutationFn: (tip: number) => updateTip(cartId, deliveryMode, tip),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["universal-bill"] });
     },
@@ -178,6 +202,7 @@ const Bill = () => {
                 ? data.discountedGrandTotal
                 : data?.originalGrandTotal
             }
+            cartId={cartId}
           />
         </View>
 

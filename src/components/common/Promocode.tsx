@@ -9,13 +9,14 @@ const PromoCode: FC<{
   deliveryMode: string;
   merchantId?: string;
   orderAmount: number;
-}> = ({ deliveryMode, merchantId, orderAmount }) => {
+  cartId: string;
+}> = ({ deliveryMode, merchantId, orderAmount, cartId }) => {
   return (
     <Pressable
       onPress={() =>
         router.push({
           pathname: "/screens/common/promo-code",
-          params: { deliveryMode, merchantId, orderAmount },
+          params: { deliveryMode, merchantId, orderAmount, cartId },
         })
       }
       style={styles.container}

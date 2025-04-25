@@ -103,28 +103,6 @@ export const addPickAndDropItems = async (
   }
 };
 
-export const addPickAndDropTipAndPromoCode = async (
-  addedTip?: number | null,
-  promoCode?: string
-) => {
-  try {
-    const res = await appAxios.post("/customers/add-tip-and-promocode", {
-      addedTip,
-      promoCode,
-    });
-
-    return res.status === 200 ? res.data.success : false;
-  } catch (err: any) {
-    console.error(`Error in adding tip or promo code:`, err.response.data);
-
-    // Extract and display server error message
-    const errorMessage = err.response?.data?.message || "Something went wrong!";
-
-    Alert.alert("", errorMessage);
-    return false;
-  }
-};
-
 export const getPickAndDropBill = async (cartId: string) => {
   try {
     const res = await appAxios.get("/customers/get-pick-and-drop-bill", {

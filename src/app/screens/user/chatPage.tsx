@@ -40,12 +40,13 @@ const chatPage = () => {
     const handleNewMessage = (newMessage: any) => {
       const formattedMessage = {
         _id: newMessage.id,
-        text: newMessage.text,
+        text: newMessage?.text,
         createdAt: new Date(newMessage.createdAt),
         user: {
           _id: newMessage.sender,
           name: newMessage.sender === userId ? "You" : agentName,
         },
+        image: newMessage?.img,
       };
 
       setMessages((previousMessages: any[]) =>
@@ -64,12 +65,13 @@ const chatPage = () => {
     if (data) {
       const formattedMessages = data.map((msg: any) => ({
         _id: msg.id,
-        text: msg.text,
+        text: msg?.text,
         createdAt: new Date(msg.createdAt),
         user: {
           _id: msg.sender,
           name: msg.sender === userId ? "You" : agentName,
         },
+        image: msg?.img,
       }));
 
       setMessages(formattedMessages.reverse());
@@ -152,7 +154,7 @@ const chatPage = () => {
         messages={messages}
         onSend={(messages) => onSend(messages)}
         user={{
-          _id: userId,
+          _id: userId as string,
           name: "You",
         }}
         isScrollToBottomEnabled

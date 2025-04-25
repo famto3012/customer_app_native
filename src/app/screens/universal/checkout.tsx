@@ -27,7 +27,7 @@ import {
   getMerchantDeliveryOption,
 } from "@/service/universal";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CartProps } from "@/types";
+import { CartProps, DeliveryOptionType } from "@/types";
 import { useAuthStore } from "@/store/store";
 import Button from "@/components/Button";
 import { commonStyles } from "@/constants/commonStyles";
@@ -118,7 +118,7 @@ const Checkout = () => {
     queryFn: () => getCustomerCart(),
   });
 
-  const { data: deliveryOption } = useQuery({
+  const { data: deliveryOption } = useQuery<DeliveryOptionType>({
     queryKey: ["merchant-delivery-option", cart?.merchantId],
     queryFn: () =>
       getMerchantDeliveryOption(cart?.merchantId?.toString() ?? ""),
@@ -145,7 +145,7 @@ const Checkout = () => {
   }, [cartData]);
 
   useEffect(() => {
-    setShowScheduleOption(!!deliveryOption);
+    setShowScheduleOption(deliveryOption !== "On-demand");
   }, [deliveryOption]);
 
   useEffect(() => {
@@ -233,6 +233,16 @@ const Checkout = () => {
   const handleConfirm = (data: formDataProps) => {
     if (!data.deliveryAddressType) {
       showAlert("Please select a delivery address");
+      return;
+    }
+
+    if (
+      deliveryOption === "Scheduled" &&
+      (!formData.ifScheduled?.startDate ||
+        !formData.ifScheduled?.endDate ||
+        !formData.ifScheduled?.time)
+    ) {
+      showAlert("This merchant accepts only scheduled orders");
       return;
     }
 
@@ -352,7 +362,6 @@ const Checkout = () => {
                 setFormData({ ...formData, voiceInstructionToAgent: data })
               }
               onAgentInstruction={(data) => {
-                console.log(data);
                 setFormData({ ...formData, instructionToDeliveryAgent: data });
               }}
               onMerchantVoice={(data) =>
