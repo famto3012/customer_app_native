@@ -307,3 +307,11 @@ export type PromoCodeProps = {
   description?: string;
   maxDiscountValue: number;
 };
+
+export type AppBannerType = {
+  name: string;
+  imageUrl: string;
+  businessCategoryId: string;
+  merchantId: string;
+  merchantName: string;
+};

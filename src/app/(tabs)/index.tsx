@@ -1,11 +1,4 @@
-import {
-  View,
-  StyleSheet,
-  Image,
-  ScrollView,
-  ImageBackground,
-  Modal,
-} from "react-native";
+import { View, StyleSheet, ScrollView, Pressable } from "react-native";
 import HomeHeader from "@/components/HomeHeader";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import SearchView from "@/components/SearchView";
@@ -37,6 +30,7 @@ import { commonStyles } from "@/constants/commonStyles";
 import TemporaryOrderSheet from "@/components/BottomSheets/universal/TemporaryOrderSheet";
 import FastImage from "react-native-fast-image";
 import { getAllOrder } from "@/localDB/controller/orderController";
+import { AppBannerType } from "@/types";
 
 const Home = () => {
   const temporaryOrderSheet = useRef<BottomSheet>(null);
@@ -131,6 +125,23 @@ const Home = () => {
     }
   }, [checkTemporaryOrders]);
 
+  const handleBannerPress = (item: AppBannerType) => {
+    if (item.businessCategoryId && item.merchantId) {
+      useAuthStore.setState({
+        selectedBusiness: item.businessCategoryId,
+        selectedMerchant: {
+          merchantId: item.merchantId as string,
+          merchantName: item.merchantName as string,
+        },
+      });
+
+      router.push({
+        pathname: "/screens/universal/products",
+        params: { merchantId: item.merchantId },
+      });
+    }
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.WHITE }}>
       <ScrollView
@@ -144,11 +155,7 @@ const Home = () => {
         }}
       >
         <ScreenWrapper>
-          <ImageBackground
-            source={require("@/assets/images/home-sketch.webp")}
-            style={styles.imageBackground}
-            resizeMode="cover"
-          >
+          <View style={styles.imageBackground}>
             <View style={styles.overlayContainer}>
               <HomeHeader
                 onPress={() =>
@@ -181,24 +188,26 @@ const Home = () => {
               width={Math.round(SCREEN_WIDTH)} // Ensuring whole number
               height={Math.round(SCREEN_HEIGHT * 0.48)} // Ensuring whole number
               data={bannerData || []}
-              renderItem={({ item }: any) => (
-                <FastImage
-                  source={{
-                    uri: item?.imageUrl,
-                    priority: FastImage.priority.high,
-                  }}
-                  resizeMode="cover"
-                  style={{
-                    width: SCREEN_WIDTH,
-                    height: Math.round(SCREEN_HEIGHT * 0.48),
-                    borderBottomLeftRadius: radius._30,
-                    borderBottomRightRadius: radius._30,
-                  }}
-                />
+              renderItem={({ item }: { item: AppBannerType }) => (
+                <Pressable onPress={() => handleBannerPress(item)}>
+                  <FastImage
+                    source={{
+                      uri: item?.imageUrl,
+                      priority: FastImage.priority.high,
+                    }}
+                    resizeMode="cover"
+                    style={{
+                      width: SCREEN_WIDTH,
+                      height: Math.round(SCREEN_HEIGHT * 0.48),
+                      borderBottomLeftRadius: radius._30,
+                      borderBottomRightRadius: radius._30,
+                    }}
+                  />
+                </Pressable>
               )}
               customAnimation={animationStyle}
             />
-          </ImageBackground>
+          </View>
           <TopService />
           <BusinessCategories query="" />
         </ScreenWrapper>

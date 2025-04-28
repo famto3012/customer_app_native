@@ -71,6 +71,7 @@ const UserSavedAddress: FC<NewAddressUIProps> = ({
     }) => setGeofenceForUser(latitude, longitude),
     onSuccess: (data, variables) => {
       if (data.success) {
+        console.log("Success");
         useAuthStore.setState({
           userAddress: {
             type: variables.type,

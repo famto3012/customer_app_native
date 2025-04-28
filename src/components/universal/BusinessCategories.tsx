@@ -25,7 +25,18 @@ const BusinessCategories: FC<{ query: string }> = ({ query }) => {
   });
 
   useEffect(() => {
-    setBusinessCategory(data);
+    if (data?.outside) {
+      router.push({
+        pathname: "/(modals)/SelectAddress",
+        params: {
+          showActionButton: "false",
+          setAsUserAddress: "true",
+          mustSelectAddress: "true",
+        },
+      });
+    } else {
+      setBusinessCategory(data?.data as BusinessCategoryProps[]);
+    }
   }, [data]);
 
   const renderItem = ({ item }: { item: BusinessCategoryProps }) => (
@@ -68,6 +79,13 @@ const BusinessCategories: FC<{ query: string }> = ({ query }) => {
         scrollEnabled={false}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
+        ListEmptyComponent={
+          <View style={{ alignItems: "center", marginTop: verticalScale(15) }}>
+            <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
+              No Business category.
+            </Typo>
+          </View>
+        }
         numColumns={3}
       />
     </View>
