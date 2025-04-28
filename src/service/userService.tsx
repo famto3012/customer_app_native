@@ -588,8 +588,20 @@ export const setGeofenceForUser = async (
     return res.status === 200
       ? res.data
       : { success: false, message: "Failed" };
-  } catch (err) {
-    console.log(`Error in setting geofence`);
+  } catch (err: any) {
+    console.log(`Error in setting geofence`, JSON.stringify(err.response.data));
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        err.response.data.message || "Failed to set geofence",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert(
+        "Error",
+        err.response.data.message || "Failed to set geofence"
+      );
+    }
     return { success: false, message: "Failed" };
   }
 };
@@ -656,5 +668,18 @@ export const applyPromo = async (
       );
     }
     return { success: false };
+  }
+};
+
+export const getServiceTimings = async () => {
+  try {
+    const res = await appAxios.get(`/customers/customization/timings`);
+
+    return res.status === 200 ? res.data : null;
+  } catch (err: any) {
+    console.log(
+      `Error in getting service timings: ${JSON.stringify(err.response.data)}`
+    );
+    return null;
   }
 };

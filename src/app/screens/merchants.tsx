@@ -31,6 +31,9 @@ const Merchants = () => {
   const [debounceQuery, setDebounceQuery] = useState<string>("");
   const [refreshing, setRefreshing] = useState(false);
   const [isDataReady, setIsDataReady] = useState(false);
+  const [filteredMerchantFilters, setFilteredMerchantFilters] = useState<any>(
+    []
+  );
 
   const { latitude, longitude } = useSafeLocation();
 
@@ -83,6 +86,23 @@ const Merchants = () => {
       setIsDataReady(true);
     }
   }, [data]);
+
+  useEffect(() => {
+    const categoryWithVegFilter = [
+      "Food",
+      "Home Chef",
+      "Home Bakers",
+      "Pet Supplies",
+    ];
+
+    if (categoryWithVegFilter.includes(businessCategory as string)) {
+      setFilteredMerchantFilters(merchantFilters);
+    } else {
+      setFilteredMerchantFilters(
+        merchantFilters.filter((item) => item.label !== "Veg")
+      );
+    }
+  }, [businessCategory]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -143,7 +163,7 @@ const Merchants = () => {
             }}
           >
             <FlatList
-              data={merchantFilters}
+              data={filteredMerchantFilters}
               renderItem={renderFilterItem}
               keyExtractor={(item) => item.value}
               horizontal

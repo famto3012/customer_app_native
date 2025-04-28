@@ -1,6 +1,6 @@
 import { appAxios } from "@/config/apiInterceptor";
 import { useData } from "@/context/DataContext";
-import { DeliveryOptionType } from "@/types";
+import { BusinessCategoryProps, DeliveryOptionType } from "@/types";
 import { Alert, Platform, ToastAndroid } from "react-native";
 import RazorpayCheckout from "react-native-razorpay";
 
@@ -8,7 +8,7 @@ export const getBusinessCategories = async (
   latitude: number,
   longitude: number,
   query: string
-) => {
+): Promise<{ outside: boolean; data: BusinessCategoryProps[] }> => {
   try {
     const res = await appAxios.post(
       "/customers/all-business-categories",
@@ -19,13 +19,16 @@ export const getBusinessCategories = async (
       { params: { query } }
     );
 
-    if (res.status === 200) {
-      return res.data.data;
-    } else {
-      throw new Error("Failed to fetch categories");
+    if (res.status === 200 && res.data.outside) {
+      return { outside: true, data: [] };
     }
-  } catch (err) {
-    console.error(`Error in getting business categories:`, err);
+
+    return { outside: false, data: res.data.data };
+  } catch (err: any) {
+    console.error(
+      `Error in getting business categories:`,
+      JSON.stringify(err.response.data)
+    );
     if (Platform.OS === "android") {
       ToastAndroid.showWithGravity(
         "Something went wrong",
@@ -35,7 +38,8 @@ export const getBusinessCategories = async (
     } else {
       Alert.alert("", "Something went wrong");
     }
-    return [];
+
+    return { outside: false, data: [] };
   }
 };
 

@@ -108,7 +108,9 @@ const AddItem: FC<{
       return;
     }
 
-    if ((item.quantity && !item.unit) || (!item.quantity && item.unit)) {
+    console.log({ item });
+
+    if (item.quantity && !item.unit) {
       if (Platform.OS === "android") {
         ToastAndroid.showWithGravity(
           "Please add both quantity and unit",
@@ -119,6 +121,10 @@ const AddItem: FC<{
         Alert.alert("Error", "Please add both quantity and unit");
       }
       return;
+    }
+
+    if (!item.quantity && item.unit) {
+      item.unit = "";
     }
 
     const formDataObject = new FormData();
@@ -159,6 +165,45 @@ const AddItem: FC<{
         />
       </View>
 
+      <View style={styles.unit}>
+        <View>
+          <Typo size={13} color={colors.NEUTRAL900}>
+            Number of
+          </Typo>
+          <Typo size={13} color={colors.NEUTRAL900}>
+            units
+          </Typo>
+        </View>
+
+        <View style={styles.actionBtn}>
+          <TouchableOpacity
+            onPress={() => {
+              if (item.numOfUnits === 1) return;
+              setItem({ ...item, numOfUnits: item.numOfUnits - 1 });
+            }}
+            style={styles.btn}
+          >
+            <Typo size={14} color={colors.PRIMARY}>
+              -
+            </Typo>
+          </TouchableOpacity>
+          <Typo size={16} color={colors.PRIMARY} fontFamily="Medium">
+            {item.numOfUnits}
+          </Typo>
+          <TouchableOpacity
+            onPress={() => {
+              if (item.numOfUnits === 99) return;
+              setItem({ ...item, numOfUnits: item.numOfUnits + 1 });
+            }}
+            style={styles.btn}
+          >
+            <Typo size={14} color={colors.PRIMARY}>
+              +
+            </Typo>
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <View style={styles.dataContainer}>
         <Typo
           size={13}
@@ -195,40 +240,6 @@ const AddItem: FC<{
           }}
           mode="auto"
         />
-      </View>
-
-      <View style={styles.unit}>
-        <Typo size={13} color={colors.NEUTRAL900}>
-          Number of units
-        </Typo>
-
-        <View style={styles.actionBtn}>
-          <TouchableOpacity
-            onPress={() => {
-              if (item.numOfUnits === 1) return;
-              setItem({ ...item, numOfUnits: item.numOfUnits - 1 });
-            }}
-            style={styles.btn}
-          >
-            <Typo size={14} color={colors.PRIMARY}>
-              -
-            </Typo>
-          </TouchableOpacity>
-          <Typo size={16} color={colors.PRIMARY} fontFamily="Medium">
-            {item.numOfUnits}
-          </Typo>
-          <TouchableOpacity
-            onPress={() => {
-              if (item.numOfUnits === 99) return;
-              setItem({ ...item, numOfUnits: item.numOfUnits + 1 });
-            }}
-            style={styles.btn}
-          >
-            <Typo size={14} color={colors.PRIMARY}>
-              +
-            </Typo>
-          </TouchableOpacity>
-        </View>
       </View>
 
       <View>
@@ -311,7 +322,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: spacingX._15,
     alignItems: "center",
-    justifyContent: "space-between",
+    // justifyContent: "space-between",
     marginVertical: verticalScale(10),
   },
   actionBtn: {
@@ -324,11 +335,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    height: verticalScale(34),
+    height: verticalScale(40),
     borderRadius: radius._20,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    width: "75%",
   },
   btn: {
     paddingHorizontal: scale(18),

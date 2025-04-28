@@ -1,12 +1,72 @@
-import { Image, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import React from "react";
 import { scale, verticalScale } from "@/utils/styling";
 import Typo from "./Typo";
 import { colors, radius, spacingX } from "@/constants/theme";
-import { router } from "expo-router";
+import { Href, router } from "expo-router";
 import LottieView from "lottie-react-native";
+import { useQuery } from "@tanstack/react-query";
+import { getServiceTimings } from "@/service/userService";
+import { useShowAlert } from "@/hooks/useShowAlert";
 
 const TopService = () => {
+  const { showAlert } = useShowAlert();
+
+  const { data, isError } = useQuery({
+    queryKey: ["service-timings"],
+    queryFn: getServiceTimings,
+  });
+
+  const replaceScreen = (
+    type: "Pick and Drop" | "Custom Order",
+    route: Href
+  ) => {
+    if (isError) {
+      showAlert("Something went wrong!");
+      return;
+    }
+
+    const { customOrderTimings, pickAndDropOrderTimings } = data;
+
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0"); // Month is 0-indexed
+    const date = String(now.getDate()).padStart(2, "0");
+
+    // Helper function to create local date
+    const createLocalDate = (timeStr: string) => {
+      const [hours, minutes] = timeStr.split(":").map(Number);
+      return new Date(year, now.getMonth(), now.getDate(), hours, minutes, 0); // Local date
+    };
+
+    if (type === "Pick and Drop") {
+      const startTime = createLocalDate(pickAndDropOrderTimings.startTime);
+      const endTime = createLocalDate(pickAndDropOrderTimings.endTime);
+
+      if (now > endTime || now < startTime) {
+        showAlert("Currently Pick and drop service is unavailable!");
+        return;
+      }
+
+      router.push(route);
+    }
+
+    if (type === "Custom Order") {
+      const startTime = createLocalDate(customOrderTimings.startTime);
+      const endTime = createLocalDate(customOrderTimings.endTime);
+
+      console.log({ now, startTime, endTime });
+
+      if (now > endTime || now < startTime) {
+        showAlert("Currently Custom Order service is unavailable!");
+        return;
+      }
+
+      router.push(route);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Typo size={15} fontFamily="SemiBold" color={colors.NEUTRAL900}>
@@ -21,7 +81,12 @@ const TopService = () => {
         }}
       >
         <Pressable
-          onPress={() => router.push("/screens/pickAndDrop/pick-and-drop-home")}
+          onPress={() =>
+            replaceScreen(
+              "Pick and Drop",
+              "/screens/pickAndDrop/pick-and-drop-home"
+            )
+          }
           style={styles.serviceCard}
         >
           <LottieView
@@ -44,18 +109,19 @@ const TopService = () => {
         </Pressable>
 
         <Pressable
-          onPress={() => router.push("/screens/customOrder/custom-order-home")}
+          onPress={() =>
+            replaceScreen(
+              "Custom Order",
+              "/screens/customOrder/custom-order-home"
+            )
+          }
           style={styles.serviceCard}
         >
-          {/* <Image
-            source={require("@/assets/images/custom-order-animation.gif")}
-            style={{ height: verticalScale(68), width: verticalScale(68) }}
-          /> */}
           <LottieView
-            source={require("@/assets/images/custom-order-animation.json")} // Path to your Lottie JSON file
+            source={require("@/assets/images/custom-order-animation.json")}
             autoPlay
             loop
-            style={{ width: verticalScale(70), height: verticalScale(70) }} // Adjust size as needed
+            style={{ width: verticalScale(70), height: verticalScale(70) }}
             renderMode="HARDWARE"
             cacheComposition={true}
           />
