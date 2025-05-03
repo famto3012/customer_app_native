@@ -10,6 +10,11 @@ import {
 
 export type DeliveryOptionType = "On-demand" | "Scheduled" | "Both";
 
+export type PaymentOptionType =
+  | "Cash-on-delivery"
+  | "Famto-cash"
+  | "Online-payment";
+
 export type ScreenWrapperProps = {
   style?: ViewStyle;
   children: React.ReactNode;

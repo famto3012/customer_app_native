@@ -763,3 +763,23 @@ export const cancelOrder = async (
     return { success: false, message: "Error while cancelling order" };
   }
 };
+
+export const getFiltersFromBusinessCategory = async (
+  businessCategoryId: string,
+  filterType: string
+) => {
+  try {
+    const res = await appAxios.get("/customers/business-filters", {
+      params: {
+        businessCategoryId,
+        filterType,
+      },
+    });
+
+    return res.status === 200 ? res.data : [];
+  } catch (err) {
+    console.error(`Error in getting filters:`, err);
+
+    return [];
+  }
+};

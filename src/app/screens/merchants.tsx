@@ -11,15 +11,17 @@ import Header from "@/components/Header";
 import Search from "@/components/Search";
 import { useLocalSearchParams } from "expo-router";
 import { XCircle } from "phosphor-react-native";
-import { merchantFilters } from "@/utils/defaultData";
 import { scale, SCREEN_HEIGHT, verticalScale } from "@/utils/styling";
 import { colors, spacingX } from "@/constants/theme";
 import Typo from "@/components/Typo";
 import MerchantCard from "@/components/universal/MerchantCard";
 import { MerchantCardProps } from "@/types";
-import { getMerchants } from "@/service/universal";
+import {
+  getFiltersFromBusinessCategory,
+  getMerchants,
+} from "@/service/universal";
 import { useSafeLocation } from "@/utils/helpers";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import MerchantCardLoader from "@/components/Loader/MerchantCardLoader";
 
 const Merchants = () => {
@@ -31,13 +33,35 @@ const Merchants = () => {
   const [debounceQuery, setDebounceQuery] = useState<string>("");
   const [refreshing, setRefreshing] = useState(false);
   const [isDataReady, setIsDataReady] = useState(false);
-  const [filteredMerchantFilters, setFilteredMerchantFilters] = useState<any>(
-    []
-  );
+  const [filteredMerchantFilters, setFilteredMerchantFilters] = useState<
+    { label: string; value: string }[]
+  >([]);
 
   const { latitude, longitude } = useSafeLocation();
 
   const MERCHANT_LIMIT = 10;
+
+  const { data: merchantFilters } = useQuery<string[]>({
+    queryKey: ["merchant-filter", businessCategoryId],
+    queryFn: () =>
+      getFiltersFromBusinessCategory(
+        businessCategoryId as string,
+        "merchantFilters"
+      ),
+  });
+
+  useEffect(() => {
+    if (merchantFilters && merchantFilters.length > 0) {
+      setFilteredMerchantFilters(
+        merchantFilters.map((filter) => ({
+          label: filter.charAt(0).toUpperCase() + filter.slice(1),
+          value: filter.toLowerCase(),
+        }))
+      );
+    } else {
+      setFilteredMerchantFilters([]);
+    }
+  }, [merchantFilters]);
 
   const {
     data,
@@ -87,23 +111,6 @@ const Merchants = () => {
     }
   }, [data]);
 
-  useEffect(() => {
-    const categoryWithVegFilter = [
-      "Food",
-      "Home Chef",
-      "Home Bakers",
-      "Pet Supplies",
-    ];
-
-    if (categoryWithVegFilter.includes(businessCategory as string)) {
-      setFilteredMerchantFilters(merchantFilters);
-    } else {
-      setFilteredMerchantFilters(
-        merchantFilters.filter((item) => item.label !== "Veg")
-      );
-    }
-  }, [businessCategory]);
-
   const handleRefresh = async () => {
     setRefreshing(true);
     await refetch();
@@ -122,7 +129,7 @@ const Merchants = () => {
   };
 
   const renderFilterItem = useCallback(
-    ({ item }: any) => (
+    ({ item }: { item: { label: string; value: string } }) => (
       <Pressable
         style={[
           styles.filterItem,
@@ -160,6 +167,7 @@ const Merchants = () => {
             style={{
               paddingHorizontal: scale(20),
               marginVertical: verticalScale(16),
+              display: filteredMerchantFilters.length > 0 ? "flex" : "none",
             }}
           >
             <FlatList

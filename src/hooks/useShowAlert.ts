@@ -1,7 +1,7 @@
 import { Alert, Platform, ToastAndroid } from "react-native";
 
 export const useShowAlert = () => {
-  const showAlert = (message: string) => {
+  const showAlert = (message: string, title: string = "Error") => {
     if (Platform.OS === "android") {
       ToastAndroid.showWithGravity(
         message,
@@ -9,7 +9,7 @@ export const useShowAlert = () => {
         ToastAndroid.CENTER
       );
     } else {
-      Alert.alert("", message);
+      Alert.alert(title, message);
     }
   };
 

@@ -225,6 +225,7 @@ const Checkout = () => {
           cartId: data.cartId,
           merchantId: data.merchantId,
           deliveryMode,
+          deliveryOption: data.deliveryOption,
         },
       });
     },

@@ -38,6 +38,7 @@ import { addOrder } from "@/localDB/controller/orderController";
 import { useData } from "@/context/DataContext";
 import { clearCart } from "@/localDB/controller/cartController";
 import { removeAppliedPromoCode, updateTip } from "@/service/userService";
+import { DeliveryOptionType } from "@/types";
 
 const Bill = () => {
   const [selectedPaymentMode, setSelectedPaymentMode] =
@@ -52,8 +53,13 @@ const Bill = () => {
     cartId,
     merchantId,
     deliveryMode,
-  }: { cartId: string; merchantId: string; deliveryMode: string } =
-    useLocalSearchParams();
+    deliveryOption,
+  }: {
+    cartId: string;
+    merchantId: string;
+    deliveryMode: string;
+    deliveryOption: DeliveryOptionType;
+  } = useLocalSearchParams();
   const promoCode = useAuthStore((state) => state.promoCode.universal);
   const { setProductCounts } = useData();
 
@@ -316,6 +322,7 @@ const Bill = () => {
               ? data.discountedGrandTotal
               : data?.originalGrandTotal
           }
+          deliveryOption={deliveryOption}
         />
       </BottomSheet>
     </ScreenWrapper>

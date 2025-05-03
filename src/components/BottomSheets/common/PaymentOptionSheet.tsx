@@ -13,6 +13,8 @@ import { FC, useEffect, useState } from "react";
 import Button from "@/components/Button";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLoyaltyAndFamtoCash } from "@/service/userService";
+import { DeliveryOptionType, PaymentOptionType } from "@/types";
+import { useShowAlert } from "@/hooks/useShowAlert";
 
 const PaymentOptionSheet: FC<{
   onSelect: (data: string) => void;
@@ -20,7 +22,8 @@ const PaymentOptionSheet: FC<{
   onConfirm: () => void;
   grandTotal: number;
   disabled?: string[];
-}> = ({ onSelect, value, onConfirm, grandTotal, disabled }) => {
+  deliveryOption: DeliveryOptionType;
+}> = ({ onSelect, value, onConfirm, grandTotal, disabled, deliveryOption }) => {
   const [selected, setSelected] = useState<string>("");
 
   const { data } = useQuery({
@@ -28,11 +31,26 @@ const PaymentOptionSheet: FC<{
     queryFn: () => fetchLoyaltyAndFamtoCash(),
   });
 
+  const { showAlert } = useShowAlert();
+
   useEffect(() => {
     setSelected(value);
   }, [value]);
 
-  const handleSelect = (value: string) => {
+  const handleSelect = (value: PaymentOptionType) => {
+    if (value === "Cash-on-delivery" && deliveryOption === "Scheduled") {
+      showAlert("Scheduled orders can't be paid through cash");
+      return;
+    }
+
+    if (data?.walletBalance < grandTotal) {
+      showAlert(
+        "Your Famto Cash balance is insufficient to make the current payment",
+        "Low Balance"
+      );
+      return;
+    }
+
     setSelected(value);
     onSelect(value);
   };
@@ -47,22 +65,6 @@ const PaymentOptionSheet: FC<{
 
       <Pressable
         onPress={() => {
-          if (data?.walletBalance < grandTotal) {
-            if (Platform.OS === "android") {
-              ToastAndroid.showWithGravity(
-                "Your Famto Cash balance is insufficient to make the current payment",
-                ToastAndroid.SHORT,
-                ToastAndroid.CENTER
-              );
-            } else {
-              Alert.alert(
-                "Low Balance",
-                "Your Famto Cash balance is insufficient to make the current payment"
-              );
-            }
-
-            return;
-          }
           handleSelect("Famto-cash");
         }}
         style={styles.optionContainer}
