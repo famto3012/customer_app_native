@@ -12,13 +12,15 @@ import { scale, verticalScale } from "@/utils/styling";
 import { MerchantDataProps } from "@/types";
 import { colors, radius, spacingX } from "@/constants/theme";
 import { XCircle } from "phosphor-react-native";
-import { productFilters } from "@/utils/defaultData";
 import Header from "@/components/Header";
 import MerchantData from "../MerchantData";
 import MerchantBanner from "../MerchantBanner";
 import SearchView from "@/components/SearchView";
 import Typo from "@/components/Typo";
 import { useData } from "@/context/DataContext";
+import { useQuery } from "@tanstack/react-query";
+import { useAuthStore } from "@/store/store";
+import { getFiltersFromBusinessCategory } from "@/service/universal";
 
 const { height } = Dimensions.get("window");
 
@@ -35,15 +37,42 @@ const HeaderComponent: FC<ListHeaderProps> = ({
   merchantId,
   merchantDataLoading,
 }) => {
-  const { productFilter, setProductFilter } = useData();
+  const [filteredProductFilters, setFilteredProductFilters] = useState<
+    { label: string; value: string }[]
+  >([]);
 
-  const renderItem = ({ item }: any) => {
+  const { productFilter, setProductFilter } = useData();
+  const { selectedBusiness } = useAuthStore.getState();
+
+  const { data: productFilters } = useQuery<string[]>({
+    queryKey: ["product-filter", selectedBusiness],
+    queryFn: () =>
+      getFiltersFromBusinessCategory(
+        selectedBusiness as string,
+        "productFilters"
+      ),
+  });
+
+  useEffect(() => {
+    if (productFilters && productFilters.length > 0) {
+      setFilteredProductFilters(
+        productFilters.map((filter) => ({
+          label: filter.charAt(0).toUpperCase() + filter.slice(1),
+          value: filter,
+        }))
+      );
+    } else {
+      setFilteredProductFilters([]);
+    }
+  }, [productFilters]);
+
+  const renderItem = ({ item }: { item: { label: string; value: string } }) => {
     const isSelected = productFilter === item.value;
 
     return (
       <Pressable
         style={[styles.filterItem, isSelected && styles.selectedFilter]}
-        onPress={() => setProductFilter(item.value)} // Directly update context state
+        onPress={() => setProductFilter(item.value)}
       >
         <Typo size={13} color={isSelected ? colors.WHITE : colors.NEUTRAL900}>
           {item.label}
@@ -74,15 +103,15 @@ const HeaderComponent: FC<ListHeaderProps> = ({
           onPress={() => router.push("/screens/universal/product-search")}
         />
 
-        {/* <FlatList
-          data={productFilters}
+        <FlatList
+          data={filteredProductFilters}
           renderItem={renderItem}
           keyExtractor={(item) => item.value}
           horizontal
           nestedScrollEnabled
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ marginVertical: verticalScale(15) }}
-        /> */}
+        />
       </View>
     </>
   );

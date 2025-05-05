@@ -156,7 +156,7 @@ const Merchants = () => {
     <ScreenWrapper>
       <Header title={businessCategory?.toString() || "Merchants"} />
 
-      {merchants.length > 0 && (
+      {!(selectedFilter === "" && query === "" && merchants.length === 0) && (
         <>
           <Search
             placeHolder="Search Restaurants/Dishes/Products"
@@ -202,13 +202,18 @@ const Merchants = () => {
             <View
               style={{
                 flex: 1,
-                height: SCREEN_HEIGHT - verticalScale(100),
+                height:
+                  selectedFilter || query
+                    ? SCREEN_HEIGHT - verticalScale(250)
+                    : SCREEN_HEIGHT - verticalScale(100),
                 justifyContent: "center",
                 alignItems: "center",
               }}
             >
               <Typo size={16} color={colors.NEUTRAL800} fontFamily="SemiBold">
-                Coming soon...!
+                {selectedFilter || query
+                  ? "No merchants available!"
+                  : "Coming soon...!"}
               </Typo>
             </View>
           ) : null
