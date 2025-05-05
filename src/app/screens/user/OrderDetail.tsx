@@ -178,8 +178,7 @@ const OrderDetail = () => {
         showsVerticalScrollIndicator={false}
       >
         {(data?.status === "On-going" || data?.status === "Pending") &&
-          data?.deliveryMode !== "Take Away" &&
-          data?.deliveryMode !== "Custom Order" && (
+          data?.deliveryMode !== "Take Away" && (
             <View
               style={{
                 width: SCREEN_WIDTH,
@@ -188,9 +187,9 @@ const OrderDetail = () => {
               }}
             >
               <Map
-                pickupLocation={mapData.pickupLocation}
-                deliveryLocation={mapData.deliveryLocation}
-                orderId={mapData.orderId}
+                pickupLocation={mapData?.pickupLocation}
+                deliveryLocation={mapData?.deliveryLocation}
+                orderId={mapData?.orderId}
               />
             </View>
           )}
@@ -211,67 +210,110 @@ const OrderDetail = () => {
                 style={{
                   flex: 1,
                   flexDirection: "row",
-                  justifyContent: "flex-end",
+                  justifyContent: "space-between",
                   gap: scale(15),
+                  marginTop: verticalScale(20),
                 }}
               >
-                <Pressable
-                  onPress={() => {
-                    if (data?.agentId) {
-                      const dialerUrl = `tel:${data?.agentPhone}`;
-                      Linking.openURL(dialerUrl).catch((err) => {
+                <View
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: scale(15),
+                  }}
+                >
+                  {data?.agentName ? (
+                    <>
+                      <Image
+                        source={
+                          data?.agentImageURL
+                            ? data?.agentImageURL
+                            : require("@/assets/images/default-user.webp")
+                        }
+                        resizeMode="cover"
+                        style={{
+                          width: SCREEN_WIDTH * 0.12,
+                          height: SCREEN_WIDTH * 0.12,
+                        }}
+                      />
+                      <Typo size={16} color={colors.NEUTRAL900}>
+                        sdf {data?.agentName}
+                      </Typo>
+                    </>
+                  ) : (
+                    <Typo size={12} color={colors.NEUTRAL900}>
+                      Thanks for your patience! We're assigning an agent to your
+                      order right now.
+                    </Typo>
+                  )}
+                </View>
+                <View
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    justifyContent: "flex-end",
+                    gap: scale(15),
+                  }}
+                >
+                  <Pressable
+                    onPress={() => {
+                      if (data?.agentId) {
+                        const dialerUrl = `tel:${data?.agentPhone}`;
+                        Linking.openURL(dialerUrl).catch((err) => {
+                          if (Platform.OS === "android") {
+                            ToastAndroid.showWithGravity(
+                              "Unable to open dialer",
+                              ToastAndroid.SHORT,
+                              ToastAndroid.CENTER
+                            );
+                          } else {
+                            Alert.alert("Error", "Unable to open dialer");
+                          }
+                        });
+                      } else {
                         if (Platform.OS === "android") {
                           ToastAndroid.showWithGravity(
-                            "Unable to open dialer",
+                            "No agent assigned for this order",
                             ToastAndroid.SHORT,
                             ToastAndroid.CENTER
                           );
                         } else {
-                          Alert.alert("Error", "Unable to open dialer");
+                          Alert.alert("", "No agent assigned for this order");
                         }
-                      });
-                    } else {
-                      if (Platform.OS === "android") {
-                        ToastAndroid.showWithGravity(
-                          "No agent assigned for this order",
-                          ToastAndroid.SHORT,
-                          ToastAndroid.CENTER
-                        );
-                      } else {
-                        Alert.alert("", "No agent assigned for this order");
                       }
-                    }
-                  }}
-                >
-                  <Phone size={32} color={colors.PRIMARY} />
-                </Pressable>
-                <Pressable
-                  onPress={() => {
-                    if (data?.agentId) {
-                      router.push({
-                        pathname: "/screens/user/chatPage",
-                        params: {
-                          agentId: data?.agentId,
-                          agentImage: data?.agentImageURL,
-                          agentName: data?.agentName,
-                          agentPhone: data?.agentPhone,
-                        },
-                      });
-                    } else {
-                      if (Platform.OS === "android") {
-                        ToastAndroid.showWithGravity(
-                          "No agent assigned for this order",
-                          ToastAndroid.SHORT,
-                          ToastAndroid.CENTER
-                        );
+                    }}
+                  >
+                    <Phone size={32} color={colors.PRIMARY} />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      if (data?.agentId) {
+                        router.push({
+                          pathname: "/screens/user/chatPage",
+                          params: {
+                            agentId: data?.agentId,
+                            agentImage: data?.agentImageURL,
+                            agentName: data?.agentName,
+                            agentPhone: data?.agentPhone,
+                          },
+                        });
                       } else {
-                        Alert.alert("", "No agent assigned for this order");
+                        if (Platform.OS === "android") {
+                          ToastAndroid.showWithGravity(
+                            "No agent assigned for this order",
+                            ToastAndroid.SHORT,
+                            ToastAndroid.CENTER
+                          );
+                        } else {
+                          Alert.alert("", "No agent assigned for this order");
+                        }
                       }
-                    }
-                  }}
-                >
-                  <ChatTeardropDots size={32} color={colors.PRIMARY} />
-                </Pressable>
+                    }}
+                  >
+                    <ChatTeardropDots size={32} color={colors.PRIMARY} />
+                  </Pressable>
+                </View>
               </View>
             )}
         </View>
@@ -447,7 +489,7 @@ const styles = StyleSheet.create({
     marginBottom: scale(20),
     borderRadius: 10,
     flex: 1,
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "space-between",
   },
   deliveryMode: {

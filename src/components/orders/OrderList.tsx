@@ -242,7 +242,12 @@ const OrderList = () => {
 
           <View style={styles.orderDetail}>
             <View>
-              <Typo size={16} color={colors.NEUTRAL900} fontFamily="Medium">
+              <Typo
+                size={16}
+                color={colors.NEUTRAL900}
+                fontFamily="Medium"
+                style={{ width: SCREEN_WIDTH * 0.45 }}
+              >
                 {item.deliveryMode === "Home Delivery" ||
                 item.deliveryMode === "Take Away"
                   ? item.merchantName
