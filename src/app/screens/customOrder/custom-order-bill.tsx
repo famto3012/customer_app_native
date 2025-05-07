@@ -65,7 +65,7 @@ const CustomOrderBill = () => {
     mutationKey: ["confirm-custom-order"],
     mutationFn: () => confirmCustomOrder(cartId.toString()),
     onSuccess: (data) => {
-      if (data.orderId) {
+      if (data.success && data.orderId) {
         addOrder(data.orderId, data.createdAt, "Custom-order");
 
         useAuthStore.setState({

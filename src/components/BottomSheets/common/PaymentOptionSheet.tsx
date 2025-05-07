@@ -22,7 +22,7 @@ const PaymentOptionSheet: FC<{
   onConfirm: () => void;
   grandTotal: number;
   disabled?: string[];
-  deliveryOption: DeliveryOptionType;
+  deliveryOption?: DeliveryOptionType;
 }> = ({ onSelect, value, onConfirm, grandTotal, disabled, deliveryOption }) => {
   const [selected, setSelected] = useState<string>("");
 

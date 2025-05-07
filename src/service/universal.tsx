@@ -462,35 +462,29 @@ export const getCartBill = async (cartId: string) => {
   }
 };
 
-export const addUniversalTip = async (tip: number) => {
-  try {
-    const res = await appAxios.post(`/customers/add-tip`, {
-      tip,
-    });
-
-    return res.status === 200 ? true : false;
-  } catch (err) {
-    console.error(`Error in adding tip:`, err);
-    if (Platform.OS === "android") {
-      ToastAndroid.showWithGravity(
-        "Something went wrong",
-        ToastAndroid.SHORT,
-        ToastAndroid.CENTER
-      );
-    } else {
-      Alert.alert("", "Something went wrong");
-    }
-    return false;
-  }
-};
-
-export const placeUniversalOrder = async (paymentMode: string) => {
+export const placeUniversalOrder = async (
+  paymentMode: string
+): Promise<{
+  success: boolean;
+  orderId: string;
+  amount: number | null;
+  createdAt: string | null;
+  merchantName: string | null;
+}> => {
   try {
     const res = await appAxios.post(`/customers/confirm-order`, {
       paymentMode,
     });
 
-    return res.data.success ? res.data : null;
+    return res.data.success
+      ? res.data
+      : {
+          success: false,
+          orderId: "",
+          amount: null,
+          createdAt: null,
+          merchantName: null,
+        };
   } catch (err) {
     console.error(`Error in placing order:`, err);
     if (Platform.OS === "android") {
@@ -502,76 +496,13 @@ export const placeUniversalOrder = async (paymentMode: string) => {
     } else {
       Alert.alert("", "Something went wrong");
     }
-    return null;
-  }
-};
-
-export const applyUniversalPromoCode = async (promoCode: string) => {
-  try {
-    const res = await appAxios.post(`/customers/apply-promocode`, {
-      promoCode,
-    });
-
-    return res.status === 200 ? res.data : null;
-  } catch (err: any) {
-    const message = err?.response?.data?.message;
-
-    if (
-      err?.response?.status === 400 &&
-      message === "Promo code is not applicable for this merchant"
-    ) {
-      // Gracefully handle business logic failure
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          message,
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert("", message);
-      }
-
-      return null;
-    }
-
-    // For actual unexpected errors
-    console.error("Unexpected error in applying promo code:", err);
-
-    if (Platform.OS === "android") {
-      ToastAndroid.showWithGravity(
-        "Something went wrong",
-        ToastAndroid.SHORT,
-        ToastAndroid.CENTER
-      );
-    } else {
-      Alert.alert("", "Something went wrong");
-    }
-
-    return null;
-  }
-};
-
-export const getProductsWithVariantsInCart = async (productId: string) => {
-  try {
-    const res = await appAxios.get(`/customers/products-with-variants`, {
-      params: {
-        productId,
-      },
-    });
-
-    return res.status === 200 ? res.data : [];
-  } catch (err) {
-    console.error(`Error in fetching products with variants in cart:`, err);
-    if (Platform.OS === "android") {
-      ToastAndroid.showWithGravity(
-        "Something went wrong",
-        ToastAndroid.SHORT,
-        ToastAndroid.CENTER
-      );
-    } else {
-      Alert.alert("", "Something went wrong");
-    }
-    return [];
+    return {
+      success: false,
+      orderId: "",
+      amount: null,
+      createdAt: null,
+      merchantName: null,
+    };
   }
 };
 
@@ -579,6 +510,7 @@ export const verifyPayment = async (
   orderId: string,
   amount: string | number
 ): Promise<{
+  success: boolean;
   orderId: string;
   createdAt: string;
   merchantName: string;
@@ -639,6 +571,30 @@ export const verifyPayment = async (
   } catch (err) {
     console.error("❌ Error in verifying payment:", err);
     return null;
+  }
+};
+
+export const getProductsWithVariantsInCart = async (productId: string) => {
+  try {
+    const res = await appAxios.get(`/customers/products-with-variants`, {
+      params: {
+        productId,
+      },
+    });
+
+    return res.status === 200 ? res.data : [];
+  } catch (err) {
+    console.error(`Error in fetching products with variants in cart:`, err);
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
+    return [];
   }
 };
 

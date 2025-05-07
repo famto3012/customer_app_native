@@ -109,6 +109,18 @@ const PickAndDropCheckout = () => {
           router.replace({
             pathname: "/(tabs)",
           });
+        } else if (data?.success && !data?.orderId && !data?.createdAt) {
+          useAuthStore.setState({
+            promoCode: {
+              universal: null,
+              pickAndDrop: null,
+              customOrder: null,
+            },
+          });
+
+          router.replace({
+            pathname: "/(tabs)",
+          });
         }
       }
     },
@@ -119,6 +131,8 @@ const PickAndDropCheckout = () => {
     mutationFn: ({ orderId, amount }: { orderId: string; amount: number }) =>
       verifyPickAndDropPayment(orderId, amount),
     onSuccess: (data) => {
+      console.log("Payment verification response: ", data);
+
       if (data?.success && data?.orderId && data?.createdAt) {
         addOrder(data.orderId, data.createdAt, "Pick-and-drop");
 
@@ -126,6 +140,18 @@ const PickAndDropCheckout = () => {
           promoCode: {
             ...useAuthStore.getState().promoCode,
             pickAndDrop: null,
+          },
+        });
+
+        router.replace({
+          pathname: "/(tabs)",
+        });
+      } else if (data?.success && data?.orderId && !data?.createdAt) {
+        useAuthStore.setState({
+          promoCode: {
+            universal: null,
+            pickAndDrop: null,
+            customOrder: null,
           },
         });
 

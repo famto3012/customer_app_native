@@ -39,10 +39,12 @@ const Home = () => {
 
   const temporarySnapPoints = useMemo(() => ["60%"], []);
 
-  const { token, outsideGeofence } = useAuthStore.getState();
+  const { token, outsideGeofence, location } = useAuthStore.getState();
 
   useEffect(() => {
-    requestLocationPermission();
+    if (!location || !location.latitude || !location.longitude) {
+      requestLocationPermission();
+    }
   }, []);
 
   useEffect(() => {
@@ -117,7 +119,7 @@ const Home = () => {
   const handleOrderCancel = useCallback(async () => {
     // First set to false to trigger state change
     setShowCount((prev) => prev + 1);
-    console.log("Here");
+
     // Add timeout to ensure state updates properly
     const hasOrders = await checkTemporaryOrders();
     if (!hasOrders) {

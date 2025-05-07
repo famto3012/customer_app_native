@@ -589,7 +589,6 @@ export const setGeofenceForUser = async (
       ? res.data
       : { success: false, message: "Failed" };
   } catch (err: any) {
-    console.log(`Error in setting geofence`, JSON.stringify(err.response.data));
     if (Platform.OS === "android") {
       ToastAndroid.showWithGravity(
         err.response.data.message || "Failed to set geofence",
