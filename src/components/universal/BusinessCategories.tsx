@@ -9,16 +9,20 @@ import { getBusinessCategories } from "@/service/universal";
 import { useAuthStore } from "@/store/store";
 import { useSafeLocation } from "@/utils/helpers";
 import { useQuery } from "@tanstack/react-query";
+import { useShowAlert } from "@/hooks/useShowAlert";
 
 const BusinessCategories: FC<{ query: string }> = ({ query }) => {
   const [businessCategory, setBusinessCategory] = useState<
     BusinessCategoryProps[]
   >([]);
+  const [isDataReady, setIsDataReady] = useState(false);
 
-  const { setSelectedBusiness, outsideGeofence } = useAuthStore.getState();
+  const { token, setSelectedBusiness, outsideGeofence } =
+    useAuthStore.getState();
   const { latitude, longitude } = useSafeLocation();
+  const { showAlert } = useShowAlert();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["business-category", latitude, longitude],
     queryFn: () => getBusinessCategories(latitude, longitude, query),
     enabled: !!latitude && !!longitude && !outsideGeofence,
@@ -26,16 +30,21 @@ const BusinessCategories: FC<{ query: string }> = ({ query }) => {
 
   useEffect(() => {
     if (data?.outside) {
-      router.push({
-        pathname: "/(modals)/SelectAddress",
-        params: {
-          showActionButton: "false",
-          setAsUserAddress: "true",
-          mustSelectAddress: "true",
-        },
-      });
+      if (token) {
+        router.push({
+          pathname: "/(modals)/SelectAddress",
+          params: {
+            showActionButton: "false",
+            setAsUserAddress: "true",
+            mustSelectAddress: "true",
+          },
+        });
+      } else {
+        showAlert("Currently we don't deliver in this area", "Not deliverable");
+      }
     } else {
       setBusinessCategory(data?.data as BusinessCategoryProps[]);
+      setIsDataReady(true);
     }
   }, [data]);
 
@@ -82,7 +91,11 @@ const BusinessCategories: FC<{ query: string }> = ({ query }) => {
         ListEmptyComponent={
           <View style={{ alignItems: "center", marginTop: verticalScale(15) }}>
             <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
-              No Business category.
+              {isDataReady
+                ? "No Business category."
+                : !data?.outside && isLoading
+                ? "Loading..."
+                : "Currently we don't deliver in this area!"}
             </Typo>
           </View>
         }
