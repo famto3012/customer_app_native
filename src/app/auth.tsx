@@ -52,27 +52,18 @@ const Auth = () => {
 
       const fullPhoneNumber = `+91${phoneNumberRef.current}`;
 
-      // const confirmation = await auth().signInWithPhoneNumber(fullPhoneNumber);
+      const confirmation = await auth().signInWithPhoneNumber(fullPhoneNumber);
 
-      // if (confirmation.verificationId) {
-      //   router.push({
-      //     pathname: "/verify-otp",
-      //     params: {
-      //       phoneNumber: phoneNumberRef.current,
-      //       referralCode: referralStatus?.status ? referral : "",
-      //       verificationId: JSON.stringify(confirmation),
-      //     },
-      //   });
-      // }
-
-      router.push({
-        pathname: "/verify-otp",
-        params: {
-          phoneNumber: phoneNumberRef.current,
-          referralCode: referralStatus?.status ? referral : "",
-          verificationId: "",
-        },
-      });
+      if (confirmation.verificationId) {
+        router.push({
+          pathname: "/verify-otp",
+          params: {
+            phoneNumber: phoneNumberRef.current,
+            referralCode: referralStatus?.status ? referral : "",
+            verificationId: JSON.stringify(confirmation),
+          },
+        });
+      }
     } catch (error: any) {
       let errorMessage = "Something went wrong. Please try again.";
 
