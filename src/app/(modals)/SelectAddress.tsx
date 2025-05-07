@@ -12,7 +12,6 @@ const SelectAddress = () => {
 
   const handleBackPress = () => {
     if (mustSelectAddress === "true") {
-      console.log("mustSelectAddress is true, exiting app...");
       BackHandler.exitApp();
       return true;
     } else if (router.canGoBack()) {

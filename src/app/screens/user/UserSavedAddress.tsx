@@ -71,7 +71,6 @@ const UserSavedAddress: FC<NewAddressUIProps> = ({
     }) => setGeofenceForUser(latitude, longitude),
     onSuccess: (data, variables) => {
       if (data.success) {
-        console.log("Success");
         useAuthStore.setState({
           userAddress: {
             type: variables.type,
@@ -87,9 +86,11 @@ const UserSavedAddress: FC<NewAddressUIProps> = ({
 
         queryClient.cancelQueries();
 
-        if (router.canGoBack()) {
-          router.back();
-        }
+        // if (router.canGoBack()) {
+        //   router.back();
+        // }
+
+        router.replace("/(tabs)");
       }
     },
   });
@@ -124,10 +125,13 @@ const UserSavedAddress: FC<NewAddressUIProps> = ({
       }
     }
 
-    if (addressFor === "pick") setPickAddress({ type, otherId, address });
-    else if (addressFor === "drop") setDropAddress({ type, otherId, address });
+    if (addressFor) {
+      if (addressFor === "pick") setPickAddress({ type, otherId, address });
+      else if (addressFor === "drop")
+        setDropAddress({ type, otherId, address });
 
-    !showActionButton && !handleSetUserGeofence.isPending && router.back();
+      !showActionButton && !handleSetUserGeofence.isPending && router.back();
+    }
   };
 
   const handleDeleteAddressMutation = useMutation({

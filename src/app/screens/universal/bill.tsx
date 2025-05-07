@@ -21,8 +21,6 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  addUniversalTip,
-  applyUniversalPromoCode,
   getCartBill,
   placeUniversalOrder,
   verifyPayment,
@@ -105,24 +103,47 @@ const Bill = () => {
     mutationKey: ["place-universal-order"],
     mutationFn: () => placeUniversalOrder(selectedPaymentMode),
     onSuccess: async (data) => {
+      console.log({ data });
+
       if (selectedPaymentMode === "Online-payment") {
         const { orderId, amount } = data;
 
         if (orderId) {
           verifyPaymentMutation.mutate({
             orderId,
-            amount,
+            amount: amount ?? 0,
           });
         }
       } else {
+        console.log("Order placed successfully", data);
         if (data?.success && data?.orderId) {
           await addOrder(
             data?.orderId,
             new Date().toISOString(),
             "Universal",
-            data?.merchantName
+            data?.merchantName as string
           );
 
+          router.replace({ pathname: "/(tabs)" });
+
+          clearCart();
+
+          setProductCounts({});
+
+          useAuthStore.setState({
+            cart: {
+              showCart: false,
+              merchant: "",
+              cartId: "",
+            },
+            promoCode: {
+              universal: null,
+              pickAndDrop: null,
+              customOrder: null,
+            },
+          });
+        } else if (data?.success && !data?.createdAt) {
+          console.log("in scheduled");
           router.replace({ pathname: "/(tabs)" });
 
           clearCart();
@@ -151,7 +172,9 @@ const Bill = () => {
     mutationFn: ({ orderId, amount }: { orderId: string; amount: number }) =>
       verifyPayment(orderId, amount),
     onSuccess: async (data) => {
-      if (data) {
+      console.log("Successfully verified payment", data);
+
+      if (data?.success && data?.orderId && data?.createdAt) {
         await addOrder(
           data?.orderId,
           data?.createdAt,
@@ -170,6 +193,25 @@ const Bill = () => {
             showCart: false,
             merchant: "",
             cartId: "",
+          },
+        });
+      } else if (data?.success && !data?.createdAt) {
+        router.replace({ pathname: "/(tabs)" });
+
+        clearCart();
+
+        setProductCounts({});
+
+        useAuthStore.setState({
+          cart: {
+            showCart: false,
+            merchant: "",
+            cartId: "",
+          },
+          promoCode: {
+            universal: null,
+            pickAndDrop: null,
+            customOrder: null,
           },
         });
       }

@@ -15,13 +15,13 @@ const BusinessCategories: FC<{ query: string }> = ({ query }) => {
     BusinessCategoryProps[]
   >([]);
 
-  const { setSelectedBusiness } = useAuthStore.getState();
+  const { setSelectedBusiness, outsideGeofence } = useAuthStore.getState();
   const { latitude, longitude } = useSafeLocation();
 
   const { data } = useQuery({
     queryKey: ["business-category", latitude, longitude],
     queryFn: () => getBusinessCategories(latitude, longitude, query),
-    enabled: !!latitude && !!longitude,
+    enabled: !!latitude && !!longitude && !outsideGeofence,
   });
 
   useEffect(() => {
