@@ -192,6 +192,7 @@ export const useAuthStore = create<AuthStore>()(
           cart: { showCart: false, merchant: "", cartId: "" },
           promoCode: { universal: null, pickAndDrop: null, customOrder: null },
           orders: [],
+          userAddress: { type: "", otherId: "", address: "" },
         });
         await secureStorage.removeItem("userId");
         await secureStorage.removeItem("token");
@@ -201,6 +202,7 @@ export const useAuthStore = create<AuthStore>()(
         await secureStorage.removeItem("cart");
         await secureStorage.removeItem("promoCode");
         await secureStorage.removeItem("orders");
+        await secureStorage.removeItem("userAddress");
       },
     }),
     {
