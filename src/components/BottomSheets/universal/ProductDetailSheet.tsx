@@ -3,7 +3,7 @@ import { FC } from "react";
 import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius, spacingX } from "@/constants/theme";
 import Typo from "@/components/Typo";
-import { Heart } from "phosphor-react-native";
+import { Circle, Heart } from "phosphor-react-native";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import FastImage from "react-native-fast-image";
 import { useData } from "@/context/DataContext";
@@ -56,6 +56,21 @@ const ProductDetailSheet: FC<{}> = () => {
                   ? product?.discountPrice
                   : product?.price}
               </Typo>
+              {product.type === "Veg" ? (
+                <Circle
+                  size={16}
+                  color={colors.GREEN}
+                  weight="fill"
+                  style={{ marginLeft: scale(40) }}
+                />
+              ) : product.type === "Non-veg" ? (
+                <Circle
+                  size={16}
+                  color={colors.RED}
+                  weight="fill"
+                  style={{ marginLeft: scale(40) }}
+                />
+              ) : null}
             </View>
           )}
 

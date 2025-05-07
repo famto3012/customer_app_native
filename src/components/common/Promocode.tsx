@@ -29,7 +29,9 @@ const PromoCode: FC<{
         <Typo fontFamily="Medium" size={12} color={colors.NEUTRAL900}>
           Apply a promo code
         </Typo>
-        <Typo size={12}>Get discounts using promo codes</Typo>
+        <Typo color={colors.NEUTRAL700} size={12}>
+          Get discounts using promo codes
+        </Typo>
       </View>
 
       <Image
@@ -44,13 +46,16 @@ export default PromoCode;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.WHITE,
+    backgroundColor: colors.PRIMARY,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: scale(10),
     paddingVertical: verticalScale(15),
     borderBottomLeftRadius: radius._10,
     borderBottomRightRadius: radius._10,
+    // borderTopLeftRadius: radius._10,
+    // borderTopRightRadius: radius._10,
+    elevation: 5,
   },
   image: {
     width: scale(24),

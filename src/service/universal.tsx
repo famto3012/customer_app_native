@@ -135,6 +135,7 @@ export const fetchCategory = async (
   page: number
 ) => {
   try {
+    console.log("Page", page);
     const res = await appAxios.get(`/customers/category`, {
       params: { merchantId, businessCategoryId, page },
     });
@@ -155,6 +156,7 @@ export const fetchProduct = async (
   filter?: string
 ) => {
   try {
+    console.log("Filter", filter, categoryId);
     const res = await appAxios.get(`/customers/products`, {
       params: { categoryId, customerId, page, filter },
     });
