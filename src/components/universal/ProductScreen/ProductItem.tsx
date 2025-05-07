@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import FastImage from "react-native-fast-image";
-import { Heart } from "phosphor-react-native";
+import { Circle, Heart } from "phosphor-react-native";
 import { Grayscale } from "react-native-color-matrix-image-filters";
 import { colors, radius, spacingX } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
@@ -143,6 +143,7 @@ const ProductItem: FC<ProductItemProps> = memo(
         );
       }
     };
+    // console.log("Product", product);
 
     return (
       <Pressable
@@ -231,6 +232,14 @@ const ProductItem: FC<ProductItemProps> = memo(
         </View>
 
         <View style={styles.contentContainer}>
+          {/* <View
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          > */}
           <Typo
             size={14}
             color={colors.NEUTRAL800}
@@ -239,7 +248,7 @@ const ProductItem: FC<ProductItemProps> = memo(
           >
             {product.productName}
           </Typo>
-
+          {/* </View> */}
           <View
             style={[
               styles.priceContainer,
@@ -263,6 +272,21 @@ const ProductItem: FC<ProductItemProps> = memo(
             >
               ₹ {product.discountPrice || product.price}
             </Typo>
+            {product.type === "Veg" ? (
+              <Circle
+                size={16}
+                color={colors.GREEN}
+                weight="fill"
+                style={{ marginLeft: scale(40) }}
+              />
+            ) : product.type === "Non-veg" ? (
+              <Circle
+                size={16}
+                color={colors.RED}
+                weight="fill"
+                style={{ marginLeft: scale(40) }}
+              />
+            ) : null}
           </View>
 
           <Typo

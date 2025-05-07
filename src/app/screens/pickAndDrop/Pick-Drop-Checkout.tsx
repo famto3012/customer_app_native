@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
     width: "80%",
     borderWidth: 0.6,
     alignSelf: "center",
-    marginVertical: verticalScale(10),
+    marginTop: verticalScale(10),
     borderColor: colors.NEUTRAL300,
   },
 });

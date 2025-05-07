@@ -78,7 +78,11 @@ const HeaderComponent: FC<ListHeaderProps> = ({
           {item.label}
         </Typo>
 
-        {isSelected && <XCircle size={20} color="white" />}
+        {isSelected && (
+          <Pressable onPress={() => setProductFilter("All")}>
+            <XCircle size={20} color="white" />
+          </Pressable>
+        )}
       </Pressable>
     );
   };
