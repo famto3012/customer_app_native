@@ -31,8 +31,6 @@ const TopService = () => {
     const now = new Date();
 
     const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0"); // Month is 0-indexed
-    const date = String(now.getDate()).padStart(2, "0");
 
     // Helper function to create local date
     const createLocalDate = (timeStr: string) => {
@@ -55,8 +53,6 @@ const TopService = () => {
     if (type === "Custom Order") {
       const startTime = createLocalDate(customOrderTimings.startTime);
       const endTime = createLocalDate(customOrderTimings.endTime);
-
-      console.log({ now, startTime, endTime });
 
       if (now > endTime || now < startTime) {
         showAlert("Currently Custom Order service is unavailable!");
