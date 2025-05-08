@@ -34,6 +34,51 @@ const ProductDetailSheet: FC<{}> = () => {
         </View>
 
         <View style={styles.detailsContainer}>
+          {product.type === "Veg" ? (
+            <View
+              style={{
+                width: scale(15),
+                height: scale(15),
+                borderWidth: 1.5,
+                borderRadius: radius._3,
+                borderColor: colors.GREEN,
+                marginBottom: scale(3),
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  width: scale(9),
+                  height: scale(9),
+                  backgroundColor: colors.GREEN,
+                  borderRadius: radius._10,
+                }}
+              ></View>
+            </View>
+          ) : product.type === "Non-veg" ? (
+            <View
+              style={{
+                width: scale(15),
+                height: scale(15),
+                borderWidth: 1.5,
+                borderRadius: radius._3,
+                borderColor: colors.RED,
+                marginBottom: scale(3),
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  width: scale(9),
+                  height: scale(9),
+                  backgroundColor: colors.RED,
+                  borderRadius: radius._10,
+                }}
+              ></View>
+            </View>
+          ) : null}
           <Typo size={18} color={colors.NEUTRAL900} fontFamily="SemiBold">
             {product?.productName}
           </Typo>
@@ -56,21 +101,6 @@ const ProductDetailSheet: FC<{}> = () => {
                   ? product?.discountPrice
                   : product?.price}
               </Typo>
-              {product.type === "Veg" ? (
-                <Circle
-                  size={16}
-                  color={colors.GREEN}
-                  weight="fill"
-                  style={{ marginLeft: scale(40) }}
-                />
-              ) : product.type === "Non-veg" ? (
-                <Circle
-                  size={16}
-                  color={colors.RED}
-                  weight="fill"
-                  style={{ marginLeft: scale(40) }}
-                />
-              ) : null}
             </View>
           )}
 
