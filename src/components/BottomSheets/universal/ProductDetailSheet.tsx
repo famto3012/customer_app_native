@@ -34,7 +34,7 @@ const ProductDetailSheet: FC<{}> = () => {
         </View>
 
         <View style={styles.detailsContainer}>
-          {product.type === "Veg" ? (
+          {product?.type === "Veg" ? (
             <View
               style={{
                 width: scale(15),
@@ -56,7 +56,7 @@ const ProductDetailSheet: FC<{}> = () => {
                 }}
               ></View>
             </View>
-          ) : product.type === "Non-veg" ? (
+          ) : product?.type === "Non-veg" ? (
             <View
               style={{
                 width: scale(15),
