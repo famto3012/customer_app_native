@@ -6,6 +6,7 @@ import axios, {
 import { BASE_URL } from "@/constants/links";
 import { useAuthStore } from "@/store/store";
 import { logout } from "@/service/authService";
+import { jwtDecode } from "jwt-decode";
 
 export const appAxios = axios.create({
   baseURL: BASE_URL,
@@ -17,11 +18,6 @@ let requestQueue: Array<{
   reject: (error: unknown) => void;
 }> = [];
 
-/**
- * Process the request queue.
- * @param error Error object or null.
- * @param token New access token or null.
- */
 const processQueue = (error: unknown, token: string | null = null) => {
   requestQueue.forEach((promise) => {
     if (error) {
@@ -33,10 +29,20 @@ const processQueue = (error: unknown, token: string | null = null) => {
   requestQueue = [];
 };
 
-/**
- * Refresh the access token.
- * If a refresh is already in progress, requests are queued.
- */
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const decoded: { exp: number } = jwtDecode(token);
+    const currentTime = Math.floor(Date.now() / 1000);
+    const remainingTime = decoded.exp - currentTime;
+
+    // Consider it "near expiry" if less than 1 minute remaining
+    return remainingTime < 60;
+  } catch (err) {
+    console.error("Error decoding token:", err);
+    return true;
+  }
+};
+
 const refreshAccessToken = async (): Promise<string | null> => {
   const { refreshToken, setToken, setRefreshToken } = useAuthStore.getState();
 
@@ -78,9 +84,6 @@ const refreshAccessToken = async (): Promise<string | null> => {
   }
 };
 
-/**
- * Request Interceptor
- */
 appAxios.interceptors.request.use(
   async (
     config: InternalAxiosRequestConfig
@@ -88,8 +91,22 @@ appAxios.interceptors.request.use(
     const { token } = useAuthStore.getState();
 
     if (token) {
-      config.headers = config.headers ?? {};
-      config.headers["Authorization"] = `Bearer ${token}`;
+      // Check token expiry before making the request
+      if (isTokenExpired(token)) {
+        try {
+          const newToken = await refreshAccessToken();
+          if (newToken) {
+            config.headers = config.headers ?? {};
+            config.headers["Authorization"] = `Bearer ${newToken}`;
+          }
+        } catch (err) {
+          console.error("Error during token refresh:", err);
+          throw err;
+        }
+      } else {
+        config.headers = config.headers ?? {};
+        config.headers["Authorization"] = `Bearer ${token}`;
+      }
     }
 
     return config;
@@ -97,9 +114,6 @@ appAxios.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error)
 );
 
-/**
- * Response Interceptor
- */
 appAxios.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (
