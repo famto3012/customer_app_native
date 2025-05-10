@@ -78,40 +78,38 @@ const VerifyOTP = () => {
   const handleVerifyOTP = async (otpCode: string) => {
     if (otpVerified.current) return;
 
-    // if (!otpVerificationId) {
-    //   showAlert("Verification ID is missing. Please try again.");
-    //   return;
-    // }
+    if (!otpVerificationId) {
+      showAlert("Verification ID is missing. Please try again.");
+      return;
+    }
 
     setIsLoading(true);
     try {
-      // let verificationIdToUse;
-      // try {
-      //   const parsedData = JSON.parse(otpVerificationId);
-      //   verificationIdToUse =
-      //     parsedData._verificationId || parsedData.verificationId;
-      // } catch (e) {
-      //   // If parsing fails, use the value directly
-      //   verificationIdToUse = otpVerificationId;
-      // }
+      let verificationIdToUse;
+      try {
+        const parsedData = JSON.parse(otpVerificationId);
+        verificationIdToUse =
+          parsedData._verificationId || parsedData.verificationId;
+      } catch (e) {
+        // If parsing fails, use the value directly
+        verificationIdToUse = otpVerificationId;
+      }
 
-      // if (!verificationIdToUse) {
-      //   throw new Error("Invalid verification ID format");
-      // }
+      if (!verificationIdToUse) {
+        throw new Error("Invalid verification ID format");
+      }
 
-      // const credential = auth.PhoneAuthProvider.credential(
-      //   verificationIdToUse,
-      //   otpCode
-      // );
+      const credential = auth.PhoneAuthProvider.credential(
+        verificationIdToUse,
+        otpCode
+      );
 
-      // const userCredential = await auth().signInWithCredential(credential);
+      const userCredential = await auth().signInWithCredential(credential);
 
-      // if (userCredential.user) {
-      //   otpVerified.current = true;
-      //   await handleSuccessfulAuth();
-      // }
-
-      await handleSuccessfulAuth();
+      if (userCredential.user) {
+        otpVerified.current = true;
+        await handleSuccessfulAuth();
+      }
     } catch (error: any) {
       let errorMessage = "Something went wrong. Please try again.";
 
