@@ -78,10 +78,10 @@ const VerifyOTP = () => {
   const handleVerifyOTP = async (otpCode: string) => {
     if (otpVerified.current) return;
 
-    if (!otpVerificationId) {
-      showAlert("Verification ID is missing. Please try again.");
-      return;
-    }
+    // if (!otpVerificationId) {
+    //   showAlert("Verification ID is missing. Please try again.");
+    //   return;
+    // }
 
     setIsLoading(true);
     try {
