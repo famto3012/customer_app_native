@@ -393,13 +393,27 @@ export const getCustomerCart = async () => {
 
 export const getMerchantDeliveryOption = async (
   merchantId: string
-): Promise<DeliveryOptionType> => {
+): Promise<{
+  deliveryOption: DeliveryOptionType;
+  preOrderStatus: boolean;
+  preOrderType: "Current-day" | "Next-day" | null;
+}> => {
   try {
+    console.log({ merchantId });
+
     const res = await appAxios.get(
       `/customers/merchant/${merchantId}/delivery-option`
     );
 
-    return res.data.data;
+    console.log(res.data);
+
+    return res.status === 200
+      ? res.data
+      : {
+          deliveryOption: "On-demand",
+          preOrderStatus: false,
+          preOrderType: null,
+        };
   } catch (err) {
     console.error(`Error in getting merchant delivery option:`, err);
     if (Platform.OS === "android") {
@@ -412,7 +426,11 @@ export const getMerchantDeliveryOption = async (
       Alert.alert("", "Something went wrong");
     }
 
-    return "On-demand";
+    return {
+      deliveryOption: "On-demand",
+      preOrderStatus: false,
+      preOrderType: null,
+    };
   }
 };
 

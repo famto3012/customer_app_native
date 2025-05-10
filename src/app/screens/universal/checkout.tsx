@@ -118,7 +118,11 @@ const Checkout = () => {
     queryFn: () => getCustomerCart(),
   });
 
-  const { data: deliveryOption } = useQuery<DeliveryOptionType>({
+  const { data: deliveryOptionData } = useQuery<{
+    deliveryOption: DeliveryOptionType;
+    preOrderStatus: boolean;
+    preOrderType: "Current-day" | "Next-day" | null;
+  }>({
     queryKey: ["merchant-delivery-option", cart?.merchantId],
     queryFn: () =>
       getMerchantDeliveryOption(cart?.merchantId?.toString() ?? ""),
@@ -145,8 +149,8 @@ const Checkout = () => {
   }, [cartData]);
 
   useEffect(() => {
-    setShowScheduleOption(deliveryOption !== "On-demand");
-  }, [deliveryOption]);
+    setShowScheduleOption(deliveryOptionData?.deliveryOption !== "On-demand");
+  }, [deliveryOptionData]);
 
   useEffect(() => {
     indicatorPosition.value = withTiming(
@@ -238,7 +242,7 @@ const Checkout = () => {
     }
 
     if (
-      deliveryOption === "Scheduled" &&
+      deliveryOptionData?.deliveryOption === "Scheduled" &&
       (!formData.ifScheduled?.startDate ||
         !formData.ifScheduled?.endDate ||
         !formData.ifScheduled?.time)
@@ -425,6 +429,8 @@ const Checkout = () => {
             )
           }
           isPlaying={isPlaying}
+          preOrderStatus={deliveryOptionData?.preOrderStatus}
+          preOrderType={deliveryOptionData?.preOrderType}
         />
       </BottomSheet>
     </GestureHandlerRootView>

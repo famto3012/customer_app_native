@@ -1,10 +1,7 @@
 import {
-  Alert,
   Image,
-  Platform,
   Pressable,
   StyleSheet,
-  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -12,24 +9,29 @@ import { BottomSheetScrollView, SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
 import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
 import { colors, radius, spacingX } from "@/constants/theme";
-import { Check, Clock } from "phosphor-react-native";
+import { Clock } from "phosphor-react-native";
 import { scheduleDetails } from "@/utils/defaultData";
 import { FC, useState, useEffect, useCallback } from "react";
 
 import { DatePickerModal } from "react-native-paper-dates";
 import { TimePickerModal } from "react-native-paper-dates";
 import { formatDate, formatTime } from "@/utils/helpers";
+import { useShowAlert } from "@/hooks/useShowAlert";
 
 interface ScheduleSheetProps {
   onPress: (startDate: string, endDate: string, time: string) => void;
   playSound: () => void;
   isPlaying: boolean;
+  preOrderStatus?: boolean;
+  preOrderType?: "Current-day" | "Next-day" | null;
 }
 
 const ScheduleSheet: FC<ScheduleSheetProps> = ({
   onPress,
   isPlaying,
   playSound,
+  preOrderStatus,
+  preOrderType,
 }) => {
   const [selectedDates, setSelectedDates] = useState<{
     startDate: Date | null;
@@ -53,6 +55,8 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
     hours: number;
     minutes: number;
   } | null>(null);
+
+  const { showAlert } = useShowAlert();
 
   // Check if a date is today
   const isToday = useCallback((date: Date | null): boolean => {
@@ -118,6 +122,21 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
   // Handle date selection
   const onDateChange = (data: any) => {
     const startDate = new Date(data.startDate);
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // Reset time for accurate date comparison
+
+    if (
+      preOrderStatus &&
+      preOrderType === "Next-day" &&
+      startDate.toDateString() === currentDate.toDateString()
+    ) {
+      showAlert(
+        "This merchant does not allow scheduling orders for today. Please select a different date.",
+        "Error"
+      );
+
+      return;
+    }
     let endDate = data.endDate ? new Date(data.endDate) : new Date(startDate);
 
     // If no endDate is provided or if startDate and endDate are the same, set endDate to startDate + 1 day
@@ -178,26 +197,15 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
   // Handle time selection
   const onTimeChange = (data: any) => {
     if (!isTimeValid(data.hours, data.minutes)) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          `Please select a time at least 1.5 hours from now (${formatTimeForDisplay(
-            minimumTime?.hours || 0,
-            minimumTime?.minutes || 0
-          )} or later).`,
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert(
-          "Invalid Time",
-          `Please select a time at least 1.5 hours from now (${formatTimeForDisplay(
-            minimumTime?.hours || 0,
-            minimumTime?.minutes || 0
-          )} or later).`
-        );
-      }
+      showAlert(
+        `Please select a time at least 1.5 hours from now (${formatTimeForDisplay(
+          minimumTime?.hours || 0,
+          minimumTime?.minutes || 0
+        )} or later).`,
+        "Error"
+      );
 
-      return; // Don't update the selected time
+      return;
     }
 
     setSelectedTime({
@@ -210,56 +218,24 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
   // Handle schedule button press
   const handleSchedule = () => {
     if (!selectedDates.startDate || !selectedDates.endDate) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          "Please select a date / date range for your order",
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert(
-          "Warning",
-          "Please select a date / date range for your order"
-        );
-      }
-
+      showAlert("Please select a date / date range for your order", "Error");
       return;
     }
 
     if (selectedTime.hours == null || selectedTime.minutes == null) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          "Please select a time for your order",
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert("Warning", "Please select a time for your order");
-      }
-
+      showAlert("Please select a time for your order", "Error");
       return;
     }
 
     // Double-check if selected time is valid
     if (!isTimeValid(selectedTime.hours, selectedTime.minutes)) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          `Please select a time at least 1.5 hours from now (${formatTimeForDisplay(
-            minimumTime?.hours || 0,
-            minimumTime?.minutes || 0
-          )} or later).`,
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert(
-          "Invalid Time",
-          `Please select a time at least 1.5 hours from now (${formatTimeForDisplay(
-            minimumTime?.hours || 0,
-            minimumTime?.minutes || 0
-          )} or later).`
-        );
-      }
+      showAlert(
+        `Please select a time at least 1.5 hours from now (${formatTimeForDisplay(
+          minimumTime?.hours || 0,
+          minimumTime?.minutes || 0
+        )} or later).`,
+        "Error"
+      );
       return;
     }
 
@@ -278,16 +254,7 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
   // Open time picker with validation
   const openTimePicker = () => {
     if (!selectedDates.startDate) {
-      if (Platform.OS === "android") {
-        ToastAndroid.showWithGravity(
-          "Please select a date first",
-          ToastAndroid.SHORT,
-          ToastAndroid.CENTER
-        );
-      } else {
-        Alert.alert("Warning", "Please select a date first");
-      }
-
+      showAlert("Please select a date first", "Error");
       return;
     }
 
