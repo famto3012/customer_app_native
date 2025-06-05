@@ -1,14 +1,13 @@
-import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
-import { FC, useEffect, useRef, useState } from "react";
-import { scale, verticalScale } from "@/utils/styling";
-import { Microphone, StopCircle, Trash } from "phosphor-react-native";
 import { colors, radius, spacingX, spacingY } from "@/constants/theme";
-import Input from "../Input";
 import { getRecordingPermissions } from "@/utils/helpers";
-import { Audio } from "expo-av";
-import Typo from "../Typo";
+import { scale, verticalScale } from "@/utils/styling";
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback } from "react";
+import { Audio } from "expo-av";
+import { Microphone, StopCircle, Trash } from "phosphor-react-native";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
+import Input from "../Input";
+import Typo from "../Typo";
 
 const Instructions: FC<{
   placeholder: string;
@@ -84,6 +83,16 @@ const Instructions: FC<{
     if (!hasPermission) return;
 
     try {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+        interruptionModeIOS: 0,
+        shouldDuckAndroid: true,
+        interruptionModeAndroid: 1,
+        playThroughEarpieceAndroid: false,
+        staysActiveInBackground: false,
+      });
+
       // Make sure any existing recording is stopped
       if (voiceRecording) {
         await voiceRecording.stopAndUnloadAsync();

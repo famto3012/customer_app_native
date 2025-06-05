@@ -1,28 +1,41 @@
-import { StyleSheet, View } from "react-native";
-import { FC } from "react";
-import { scale, verticalScale } from "@/utils/styling";
-import { colors, radius, spacingX } from "@/constants/theme";
 import Typo from "@/components/Typo";
-import { Circle, Heart } from "phosphor-react-native";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import FastImage from "react-native-fast-image";
+import { colors, radius, spacingX } from "@/constants/theme";
 import { useData } from "@/context/DataContext";
+import { getImageDisplayType } from "@/service/universal";
+import { useAuthStore } from "@/store/store";
+import { scale, verticalScale } from "@/utils/styling";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { useQuery } from "@tanstack/react-query";
+import { FC } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
+import FastImage from "react-native-fast-image";
 
 const ProductDetailSheet: FC<{}> = () => {
   const { product } = useData();
+  const { selectedBusiness } = useAuthStore.getState();
+
+  const { data, isPending } = useQuery({
+    queryKey: ["image-display-type", selectedBusiness],
+    queryFn: () => getImageDisplayType(selectedBusiness as string),
+    enabled: !!product,
+  });
+
+  if (isPending) return null;
 
   return (
     <View style={styles.container}>
       <BottomSheetScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          <FastImage
-            source={{
-              uri: product?.productImageURL,
-              priority: FastImage.priority.high,
-            }}
-            style={styles.image}
-            resizeMode="cover"
-          />
+          <Pressable>
+            <FastImage
+              source={{
+                uri: product?.productImageURL,
+                priority: FastImage.priority.high,
+              }}
+              style={styles.image}
+              resizeMode={data ?? "cover"}
+            />
+          </Pressable>
 
           {/* <View style={styles.favoriteButton}>
             <Heart

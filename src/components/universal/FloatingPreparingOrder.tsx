@@ -1,14 +1,14 @@
-import { Image, Pressable, StyleSheet, View } from "react-native";
 import { colors, radius, spacingY } from "@/constants/theme";
-import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
-import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
-import Typo from "../Typo";
-import { FC, useEffect, useState } from "react";
-import { router } from "expo-router";
 import {
   getAllOrder,
   removeOrderById,
 } from "@/localDB/controller/orderController";
+import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
+import { router } from "expo-router";
+import { FC, useEffect, useState } from "react";
+import { Image, Pressable, StyleSheet, View } from "react-native";
+import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
+import Typo from "../Typo";
 
 const FloatingPreparingOrder: FC<{
   data: any;
@@ -179,6 +179,10 @@ const styles = StyleSheet.create({
     elevation: 5,
     flexDirection: "row",
     marginBottom: verticalScale(75),
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
   },
   text: {
     color: colors.WHITE,

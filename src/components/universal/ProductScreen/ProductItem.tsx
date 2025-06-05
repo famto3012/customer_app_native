@@ -1,26 +1,26 @@
-import { FC, memo, useMemo, useState } from "react";
-import {
-  View,
-  Pressable,
-  StyleSheet,
-  Platform,
-  ToastAndroid,
-  Alert,
-} from "react-native";
-import FastImage from "react-native-fast-image";
-import { Circle, Heart } from "phosphor-react-native";
-import { Grayscale } from "react-native-color-matrix-image-filters";
-import { colors, radius, spacingX } from "@/constants/theme";
-import { scale, verticalScale } from "@/utils/styling";
 import Typo from "@/components/Typo";
 import AddCartButton from "@/components/universal/AddCartButton";
-import { ProductProps } from "@/types";
-import { router } from "expo-router";
-import { useAuthStore } from "@/store/store";
-import { updateCart } from "@/localDB/controller/cartController";
+import { colors, radius, spacingX } from "@/constants/theme";
 import { useData } from "@/context/DataContext";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateCart } from "@/localDB/controller/cartController";
 import { toggleProductFavorite } from "@/service/universal";
+import { useAuthStore } from "@/store/store";
+import { ProductProps } from "@/types";
+import { scale, verticalScale } from "@/utils/styling";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { router } from "expo-router";
+import { Heart } from "phosphor-react-native";
+import { FC, memo, useMemo, useState } from "react";
+import {
+  Alert,
+  Platform,
+  Pressable,
+  StyleSheet,
+  ToastAndroid,
+  View,
+} from "react-native";
+import { Grayscale } from "react-native-color-matrix-image-filters";
+import FastImage from "react-native-fast-image";
 
 interface ProductItemProps {
   product: ProductProps;
@@ -143,7 +143,6 @@ const ProductItem: FC<ProductItemProps> = memo(
         );
       }
     };
-    // console.log("Product", product);
 
     return (
       <Pressable

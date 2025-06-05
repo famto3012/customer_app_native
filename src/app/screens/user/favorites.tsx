@@ -1,18 +1,18 @@
-import { Pressable, StyleSheet, View } from "react-native";
-import React, { useEffect, useState } from "react";
-import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
+import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
+import FavoriteMerchantList from "@/components/user/FavoriteMerchantList";
+import FavoriteProductList from "@/components/user/FavoriteProductList";
+import { colors } from "@/constants/theme";
 import { scale, verticalScale } from "@/utils/styling";
 import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
+import React, { useEffect, useState } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { colors } from "@/constants/theme";
-import FavoriteMerchantList from "@/components/user/FavoriteMerchantList";
-import FavoriteProductList from "@/components/user/FavoriteProductList";
 
 const TAB_WIDTH = (SCREEN_WIDTH - scale(40)) / 2;
 
@@ -35,7 +35,7 @@ const Favorites = () => {
 
   return (
     <ScreenWrapper>
-      <Header title="Favorites" />
+      <Header title="Favourites" />
 
       <View style={styles.tabContainer}>
         <View style={styles.tab}>

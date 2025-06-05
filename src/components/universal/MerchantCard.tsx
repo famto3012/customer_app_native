@@ -1,3 +1,12 @@
+import { colors, radius, spacingX } from "@/constants/theme";
+import { toggleMerchantFavorite } from "@/service/universal";
+import { useAuthStore } from "@/store/store";
+import { MerchantCardProps } from "@/types";
+import { scale, verticalScale } from "@/utils/styling";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { router } from "expo-router";
+import { Heart, Star } from "phosphor-react-native";
+import { memo, useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -7,22 +16,13 @@ import {
   ToastAndroid,
   View,
 } from "react-native";
-import { memo, useEffect, useState } from "react";
-import { scale, verticalScale } from "@/utils/styling";
-import { colors, radius, spacingX } from "@/constants/theme";
-import Typo from "../Typo";
-import { Heart, Star } from "phosphor-react-native";
-import { MerchantCardProps } from "@/types";
-import { toggleMerchantFavorite } from "@/service/universal";
-import { useAuthStore } from "@/store/store";
+import { Grayscale } from "react-native-color-matrix-image-filters";
 import Animated, {
+  useAnimatedStyle,
   useSharedValue,
   withSpring,
-  useAnimatedStyle,
 } from "react-native-reanimated";
-import { router } from "expo-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Grayscale } from "react-native-color-matrix-image-filters";
+import Typo from "../Typo";
 
 const MerchantCard = ({ item }: { item: MerchantCardProps }) => {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
@@ -213,8 +213,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     borderColor: "white",
-    borderRadius: radius._30,
+    borderRadius: Platform.OS === "android" ? radius._30 : radius._10,
     paddingHorizontal: spacingX._7,
+    overflow: "hidden",
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,

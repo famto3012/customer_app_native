@@ -1,15 +1,16 @@
-import { FlatList, Image, Pressable, StyleSheet, View } from "react-native";
-import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
-import Typo from "../Typo";
 import { colors, radius } from "@/constants/theme";
-import { BusinessCategoryProps } from "@/types";
-import { router } from "expo-router";
-import { FC, useEffect, useState } from "react";
+import { useShowAlert } from "@/hooks/useShowAlert";
 import { getBusinessCategories } from "@/service/universal";
 import { useAuthStore } from "@/store/store";
+import { BusinessCategoryProps } from "@/types";
 import { useSafeLocation } from "@/utils/helpers";
+import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import { useQuery } from "@tanstack/react-query";
-import { useShowAlert } from "@/hooks/useShowAlert";
+import { router } from "expo-router";
+import { FC, useEffect, useState } from "react";
+import { FlatList, Image, Pressable, StyleSheet, View } from "react-native";
+import BusinessCategoryLoader from "../Loader/BusinessCategoryLoader";
+import Typo from "../Typo";
 
 const BusinessCategories: FC<{ query: string }> = ({ query }) => {
   const [businessCategory, setBusinessCategory] = useState<
@@ -90,13 +91,13 @@ const BusinessCategories: FC<{ query: string }> = ({ query }) => {
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={
           <View style={{ alignItems: "center", marginTop: verticalScale(15) }}>
-            <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
-              {isDataReady
-                ? "No Business category."
-                : !data?.outside && isLoading
-                ? "Loading..."
-                : "Currently we don't deliver in this area!"}
-            </Typo>
+            {!isDataReady ? (
+              <BusinessCategoryLoader />
+            ) : (
+              <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
+                Currently we don't deliver in this area!
+              </Typo>
+            )}
           </View>
         }
         numColumns={3}

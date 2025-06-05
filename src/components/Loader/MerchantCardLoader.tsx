@@ -1,7 +1,7 @@
+import { spacingY } from "@/constants/theme";
+import { SCREEN_WIDTH } from "@/utils/styling";
 import { View } from "react-native";
 import SkeletonPlaceholder from "react-native-skeleton-placeholder";
-import { SCREEN_WIDTH } from "@/utils/styling";
-import { spacingY } from "@/constants/theme";
 
 const MerchantCardLoader = () => {
   return (

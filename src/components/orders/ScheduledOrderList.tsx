@@ -1,18 +1,25 @@
-import { FlatList, Image, Pressable, StyleSheet, View } from "react-native";
-import { useCallback, useEffect, useState } from "react";
-import { scale, verticalScale } from "@/utils/styling";
-import Typo from "../Typo";
 import { colors, radius } from "@/constants/theme";
-import { ScheduledOrderItemProps } from "@/types";
-import { useQuery } from "@tanstack/react-query";
 import { getScheduledOrderList } from "@/service/orderService";
-import { SCREEN_HEIGHT, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
-import { RefreshControl } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
 import { useAuthStore } from "@/store/store";
-import LottieView from "lottie-react-native";
+import { ScheduledOrderItemProps } from "@/types";
+import { scale, verticalScale } from "@/utils/styling";
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
+import { useFocusEffect } from "@react-navigation/native";
+import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
+import LottieView from "lottie-react-native";
+import { useCallback, useEffect, useState } from "react";
+import {
+  FlatList,
+  Image,
+  Platform,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from "react-native";
 import SkeletonPlaceholder from "react-native-skeleton-placeholder";
+import Typo from "../Typo";
 
 const ScheduledOrderList = () => {
   const [scheduledOrderList, setScheduledOrderList] = useState<
@@ -104,15 +111,17 @@ const ScheduledOrderList = () => {
                 : ""}
             </Typo>
           </View>
-          <Typo
-            size={12}
-            color={
-              item.orderStatus === "Pending" ? colors.YELLOW : colors.GREEN
-            }
-            style={styles.completed}
-          >
-            {item.orderStatus}
-          </Typo>
+          <View style={styles.completed}>
+            <Typo
+              size={12}
+              color={
+                item.orderStatus === "Pending" ? colors.YELLOW : colors.GREEN
+              }
+              // style={styles.completed}
+            >
+              {item.orderStatus}
+            </Typo>
+          </View>
         </View>
 
         <View style={styles.orderItemBody}>
@@ -437,7 +446,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: colors.NEUTRAL100,
+    backgroundColor:
+      Platform.OS === "android" ? colors.NEUTRAL100 : colors.NEUTRAL50,
     paddingVertical: verticalScale(12),
     paddingHorizontal: scale(15),
     marginTop: verticalScale(12),

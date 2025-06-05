@@ -1,20 +1,13 @@
-import {
-  Alert,
-  Platform,
-  Pressable,
-  StyleSheet,
-  ToastAndroid,
-  View,
-} from "react-native";
-import Typo from "@/components/Typo";
-import { scale, verticalScale } from "@/utils/styling";
-import { colors } from "@/constants/theme";
-import { FC, useEffect, useState } from "react";
 import Button from "@/components/Button";
-import { useQuery } from "@tanstack/react-query";
+import Typo from "@/components/Typo";
+import { colors } from "@/constants/theme";
+import { useShowAlert } from "@/hooks/useShowAlert";
 import { fetchLoyaltyAndFamtoCash } from "@/service/userService";
 import { DeliveryOptionType, PaymentOptionType } from "@/types";
-import { useShowAlert } from "@/hooks/useShowAlert";
+import { scale, verticalScale } from "@/utils/styling";
+import { useQuery } from "@tanstack/react-query";
+import { FC, useEffect, useState } from "react";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 
 const PaymentOptionSheet: FC<{
   onSelect: (data: string) => void;
@@ -43,8 +36,7 @@ const PaymentOptionSheet: FC<{
       return;
     }
 
-    if (value === "Famto-cash" && data?.walletBalance < grandTotal) {
-      console.log("Here");
+    if (value === "Famto-cash" && Number(data?.walletBalance) < grandTotal) {
       showAlert(
         "Your Famto Cash balance is insufficient to make the current payment",
         "Low Balance"
@@ -142,6 +134,7 @@ const styles = StyleSheet.create({
   container: {
     padding: scale(20),
     flex: 1,
+    marginBottom: Platform.OS === "ios" ? verticalScale(15) : 0,
   },
   separator: {
     borderWidth: 1,

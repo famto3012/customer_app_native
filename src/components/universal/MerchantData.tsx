@@ -1,11 +1,11 @@
-import { Pressable, StyleSheet, View } from "react-native";
-import { FC } from "react";
-import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import { colors, radius, spacingX } from "@/constants/theme";
 import { MerchantDataProps } from "@/types";
-import Typo from "../Typo";
+import { scale, verticalScale } from "@/utils/styling";
 import { Clock, Star } from "phosphor-react-native";
+import { FC } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 import MerchantDataLoader from "../Loader/MerchantDataLoader";
+import Typo from "../Typo";
 
 const MerchantData: FC<{
   merchantData: MerchantDataProps;
@@ -19,8 +19,8 @@ const MerchantData: FC<{
           <MerchantDataLoader />
         </View>
       ) : (
-        <View style={styles.merchantData}>
-          <View style={{ gap: scale(10) }}>
+        <View style={[styles.merchantData, {}]}>
+          <View style={{ gap: scale(10), flex: 1, maxWidth: "80%" }}>
             <Typo size={20} color={colors.NEUTRAL900} fontWeight="bold">
               {merchantData?.merchantName}
             </Typo>
@@ -43,7 +43,7 @@ const MerchantData: FC<{
             </Typo>
           </View>
 
-          <View>
+          <View style={{ flexShrink: 1 }}>
             <Pressable style={styles.rating} onPress={openRating}>
               <Star size={scale(15)} color={colors.WHITE} weight="fill" />
               <Typo size={14} color={colors.WHITE}>

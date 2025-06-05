@@ -1,29 +1,30 @@
-import {
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-  ToastAndroid,
-  Share,
-} from "react-native";
-import React, { useEffect, useState } from "react";
-import ScreenWrapper from "@/components/ScreenWrapper";
+import Button from "@/components/Button";
 import Header from "@/components/Header";
-import { scale, verticalScale } from "@/utils/styling";
+import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import { colors, radius, spacingX } from "@/constants/theme";
+import { useAudioCleanup } from "@/hooks/useAudio";
+import { getReferralCode } from "@/service/userService";
 import { referralDetails } from "@/utils/defaultData";
-import Button from "@/components/Button";
+import { playOrStopSound } from "@/utils/helpers";
+import { scale, verticalScale } from "@/utils/styling";
+import { useQuery } from "@tanstack/react-query";
+import * as Clipboard from "expo-clipboard";
 import {
   Clipboard as ClipBoardIcon,
   ShareNetwork,
 } from "phosphor-react-native";
-import { useQuery } from "@tanstack/react-query";
-import { getReferralCode } from "@/service/userService";
-import * as Clipboard from "expo-clipboard";
-import { playOrStopSound } from "@/utils/helpers";
-import { useAudioCleanup } from "@/hooks/useAudio";
+import React, { useEffect, useState } from "react";
+import {
+  Image,
+  Platform,
+  Pressable,
+  ScrollView,
+  Share,
+  StyleSheet,
+  ToastAndroid,
+  View,
+} from "react-native";
 
 type ReferralProps = {
   appLink: string;
@@ -237,6 +238,7 @@ const styles = StyleSheet.create({
     marginTop: "auto",
     paddingVertical: verticalScale(20),
     paddingHorizontal: scale(20),
+    marginBottom: Platform.OS === "ios" ? verticalScale(10) : 0,
   },
   codeContainer: {
     backgroundColor: colors.NEUTRAL200,

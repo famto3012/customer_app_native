@@ -45,7 +45,7 @@ interface AuthStore {
   location: { latitude: number; longitude: number } | null;
   selectedBusiness: string | null;
   newUser: boolean;
-  cart: { showCart: boolean; merchant: string; cartId: string };
+  cart: { showCart: boolean; merchant: string; merchantId: string; cartId: string };
   promoCode: {
     universal: string | null;
     pickAndDrop: string | null;

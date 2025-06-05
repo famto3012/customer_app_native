@@ -1,8 +1,8 @@
+import { colors } from "@/constants/theme";
+import { scale, verticalScale } from "@/utils/styling";
 import { FC } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import Typo from "../Typo";
-import { colors } from "@/constants/theme";
-import { scale, verticalScale } from "@/utils/styling";
 
 interface UniversalBillProps {
   deliveryChargePerDay: number;
@@ -74,7 +74,9 @@ const OrderBillDetail: FC<{ data: UniversalBillProps; isLoading: boolean }> = ({
         <RenderBillField field={discountLabel} value={data?.discountedAmount} />
       )}
 
-      <RenderBillField field="Sub Total" value={data?.subTotal} />
+      {data?.subTotal && (
+        <RenderBillField field="Sub Total" value={data?.subTotal} />
+      )}
 
       <View
         style={{

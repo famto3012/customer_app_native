@@ -1,25 +1,27 @@
+import { colors, radius, spacingY } from "@/constants/theme";
+import { getCartItems } from "@/localDB/controller/cartController";
+import { addItemsToCart } from "@/service/universal";
+import { useAuthStore } from "@/store/store";
+import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
+import { useMutation } from "@tanstack/react-query";
+import { router } from "expo-router";
+import { XCircle } from "phosphor-react-native";
+import { FC } from "react";
 import {
   ActivityIndicator,
   Image,
+  Platform,
   Pressable,
   StyleSheet,
   View,
 } from "react-native";
-import { colors, radius, spacingY } from "@/constants/theme";
-import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
-import { useAuthStore } from "@/store/store";
 import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
 import Typo from "../Typo";
-import { XCircle } from "phosphor-react-native";
-import { FC } from "react";
-import { router } from "expo-router";
-import { getCartItems } from "@/localDB/controller/cartController";
-import { useMutation } from "@tanstack/react-query";
-import { addItemsToCart } from "@/service/universal";
 
 const FloatingCart: FC<{ onClearCart: () => void }> = ({ onClearCart }) => {
   const showCart = useAuthStore((state) => state.cart.showCart);
   const merchant = useAuthStore((state) => state.cart.merchant);
+  const merchantId = useAuthStore((state) => state.cart.merchantId);
 
   const { selectedMerchant } = useAuthStore.getState();
 
@@ -43,7 +45,7 @@ const FloatingCart: FC<{ onClearCart: () => void }> = ({ onClearCart }) => {
     const items = await getCartItems();
 
     handleAddItemsToCartMutation.mutate({
-      merchantId: selectedMerchant?.merchantId || "",
+      merchantId: merchantId || "",
       items,
     });
   };
@@ -100,9 +102,9 @@ export default FloatingCart;
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    bottom: 20,
+    bottom: Platform.OS === "ios" ? verticalScale(30) : verticalScale(20),
     backgroundColor: colors.WHITE,
-    width: SCREEN_WIDTH - 40,
+    width: SCREEN_WIDTH - scale(40),
     marginHorizontal: scale(20),
     paddingVertical: verticalScale(12),
     paddingHorizontal: scale(10),

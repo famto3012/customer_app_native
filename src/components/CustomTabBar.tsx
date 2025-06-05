@@ -1,8 +1,8 @@
-import { View, Platform, TouchableOpacity, StyleSheet } from "react-native";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { colors, radius, spacingY } from "@/constants/theme";
 import { verticalScale } from "@/utils/styling";
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import * as Icon from "phosphor-react-native";
+import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 
 export default function CustomTabBar({
   state,

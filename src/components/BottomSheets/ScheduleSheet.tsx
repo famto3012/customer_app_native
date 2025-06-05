@@ -1,22 +1,22 @@
+import { colors, radius, spacingX } from "@/constants/theme";
+import { scheduleDetails } from "@/utils/defaultData";
+import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
+import { BottomSheetScrollView, SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
+import { Clock } from "phosphor-react-native";
+import { FC, useCallback, useEffect, useState } from "react";
 import {
   Image,
+  Platform,
   Pressable,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
-import { BottomSheetScrollView, SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
-import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
 import Typo from "../Typo";
-import { colors, radius, spacingX } from "@/constants/theme";
-import { Clock } from "phosphor-react-native";
-import { scheduleDetails } from "@/utils/defaultData";
-import { FC, useState, useEffect, useCallback } from "react";
 
-import { DatePickerModal } from "react-native-paper-dates";
-import { TimePickerModal } from "react-native-paper-dates";
-import { formatDate, formatTime } from "@/utils/helpers";
 import { useShowAlert } from "@/hooks/useShowAlert";
+import { formatDate, formatTime } from "@/utils/helpers";
+import { DatePickerModal, TimePickerModal } from "react-native-paper-dates";
 
 interface ScheduleSheetProps {
   onPress: (startDate: string, endDate: string, time: string) => void;
@@ -163,6 +163,38 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
     setShowDatePicker(false);
   };
 
+  // const isTimeValid = useCallback(
+  //   (hours: number, minutes: number): boolean => {
+  //     if (!isToday(selectedDates.startDate)) {
+  //       console.log("Here");
+  //       return true; // Allow any time if not today
+  //     }
+
+  //     const now = new Date();
+
+  //     // Calculate the minimum allowed time (current time + 1.5 hours)
+  //     const minimumSelectableTime = new Date(now.getTime() + 90 * 60000);
+  //     const minHours = minimumSelectableTime.getHours();
+  //     const minMinutes = minimumSelectableTime.getMinutes();
+
+  //     console.log(`Selected Time: ${hours}:${minutes}`);
+  //     console.log(`Minimum Allowed Time: ${minHours}:${minMinutes}`);
+
+  //     // Handle time comparison properly, including rollover past midnight
+  //     if (
+  //       (now.getHours() <= minHours &&
+  //         (hours < minHours || (hours === minHours && minutes < minMinutes))) ||
+  //       (now.getHours() > minHours && hours < minHours)
+  //     ) {
+  //       // alert("Selected time must be at least 1 hour 30 minutes ahead.");
+  //       return false;
+  //     }
+
+  //     return true;
+  //   },
+  //   [selectedDates.startDate]
+  // );
+
   const isTimeValid = useCallback(
     (hours: number, minutes: number): boolean => {
       if (!isToday(selectedDates.startDate)) {
@@ -171,21 +203,17 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
 
       const now = new Date();
 
-      // Calculate the minimum allowed time (current time + 1.5 hours)
+      // Minimum time is now + 1.5 hours
       const minimumSelectableTime = new Date(now.getTime() + 90 * 60000);
-      const minHours = minimumSelectableTime.getHours();
-      const minMinutes = minimumSelectableTime.getMinutes();
 
-      // console.log(`Selected Time: ${hours}:${minutes}`);
-      // console.log(`Minimum Allowed Time: ${minHours}:${minMinutes}`);
+      // Construct a date with selected time on the selected day
+      const selectedTime = new Date(selectedDates.startDate);
+      selectedTime.setHours(hours, minutes, 0, 0);
 
-      // Handle time comparison properly, including rollover past midnight
-      if (
-        (now.getHours() <= minHours &&
-          (hours < minHours || (hours === minHours && minutes < minMinutes))) ||
-        (now.getHours() > minHours && hours < minHours)
-      ) {
-        // alert("Selected time must be at least 1 hour 30 minutes ahead.");
+      console.log(`Selected Time: ${selectedTime}`);
+      console.log(`Minimum Allowed Time: ${minimumSelectableTime}`);
+
+      if (selectedTime < minimumSelectableTime) {
         return false;
       }
 
@@ -445,6 +473,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     alignItems: "center",
     paddingVertical: verticalScale(15),
+    marginBottom: Platform.OS === "android" ? 0 : verticalScale(15),
   },
   scheduleButton: {
     backgroundColor: colors.PRIMARY,

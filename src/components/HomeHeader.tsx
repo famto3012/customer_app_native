@@ -1,16 +1,15 @@
-import { View, Pressable, Image } from "react-native";
-import React, { FC, useEffect } from "react";
-import { CaretDown, MapPin } from "phosphor-react-native";
-import { scale, verticalScale } from "@/utils/styling";
-import Typo from "./Typo";
+import { commonStyles } from "@/constants/commonStyles";
 import { colors, spacingX } from "@/constants/theme";
-import { router } from "expo-router";
-import { UserProfileProps } from "@/types";
-import { useQuery } from "@tanstack/react-query";
 import { fetchUserProfile } from "@/service/userService";
 import { useAuthStore } from "@/store/store";
-import { commonStyles } from "@/constants/commonStyles";
-import { StyleSheet } from "react-native";
+import { UserProfileProps } from "@/types";
+import { scale, verticalScale } from "@/utils/styling";
+import { useQuery } from "@tanstack/react-query";
+import { router } from "expo-router";
+import { CaretDown, MapPin } from "phosphor-react-native";
+import React, { FC } from "react";
+import { Image, Platform, Pressable, StyleSheet, View } from "react-native";
+import Typo from "./Typo";
 
 const HomeHeader: FC<{ onPress: () => void }> = ({ onPress }) => {
   const token = useAuthStore((state) => state.token);
@@ -29,6 +28,7 @@ const HomeHeader: FC<{ onPress: () => void }> = ({ onPress }) => {
         {
           marginHorizontal: scale(20),
           gap: spacingX._15,
+          marginTop: Platform.OS === "android" ? verticalScale(25) : 0,
         },
       ]}
     >

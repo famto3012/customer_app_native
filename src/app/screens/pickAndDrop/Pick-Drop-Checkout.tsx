@@ -1,35 +1,41 @@
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import ScreenWrapper from "@/components/ScreenWrapper";
-import Header from "@/components/Header";
-import ItemSpecification from "@/components/pickandDrop/ItemSpecification";
-import AddTip from "@/components/common/AddTip";
-import Typo from "@/components/Typo";
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { colors, radius, spacingX } from "@/constants/theme";
-import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
+import PaymentOptionSheet from "@/components/BottomSheets/common/PaymentOptionSheet";
 import Button from "@/components/Button";
-import PromoCode from "@/components/common/Promocode";
-import BillUpdate from "@/components/common/BillUpdate";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-} from "@gorhom/bottom-sheet";
-import { commonStyles } from "@/constants/commonStyles";
-import { PickAndDropCartBill } from "@/types";
-import { useAuthStore } from "@/store/store";
+import AddTip from "@/components/common/AddTip";
 import AppliedPromoCode from "@/components/common/AppliedPromoCode";
+import BillUpdate from "@/components/common/BillUpdate";
+import PromoCode from "@/components/common/Promocode";
+import Header from "@/components/Header";
+import BillSheet from "@/components/pickandDrop/BillSheet";
+import ItemSpecification from "@/components/pickandDrop/ItemSpecification";
+import ScreenWrapper from "@/components/ScreenWrapper";
+import Typo from "@/components/Typo";
+import { commonStyles } from "@/constants/commonStyles";
+import { colors, radius, spacingX } from "@/constants/theme";
+import { addOrder } from "@/localDB/controller/orderController";
 import {
   confirmPickAndDropOrder,
   getPickAndDropBill,
   verifyPickAndDropPayment,
 } from "@/service/pickandDropService";
-import BillSheet from "@/components/pickandDrop/BillSheet";
-import { CaretUp } from "phosphor-react-native";
-import PaymentOptionSheet from "@/components/BottomSheets/common/PaymentOptionSheet";
-import { addOrder } from "@/localDB/controller/orderController";
 import { updateTip } from "@/service/userService";
+import { useAuthStore } from "@/store/store";
+import { PickAndDropCartBill } from "@/types";
+import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { CaretUp } from "phosphor-react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 
 const PickAndDropCheckout = () => {
   const [promoCodeUsed, setPromoCodeUsed] = useState<string>("");
@@ -222,7 +228,8 @@ const PickAndDropCheckout = () => {
         <View
           style={{
             backgroundColor: "white",
-            padding: 15,
+            padding: scale(15),
+            paddingBottom: Platform.OS === "ios" ? verticalScale(30) : 0,
           }}
         >
           <View

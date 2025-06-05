@@ -1,31 +1,31 @@
-import { FlatList, ScrollView, StyleSheet, View } from "react-native";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import ScreenWrapper from "@/components/ScreenWrapper";
-import Header from "@/components/Header";
-import Typo from "@/components/Typo";
-import { colors, radius, spacingX } from "@/constants/theme";
-import { scale, verticalScale } from "@/utils/styling";
-import { router, useLocalSearchParams } from "expo-router";
-import { PickAndDropItemProps } from "@/types";
-import ItemCard from "@/components/pickandDrop/ItemCard";
-import Button from "@/components/Button";
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-} from "@gorhom/bottom-sheet";
-import { commonStyles } from "@/constants/commonStyles";
 import PickAndDropItemSheet from "@/components/BottomSheets/pickAndDrop/PickAndDropItemSheet";
-import { Warning } from "phosphor-react-native";
-import VehicleCard from "@/components/pickandDrop/VehicleCard";
 import VehicleDetail from "@/components/BottomSheets/pickAndDrop/VehicleDetail";
-import { pickAndDropVehicleDetail } from "@/utils/defaultData";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import Button from "@/components/Button";
+import Header from "@/components/Header";
+import VehicleLoader from "@/components/Loader/VehicleLoader";
+import ItemCard from "@/components/pickandDrop/ItemCard";
+import VehicleCard from "@/components/pickandDrop/VehicleCard";
+import ScreenWrapper from "@/components/ScreenWrapper";
+import Typo from "@/components/Typo";
+import { commonStyles } from "@/constants/commonStyles";
+import { colors, radius, spacingX } from "@/constants/theme";
+import { useShowAlert } from "@/hooks/useShowAlert";
 import {
   addPickAndDropItems,
   getVehicleDetails,
 } from "@/service/pickandDropService";
-import VehicleLoader from "@/components/Loader/VehicleLoader";
-import { useShowAlert } from "@/hooks/useShowAlert";
+import { PickAndDropItemProps } from "@/types";
+import { pickAndDropVehicleDetail } from "@/utils/defaultData";
+import { scale, verticalScale } from "@/utils/styling";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { router, useLocalSearchParams } from "expo-router";
+import { Warning } from "phosphor-react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FlatList, Platform, ScrollView, StyleSheet, View } from "react-native";
 
 interface DataProps {
   vehicleType: string;
@@ -160,11 +160,11 @@ const PickAndDropDetail = () => {
                     setSelectedItem({ item, index });
                     editItemSheetRef.current?.expand();
                   }}
-                  onDeleteItem={(itemIndex: number) =>
+                  onDeleteItem={(itemIndex: number) => {
                     setItems((prevItems) =>
                       prevItems.filter((_, index) => index !== itemIndex)
-                    )
-                  }
+                    );
+                  }}
                   index={index}
                 />
               )}
@@ -222,7 +222,8 @@ const PickAndDropDetail = () => {
 
         <View
           style={{
-            paddingVertical: verticalScale(20),
+            paddingVertical:
+              Platform.OS === "ios" ? verticalScale(30) : verticalScale(20),
             paddingHorizontal: scale(20),
           }}
         >

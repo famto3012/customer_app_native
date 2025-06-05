@@ -1,29 +1,29 @@
+import Button from "@/components/Button";
+import Header from "@/components/Header";
+import ScreenWrapper from "@/components/ScreenWrapper";
+import Input from "@/components/user/Input";
+import { spacingY } from "@/constants/theme";
+import { fetchUserProfile, updateUserProfile } from "@/service/userService";
+import { useAuthStore } from "@/store/store";
+import { UserProfileProps } from "@/types";
+import { scale, verticalScale } from "@/utils/styling";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
-  View,
-  KeyboardAvoidingView,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Alert,
   ToastAndroid,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import ScreenWrapper from "@/components/ScreenWrapper";
-import Header from "@/components/Header";
-import { scale, verticalScale } from "@/utils/styling";
-import { spacingY } from "@/constants/theme";
-import Button from "@/components/Button";
-import Input from "@/components/user/Input";
-import { useAuthStore } from "@/store/store";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { UserProfileProps } from "@/types";
-import { fetchUserProfile, updateUserProfile } from "@/service/userService";
-import * as ImagePicker from "expo-image-picker";
-import { router } from "expo-router";
 
 const EditProfile = () => {
   const [profileData, setProfileData] = useState<UserProfileProps>({

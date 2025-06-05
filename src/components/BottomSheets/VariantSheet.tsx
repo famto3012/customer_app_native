@@ -1,24 +1,25 @@
+import { colors, radius, spacingX } from "@/constants/theme";
+import { useData } from "@/context/DataContext";
+import { updateCart } from "@/localDB/controller/cartController";
+import { getVariants } from "@/service/universal";
+import { useAuthStore } from "@/store/store";
+import { Variant } from "@/types";
+import { scale, verticalScale } from "@/utils/styling";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { useQuery } from "@tanstack/react-query";
+import { FC, useEffect, useState } from "react";
 import {
+  Alert,
   FlatList,
   Image,
+  Platform,
   Pressable,
   StyleSheet,
-  View,
   TouchableOpacity,
-  Alert,
+  View,
 } from "react-native";
-import { FC, useEffect, useState } from "react";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { Variant } from "@/types";
-import Typo from "../Typo";
-import { scale, verticalScale } from "@/utils/styling";
-import { colors, radius, spacingX } from "@/constants/theme";
-import { getVariants } from "@/service/universal";
-import { updateCart } from "@/localDB/controller/cartController";
-import { useAuthStore } from "@/store/store";
-import { useQuery } from "@tanstack/react-query";
-import { useData } from "@/context/DataContext";
 import VariantLoader from "../Loader/VariantLoader";
+import Typo from "../Typo";
 
 interface SelectedVariantProps {
   variantTypeId: string;
@@ -314,6 +315,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(20),
     borderTopWidth: 1,
     borderTopColor: colors.NEUTRAL300,
+    marginBottom: Platform.OS === "ios" ? verticalScale(20) : 0,
   },
   secondaryBtn: {
     flexDirection: "row",

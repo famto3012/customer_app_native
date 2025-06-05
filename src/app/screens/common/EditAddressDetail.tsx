@@ -1,3 +1,17 @@
+import Button from "@/components/Button";
+import Input from "@/components/Input";
+import Typo from "@/components/Typo";
+import { commonStyles } from "@/constants/commonStyles";
+import { colors, spacingY } from "@/constants/theme";
+import { updateUserAddress } from "@/service/userService";
+import { useAuthStore } from "@/store/store";
+import { UserAddressProps } from "@/types";
+import { scale, verticalScale } from "@/utils/styling";
+import { BottomSheetScrollView, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
+import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { router } from "expo-router";
+import { RefObject, useEffect, useState } from "react";
 import {
   Alert,
   Keyboard,
@@ -6,23 +20,9 @@ import {
   StyleSheet,
   ToastAndroid,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { RefObject, useEffect, useState } from "react";
-import { scale, verticalScale } from "@/utils/styling";
-import { colors, spacingY } from "@/constants/theme";
-import { BottomSheetScrollView, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
-import Button from "@/components/Button";
-import Input from "@/components/Input";
-import Typo from "@/components/Typo";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
-import { UserAddressProps } from "@/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateUserAddress } from "@/service/userService";
-import { router } from "expo-router";
-import { useAuthStore } from "@/store/store";
-import { commonStyles } from "@/constants/commonStyles";
-import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 
 const EditAddressDetail = ({
   editAddressSheetRef,

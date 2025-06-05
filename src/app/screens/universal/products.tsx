@@ -444,37 +444,42 @@
 // };
 
 // export default Products;
-import { FlatList, View } from "react-native";
-import { useEffect, useState, useCallback, useRef, useMemo } from "react";
-import { CategoryProps, MerchantDataProps, ProductProps } from "@/types";
-import { useLocalSearchParams } from "expo-router";
-import { useAuthStore } from "@/store/store";
-import { useQuery } from "@tanstack/react-query";
-import FloatingCart from "@/components/universal/FloatingCart";
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-} from "@gorhom/bottom-sheet";
 import VariantSheet from "@/components/BottomSheets/VariantSheet";
 import ClearCartSheet from "@/components/BottomSheets/universal/ClearCartSheet";
+import DistanceWarning from "@/components/BottomSheets/universal/DistanceWarning";
 import DuplicateVariantSheet from "@/components/BottomSheets/universal/DuplicateVariantSheet";
+import MerchantRatingSheet from "@/components/BottomSheets/universal/MerchantRatingSheet";
+import ProductDetailSheet from "@/components/BottomSheets/universal/ProductDetailSheet";
+import ProductCategoryLoader from "@/components/Loader/ProductCategoryLoader";
+import ScreenWrapper from "@/components/ScreenWrapper";
+import Typo from "@/components/Typo";
+import FloatingCart from "@/components/universal/FloatingCart";
+import CategoryContainer from "@/components/universal/ProductScreen/CategoryContainer";
+import CategoryFooter from "@/components/universal/ProductScreen/CategoryFooter";
+import EmptyComponent from "@/components/universal/ProductScreen/EmptyComponent";
+import HeaderComponent from "@/components/universal/ProductScreen/HeaderComponent";
+import { commonStyles } from "@/constants/commonStyles";
+import { colors } from "@/constants/theme";
+import { useData } from "@/context/DataContext";
 import {
   fetchCategory,
   fetchProduct,
+  getMerchantAvailability,
   getMerchantData,
 } from "@/service/universal";
+import { useAuthStore } from "@/store/store";
+import { CategoryProps, MerchantDataProps, ProductProps } from "@/types";
 import { useSafeLocation } from "@/utils/helpers";
-import HeaderComponent from "@/components/universal/ProductScreen/HeaderComponent";
-import CategoryContainer from "@/components/universal/ProductScreen/CategoryContainer";
-import EmptyComponent from "@/components/universal/ProductScreen/EmptyComponent";
-import { commonStyles } from "@/constants/commonStyles";
-import ProductDetailSheet from "@/components/BottomSheets/universal/ProductDetailSheet";
-import MerchantRatingSheet from "@/components/BottomSheets/universal/MerchantRatingSheet";
-import DistanceWarning from "@/components/BottomSheets/universal/DistanceWarning";
-import ProductCategoryLoader from "@/components/Loader/ProductCategoryLoader";
-import { verticalScale } from "@/utils/styling";
-import { useData } from "@/context/DataContext";
-import CategoryFooter from "@/components/universal/ProductScreen/CategoryFooter";
+import { scale, verticalScale } from "@/utils/styling";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+  SCREEN_WIDTH,
+} from "@gorhom/bottom-sheet";
+import { useQuery } from "@tanstack/react-query";
+import { useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Animated, FlatList, View } from "react-native";
 
 const Products = () => {
   // Combined data structure for categories and their products
@@ -515,17 +520,21 @@ const Products = () => {
   const showCart = useAuthStore((state) => state.cart.showCart);
   const { openDuplicate, setOpenDuplicate, productFilter } = useData();
 
+
   const { data: merchantData, isLoading: merchantDataLoading } =
     useQuery<MerchantDataProps>({
       queryKey: ["merchant-data", merchantId],
       queryFn: () => getMerchantData(merchantId as string, latitude, longitude),
     });
 
+ 
+
   useEffect(() => {
     if (merchantData?.distanceWarning) {
       distanceWarningSheetRef.current?.expand();
     }
   }, [merchantData]);
+
 
   // Reset state when merchant or business changes
   useEffect(() => {
@@ -950,10 +959,13 @@ const Products = () => {
     []
   );
 
+ 
+
   return (
     <>
-      <View style={{ flex: 1 }} onLayout={onContainerLayout}>
-        {/* <FlatList
+      <ScreenWrapper>
+        <View style={{ flex: 1 }} onLayout={onContainerLayout}>
+          {/* <FlatList
           ref={listRef}
           data={listData}
           renderItem={renderItem}
@@ -985,134 +997,136 @@ const Products = () => {
           getItemLayout={getItemLayout}
           extraData={isLoading} // Add this to ensure re-render when loading state changes
         /> */}
-        <FlatList
-          ref={listRef}
-          data={listData}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          onContentSizeChange={onContentSizeChange}
-          ListEmptyComponent={ListEmptyComponent}
-          ListHeaderComponent={() => (
-            <HeaderComponent
-              merchantData={merchantData ?? null}
-              merchantDataLoading={merchantDataLoading}
-              merchantId={merchantId}
-              openRating={() => ratingSheetRef.current?.expand()}
-            />
-          )}
-          ListFooterComponent={
-            <CategoryFooter merchantData={merchantData ?? null} />
-          }
-          contentContainerStyle={{
-            paddingBottom: showCart ? verticalScale(60) : 0,
-          }}
-          onEndReached={handleEndReached}
-          onEndReachedThreshold={0.5}
-          removeClippedSubviews={false} // CHANGE THIS to false
-          extraData={[isLoading, categories.length]} // Make this an array with both values
-          initialNumToRender={3}
-          maxToRenderPerBatch={5}
-          windowSize={10}
-          showsVerticalScrollIndicator={false}
-          // Remove getItemLayout to allow dynamic heights
-          // legacyImplementation can also be removed
-        />
-      </View>
+          <FlatList
+            ref={listRef}
+            data={listData}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
+            onContentSizeChange={onContentSizeChange}
+            ListEmptyComponent={ListEmptyComponent}
+            ListHeaderComponent={() => (
+              <HeaderComponent
+                merchantData={merchantData ?? null}
+                merchantDataLoading={merchantDataLoading}
+                merchantId={merchantId}
+                openRating={() => ratingSheetRef.current?.expand()}
+              />
+            )}
+            ListFooterComponent={
+              <CategoryFooter merchantData={merchantData ?? null} />
+            }
+            contentContainerStyle={{
+              paddingBottom: showCart ? verticalScale(60) : 0,
+            }}
+            onEndReached={handleEndReached}
+            onEndReachedThreshold={0.5}
+            removeClippedSubviews={false} // CHANGE THIS to false
+            extraData={[isLoading, categories.length]} // Make this an array with both values
+            initialNumToRender={3}
+            maxToRenderPerBatch={5}
+            windowSize={10}
+            showsVerticalScrollIndicator={false}
+            // Remove getItemLayout to allow dynamic heights
+            // legacyImplementation can also be removed
+          />
+        </View>
+     
 
-      <FloatingCart onClearCart={() => clearCartSheetRef.current?.expand()} />
+        <FloatingCart onClearCart={() => clearCartSheetRef.current?.expand()} />
 
-      <BottomSheet
-        ref={variantSheetRef}
-        index={-1}
-        snapPoints={variantSheetSnapPoints}
-        enableDynamicSizing={false}
-        enablePanDownToClose
-        backdropComponent={renderBackdrop}
-      >
-        <VariantSheet
-          onAddItem={() => {
-            variantSheetRef.current?.close();
-          }}
-        />
-      </BottomSheet>
+        <BottomSheet
+          ref={variantSheetRef}
+          index={-1}
+          snapPoints={variantSheetSnapPoints}
+          enableDynamicSizing={false}
+          enablePanDownToClose
+          backdropComponent={renderBackdrop}
+        >
+          <VariantSheet
+            onAddItem={() => {
+              variantSheetRef.current?.close();
+            }}
+          />
+        </BottomSheet>
 
-      <BottomSheet
-        ref={clearCartSheetRef}
-        index={-1}
-        snapPoints={clearCartSheetSnapPoints}
-        enableDynamicSizing={false}
-        enablePanDownToClose
-        backdropComponent={renderBackdrop}
-      >
-        <ClearCartSheet
-          closeClearCartSheet={() => {
-            clearCartSheetRef.current?.close();
-          }}
-        />
-      </BottomSheet>
+        <BottomSheet
+          ref={clearCartSheetRef}
+          index={-1}
+          snapPoints={clearCartSheetSnapPoints}
+          enableDynamicSizing={false}
+          enablePanDownToClose
+          backdropComponent={renderBackdrop}
+        >
+          <ClearCartSheet
+            closeClearCartSheet={() => {
+              clearCartSheetRef.current?.close();
+            }}
+          />
+        </BottomSheet>
 
-      <BottomSheet
-        ref={duplicateVariantSheetRef}
-        index={-1}
-        snapPoints={duplicateSheetSnapPoints}
-        enableDynamicSizing={false}
-        enablePanDownToClose
-        backdropComponent={renderBackdrop}
-        onClose={() => setOpenDuplicate(false)}
-      >
-        <DuplicateVariantSheet
-          onNewCustomization={() => {
-            setOpenDuplicate(false);
-            duplicateVariantSheetRef.current?.close();
-            variantSheetRef.current?.expand();
-          }}
-          closeSheet={() => {
-            duplicateVariantSheetRef.current?.close();
-          }}
-          openDuplicate={openDuplicate}
-        />
-      </BottomSheet>
+        <BottomSheet
+          ref={duplicateVariantSheetRef}
+          index={-1}
+          snapPoints={duplicateSheetSnapPoints}
+          enableDynamicSizing={false}
+          enablePanDownToClose
+          backdropComponent={renderBackdrop}
+          onClose={() => setOpenDuplicate(false)}
+        >
+          <DuplicateVariantSheet
+            onNewCustomization={() => {
+              setOpenDuplicate(false);
+              duplicateVariantSheetRef.current?.close();
+              variantSheetRef.current?.expand();
+            }}
+            closeSheet={() => {
+              duplicateVariantSheetRef.current?.close();
+            }}
+            openDuplicate={openDuplicate}
+          />
+        </BottomSheet>
 
-      <BottomSheet
-        ref={productDetailRef}
-        index={-1}
-        snapPoints={productDetailSnapPoints}
-        enableDynamicSizing={false}
-        enablePanDownToClose
-        backdropComponent={renderBackdrop}
-      >
-        <ProductDetailSheet />
-      </BottomSheet>
+        <BottomSheet
+          ref={productDetailRef}
+          index={-1}
+          snapPoints={productDetailSnapPoints}
+          enableDynamicSizing={false}
+          enablePanDownToClose
+          backdropComponent={renderBackdrop}
+        >
+          <ProductDetailSheet />
+        </BottomSheet>
 
-      <BottomSheet
-        ref={ratingSheetRef}
-        index={-1}
-        snapPoints={ratingSheetSnapPoints}
-        enableDynamicSizing
-        enablePanDownToClose
-        backdropComponent={renderBackdrop}
-      >
-        <MerchantRatingSheet
-          merchantId={merchantId as string}
-          rating={merchantData?.rating || 0}
-          onPress={() => ratingSheetRef.current?.close()}
-        />
-      </BottomSheet>
+        <BottomSheet
+          ref={ratingSheetRef}
+          index={-1}
+          snapPoints={ratingSheetSnapPoints}
+          enableDynamicSizing
+          enablePanDownToClose
+          backdropComponent={renderBackdrop}
+        >
+          <MerchantRatingSheet
+            merchantId={merchantId as string}
+            rating={merchantData?.rating || 0}
+            onPress={() => ratingSheetRef.current?.close()}
+          />
+        </BottomSheet>
 
-      <BottomSheet
-        ref={distanceWarningSheetRef}
-        index={-1}
-        snapPoints={distanceWarningSheetSnapPoints}
-        enableDynamicSizing={false}
-        enablePanDownToClose
-        backdropComponent={renderBackdrop}
-      >
-        <DistanceWarning
-          closeDistanceWarningSheet={() => {
-            distanceWarningSheetRef.current?.close();
-          }}
-        />
-      </BottomSheet>
+        <BottomSheet
+          ref={distanceWarningSheetRef}
+          index={-1}
+          snapPoints={distanceWarningSheetSnapPoints}
+          enableDynamicSizing={false}
+          enablePanDownToClose
+          backdropComponent={renderBackdrop}
+        >
+          <DistanceWarning
+            closeDistanceWarningSheet={() => {
+              distanceWarningSheetRef.current?.close();
+            }}
+          />
+        </BottomSheet>
+      </ScreenWrapper>
     </>
   );
 };

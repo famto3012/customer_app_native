@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { Image, StyleSheet, View } from "react-native";
-import { scale, verticalScale } from "@/utils/styling";
-import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
+import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
 import { colors, radius, spacingX } from "@/constants/theme";
+import { useAudioCleanup } from "@/hooks/useAudio";
 import { loyaltyDetails } from "@/utils/defaultData";
 import { playOrStopSound } from "@/utils/helpers";
-import { useAudioCleanup } from "@/hooks/useAudio";
+import { scale, verticalScale } from "@/utils/styling";
+import { useState } from "react";
+import { Image, Platform, StyleSheet, View } from "react-native";
 
 const LoyaltyPoints = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     marginTop: "auto",
-    marginBottom: verticalScale(20),
+    marginBottom: Platform.OS === "ios" ? verticalScale(30) : verticalScale(20),
     backgroundColor: colors.NEUTRAL100,
     marginHorizontal: scale(20),
     alignSelf: "center",

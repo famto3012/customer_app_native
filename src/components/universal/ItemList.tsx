@@ -108,6 +108,7 @@ const ItemList: FC<{ items: CartProps["items"] }> = ({ items }) => {
             cart: {
               showCart: false,
               merchant: "",
+              merchantId: "",
               cartId: "",
             },
           });

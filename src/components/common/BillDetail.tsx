@@ -1,8 +1,8 @@
-import { ActivityIndicator, StyleSheet, View } from "react-native";
-import Typo from "../Typo";
 import { colors } from "@/constants/theme";
 import { verticalScale } from "@/utils/styling";
 import { FC } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
+import Typo from "../Typo";
 
 interface UniversalBillProps {
   deliveryChargePerDay: number;
@@ -18,6 +18,7 @@ interface UniversalBillProps {
   addedTip?: number;
   subTotal: number;
   surgePrice?: number;
+  loyaltyDiscount?: number;
 }
 
 const BillDetail: FC<{ data: UniversalBillProps; isLoading: boolean }> = ({
@@ -27,6 +28,10 @@ const BillDetail: FC<{ data: UniversalBillProps; isLoading: boolean }> = ({
   const discountLabel = data?.promoCodeUsed
     ? `Discount (${data.promoCodeUsed})`
     : `Discount`;
+
+  const discountWithoutLoyalty = data?.loyaltyDiscount
+    ? (data?.discountedAmount as number) - data?.loyaltyDiscount
+    : data?.discountedAmount;
 
   const RenderBillField = ({
     field,
@@ -62,7 +67,7 @@ const BillDetail: FC<{ data: UniversalBillProps; isLoading: boolean }> = ({
 
   return (
     <View style={styles.container}>
-      <RenderBillField field="Item Total" value={data?.itemTotal} />
+      <RenderBillField field="Item Totals" value={data?.itemTotal} />
       <RenderBillField
         field="Delivery Charges"
         value={
@@ -76,10 +81,19 @@ const BillDetail: FC<{ data: UniversalBillProps; isLoading: boolean }> = ({
       )}
 
       {typeof data?.discountedAmount === "number" &&
+        discountWithoutLoyalty !== 0 &&
         data?.discountedAmount > 0 && (
           <RenderBillField
             field={discountLabel}
-            value={data?.discountedAmount}
+            value={discountWithoutLoyalty as number}
+          />
+        )}
+
+      {typeof data?.loyaltyDiscount === "number" &&
+        data?.loyaltyDiscount > 0 && (
+          <RenderBillField
+            field="Loyalty discount"
+            value={data?.loyaltyDiscount}
           />
         )}
 

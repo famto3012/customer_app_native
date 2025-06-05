@@ -1,39 +1,45 @@
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import ScreenWrapper from "@/components/ScreenWrapper";
-import Header from "@/components/Header";
+import ScheduleSheet from "@/components/BottomSheets/ScheduleSheet";
+import Button from "@/components/Button";
 import SchedulePicker from "@/components/common/SchedulePicker";
+import Header from "@/components/Header";
+import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
-import { scale, verticalScale } from "@/utils/styling";
-import { colors, radius } from "@/constants/theme";
 import HomeDelivery from "@/components/universal/HomeDelivery";
 import TakeAway from "@/components/universal/TakeAway";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-} from "react-native-reanimated";
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-  SCREEN_WIDTH,
-} from "@gorhom/bottom-sheet";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import ScheduleSheet from "@/components/BottomSheets/ScheduleSheet";
-import { router } from "expo-router";
+import { commonStyles } from "@/constants/commonStyles";
+import { colors, radius } from "@/constants/theme";
+import { useAudioCleanup } from "@/hooks/useAudio";
+import { useShowAlert } from "@/hooks/useShowAlert";
 import {
   confirmOrder,
   getCustomerCart,
   getMerchantDeliveryOption,
 } from "@/service/universal";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { CartProps, DeliveryOptionType } from "@/types";
 import { useAuthStore } from "@/store/store";
-import Button from "@/components/Button";
-import { commonStyles } from "@/constants/commonStyles";
+import { CartProps, DeliveryOptionType } from "@/types";
 import { forceAudioCleanup, playOrStopSound } from "@/utils/helpers";
-import { useAudioCleanup } from "@/hooks/useAudio";
-import { useShowAlert } from "@/hooks/useShowAlert";
+import { scale, verticalScale } from "@/utils/styling";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+  SCREEN_WIDTH,
+} from "@gorhom/bottom-sheet";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { router } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 const TAB_WIDTH = (SCREEN_WIDTH - scale(40)) / 2;
 
@@ -469,7 +475,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: SCREEN_WIDTH,
     backgroundColor: colors.WHITE,
-    paddingVertical: verticalScale(24),
+    paddingVertical:
+      Platform.OS === "ios" ? verticalScale(35) : verticalScale(24),
     flexDirection: "row",
     justifyContent: "center",
     paddingHorizontal: scale(20),

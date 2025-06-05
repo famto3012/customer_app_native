@@ -1,42 +1,45 @@
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import ScreenWrapper from "@/components/ScreenWrapper";
+import PaymentOptionSheet from "@/components/BottomSheets/common/PaymentOptionSheet";
 import Header from "@/components/Header";
-import AddTip from "@/components/common/AddTip";
-import { scale, verticalScale } from "@/utils/styling";
+import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
-import { colors, radius } from "@/constants/theme";
-import PromoCode from "@/components/common/Promocode";
+import AddTip from "@/components/common/AddTip";
+import AppliedPromoCode from "@/components/common/AppliedPromoCode";
 import BillDetail from "@/components/common/BillDetail";
+import PromoCode from "@/components/common/Promocode";
+import { commonStyles } from "@/constants/commonStyles";
+import { colors, radius } from "@/constants/theme";
+import { useData } from "@/context/DataContext";
+import { useShowAlert } from "@/hooks/useShowAlert";
+import { clearCart } from "@/localDB/controller/cartController";
+import { addOrder } from "@/localDB/controller/orderController";
+import {
+  getCartBill,
+  getMerchantAvailability,
+  placeUniversalOrder,
+  verifyPayment,
+} from "@/service/universal";
+import { updateTip } from "@/service/userService";
+import { useAuthStore } from "@/store/store";
+import { DeliveryOptionType, MerchantDataProps } from "@/types";
+import { scale, verticalScale } from "@/utils/styling";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
   SCREEN_WIDTH,
 } from "@gorhom/bottom-sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  getCartBill,
-  placeUniversalOrder,
-  verifyPayment,
-} from "@/service/universal";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CaretUp } from "phosphor-react-native";
-import PaymentOptionSheet from "@/components/BottomSheets/common/PaymentOptionSheet";
-import { useAuthStore } from "@/store/store";
-import { commonStyles } from "@/constants/commonStyles";
-import AppliedPromoCode from "@/components/common/AppliedPromoCode";
-import { addOrder } from "@/localDB/controller/orderController";
-import { useData } from "@/context/DataContext";
-import { clearCart } from "@/localDB/controller/cartController";
-import { removeAppliedPromoCode, updateTip } from "@/service/userService";
-import { DeliveryOptionType } from "@/types";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const Bill = () => {
   const [selectedPaymentMode, setSelectedPaymentMode] =
@@ -61,7 +64,10 @@ const Bill = () => {
   const promoCode = useAuthStore((state) => state.promoCode.universal);
   const { setProductCounts } = useData();
 
+  // const [merchantId, setMerchantId] = useState("");
+
   const queryClient = useQueryClient();
+  const { showAlert } = useShowAlert();
 
   useFocusEffect(
     useCallback(() => {
@@ -72,7 +78,7 @@ const Bill = () => {
         setPromoCodeUsed("");
       }
 
-      if (data?.addedTip) {
+      if (data?.billdetail?.addedTip) {
         handleAddTipMutation.mutate(0);
       }
 
@@ -99,12 +105,21 @@ const Bill = () => {
     queryFn: () => getCartBill(cartId.toString()),
   });
 
+  const { data: merchantAvailabilityData } = useQuery<MerchantDataProps>({
+    queryKey: ["merchant-availability", merchantId],
+    queryFn: () => getMerchantAvailability(merchantId),
+  });
+
+  // useEffect(() => {
+  //   if (data?.merchantId) {
+  //     setMerchantId(data?.merchantId);
+  //   }
+  // }, [data]);
+
   const placeOrderMutation = useMutation({
     mutationKey: ["place-universal-order"],
     mutationFn: () => placeUniversalOrder(selectedPaymentMode),
     onSuccess: async (data) => {
-      console.log({ data });
-
       if (selectedPaymentMode === "Online-payment") {
         const { orderId, amount } = data;
 
@@ -115,7 +130,6 @@ const Bill = () => {
           });
         }
       } else {
-        console.log("Order placed successfully", data);
         if (data?.success && data?.orderId) {
           await addOrder(
             data?.orderId,
@@ -134,6 +148,7 @@ const Bill = () => {
             cart: {
               showCart: false,
               merchant: "",
+              merchantId: "",
               cartId: "",
             },
             promoCode: {
@@ -143,7 +158,6 @@ const Bill = () => {
             },
           });
         } else if (data?.success && !data?.createdAt) {
-          console.log("in scheduled");
           router.replace({ pathname: "/(tabs)" });
 
           clearCart();
@@ -154,6 +168,7 @@ const Bill = () => {
             cart: {
               showCart: false,
               merchant: "",
+              merchantId: "",
               cartId: "",
             },
             promoCode: {
@@ -172,8 +187,6 @@ const Bill = () => {
     mutationFn: ({ orderId, amount }: { orderId: string; amount: number }) =>
       verifyPayment(orderId, amount),
     onSuccess: async (data) => {
-      console.log("Successfully verified payment", data);
-
       if (data?.success && data?.orderId && data?.createdAt) {
         await addOrder(
           data?.orderId,
@@ -192,6 +205,7 @@ const Bill = () => {
           cart: {
             showCart: false,
             merchant: "",
+            merchantId: "",
             cartId: "",
           },
         });
@@ -206,6 +220,7 @@ const Bill = () => {
           cart: {
             showCart: false,
             merchant: "",
+            merchantId: "",
             cartId: "",
           },
           promoCode: {
@@ -237,7 +252,7 @@ const Bill = () => {
         <Header title="Checkout" />
 
         <AddTip
-          previousTip={data?.addedTip ?? 0}
+          previousTip={data?.billdetail?.addedTip ?? 0}
           onTipSelect={(data: number) => handleAddTipMutation.mutate(data)}
         />
 
@@ -246,9 +261,9 @@ const Bill = () => {
             deliveryMode={deliveryMode?.toString()}
             merchantId={merchantId?.toString()}
             orderAmount={
-              data?.discountedGrandTotal
-                ? data.discountedGrandTotal
-                : data?.originalGrandTotal
+              data?.billDetail?.discountedGrandTotal
+                ? data?.billDetail?.discountedGrandTotal
+                : data?.billDetail?.originalGrandTotal
             }
             cartId={cartId}
           />
@@ -268,14 +283,15 @@ const Bill = () => {
             Bill Summary
           </Typo>
 
-          <BillDetail data={data} isLoading={billLoading} />
+          <BillDetail data={data?.billDetail} isLoading={billLoading} />
         </View>
       </ScrollView>
 
       <View
         style={{
-          backgroundColor: "white",
-          padding: 15,
+          backgroundColor: colors.WHITE,
+          padding: verticalScale(15),
+          marginBottom: Platform.OS === "ios" ? verticalScale(15) : 0,
         }}
       >
         <View
@@ -326,7 +342,47 @@ const Bill = () => {
           </View>
 
           <TouchableOpacity
-            onPress={() => placeOrderMutation.mutate()}
+            onPress={() => {
+              // console.log("merchantAvailabilityData", merchantAvailabilityData);
+              if (
+                merchantAvailabilityData?.type === "Specific-time" &&
+                merchantAvailabilityData?.todayAvailability
+              ) {
+                const now = new Date();
+                const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+                const nowIST = new Date(utc + 5.5 * 60 * 60 * 1000);
+
+                const [endHour, endMinute] =
+                  merchantAvailabilityData.todayAvailability.endTime
+                    .split(":")
+                    .map(Number);
+
+                const endTime = new Date(nowIST);
+                endTime.setHours(endHour, endMinute, 0, 0);
+                // console.log("TIme", nowIST, endTime);
+
+                if (nowIST > endTime) {
+                  const [startHour, startMinute] =
+                    merchantAvailabilityData.todayAvailability.startTime
+                      .split(":")
+                      .map(Number);
+
+                  const startFormatted = `${startHour
+                    .toString()
+                    .padStart(2, "0")}:${startMinute
+                    .toString()
+                    .padStart(2, "0")}`;
+
+                  showAlert(
+                    `The shop is closed for today. It will be open again tomorrow at ${merchantAvailabilityData?.nextDay?.startTime}.`,
+                    "Error"
+                  );
+                  return;
+                }
+              }
+
+              placeOrderMutation.mutate();
+            }}
             style={{
               backgroundColor: colors.PRIMARY,
               flex: 1,
@@ -360,9 +416,9 @@ const Bill = () => {
           value={selectedPaymentMode}
           onConfirm={() => paymentSheetRef.current?.close()}
           grandTotal={
-            data?.discountedGrandTotal
-              ? data.discountedGrandTotal
-              : data?.originalGrandTotal
+            data?.billDetail?.discountedGrandTotal
+              ? data.billDetail?.discountedGrandTotal
+              : data?.billDetail?.originalGrandTotal
           }
           deliveryOption={deliveryOption}
         />
@@ -375,6 +431,7 @@ export default Bill;
 
 const styles = StyleSheet.create({
   promoContainer: {
+    backgroundColor: colors.WHITE,
     marginTop: verticalScale(30),
     borderRadius: radius._10,
     marginHorizontal: scale(20),
