@@ -36,8 +36,6 @@ const PaymentOptionSheet: FC<{
       return;
     }
 
-    console.log({ value, balance: data.walletBalance, grandTotal });
-
     if (value === "Famto-cash" && Number(data?.walletBalance) < grandTotal) {
       showAlert(
         "Your Famto Cash balance is insufficient to make the current payment",
