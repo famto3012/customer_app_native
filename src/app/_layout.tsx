@@ -1,20 +1,20 @@
-import { useEffect, useState } from "react";
-import { Stack, useRouter } from "expo-router";
+import { DataProvider } from "@/context/DataContext";
+import { SocketProvider } from "@/service/socketProvider";
+import { resetAndNavigate } from "@/utils/navigation";
+import NetInfo from "@react-native-community/netinfo";
+import "@react-native-firebase/app";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as Linking from "expo-linking";
+import { Stack, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   gestureHandlerRootHOC,
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  PaperProvider,
   MD3LightTheme as DefaultTheme,
+  PaperProvider,
 } from "react-native-paper";
-import { SocketProvider } from "@/service/socketProvider";
-import { DataProvider } from "@/context/DataContext";
-import { resetAndNavigate } from "@/utils/navigation";
-import { migrateData } from "@/utils/flutterMigration";
-import NetInfo from "@react-native-community/netinfo";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,9 +60,11 @@ const RootLayout = () => {
 
   const router = useRouter();
 
-  useEffect(() => {
-    migrateData();
-  }, []);
+  // useEffect(() => {
+  //   if (Platform.OS === "android") {
+  //     migrateData();
+  //   }
+  // }, []);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -111,6 +113,7 @@ const RootLayout = () => {
   }, [router]);
 
   return (
+    // <SafeAreaView style={{ flex: 1, backgroundColor: colors.WHITE }}>
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView>
         <DataProvider>
@@ -122,6 +125,7 @@ const RootLayout = () => {
         </DataProvider>
       </GestureHandlerRootView>
     </QueryClientProvider>
+    // </SafeAreaView>
   );
 };
 

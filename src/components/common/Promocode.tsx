@@ -1,9 +1,9 @@
-import { Image, Pressable, StyleSheet, View } from "react-native";
-import { scale, verticalScale } from "@/utils/styling";
-import Typo from "../Typo";
 import { colors, radius } from "@/constants/theme";
-import { FC } from "react";
+import { scale, verticalScale } from "@/utils/styling";
 import { router } from "expo-router";
+import { FC } from "react";
+import { Image, Pressable, StyleSheet, View } from "react-native";
+import Typo from "../Typo";
 
 const PromoCode: FC<{
   deliveryMode: string;
@@ -46,7 +46,7 @@ export default PromoCode;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.PRIMARY,
+    backgroundColor: colors.PRIMARY_SECOND,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: scale(10),

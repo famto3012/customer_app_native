@@ -1,27 +1,27 @@
-import { ScrollView, StyleSheet, View } from "react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
-import ScreenWrapper from "@/components/ScreenWrapper";
-import Header from "@/components/Header";
-import SchedulePicker from "@/components/common/SchedulePicker";
-import { scale, verticalScale } from "@/utils/styling";
-import Typo from "@/components/Typo";
-import { colors } from "@/constants/theme";
-import Instructions from "@/components/common/Instructions";
+import ScheduleSheet from "@/components/BottomSheets/ScheduleSheet";
+import PickAndDropItemSheet from "@/components/BottomSheets/pickAndDrop/PickAndDropItemSheet";
 import Button from "@/components/Button";
+import Header from "@/components/Header";
+import ScreenWrapper from "@/components/ScreenWrapper";
+import Typo from "@/components/Typo";
+import Instructions from "@/components/common/Instructions";
+import SchedulePicker from "@/components/common/SchedulePicker";
+import UserSelectedAddress from "@/components/common/UserSelectedAddress";
+import { commonStyles } from "@/constants/commonStyles";
+import { colors } from "@/constants/theme";
+import { useAudioCleanup } from "@/hooks/useAudio";
+import { addPickAndDropAddress } from "@/service/pickandDropService";
+import { PickAndDropItemProps } from "@/types";
+import { forceAudioCleanup, playOrStopSound } from "@/utils/helpers";
+import { scale, verticalScale } from "@/utils/styling";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
-import { commonStyles } from "@/constants/commonStyles";
-import ScheduleSheet from "@/components/BottomSheets/ScheduleSheet";
-import PickAndDropItemSheet from "@/components/BottomSheets/pickAndDrop/PickAndDropItemSheet";
-import { PickAndDropItemProps } from "@/types";
 import { useMutation } from "@tanstack/react-query";
-import { addPickAndDropAddress } from "@/service/pickandDropService";
 import { router } from "expo-router";
-import UserSelectedAddress from "@/components/common/UserSelectedAddress";
-import { forceAudioCleanup, playOrStopSound } from "@/utils/helpers";
-import { useAudioCleanup } from "@/hooks/useAudio";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Platform, ScrollView, StyleSheet, View } from "react-native";
 
 interface FormDataProps {
   pickUpAddressType: string;
@@ -325,14 +325,16 @@ const styles = StyleSheet.create({
   },
   confirmContainer: {
     paddingHorizontal: scale(20),
-    paddingVertical: verticalScale(20),
+    paddingTop: verticalScale(25),
+    paddingBottom:
+      Platform.OS === "ios" ? verticalScale(35) : verticalScale(20),
     backgroundColor: colors.WHITE,
     shadowOffset: {
       width: 0,
-      height: -12,
+      height: -1,
     },
-    shadowOpacity: 0.58,
-    shadowRadius: 16.0,
-    elevation: 24,
+    shadowOpacity: 0.2,
+    shadowRadius: 12.0,
+    elevation: 10,
   },
 });

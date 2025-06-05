@@ -1,18 +1,17 @@
-import { View, Pressable, Alert, Platform, ToastAndroid } from "react-native";
-import React, { useEffect, useState, useRef } from "react";
-import ScreenWrapper from "@/components/ScreenWrapper";
-import { CaretLeft } from "phosphor-react-native";
-import { colors, spacingX, spacingY } from "@/constants/theme";
-import { verticalScale } from "@/utils/styling";
-import { router, useLocalSearchParams } from "expo-router";
-import Typo from "@/components/Typo";
 import Button from "@/components/Button";
-import { OtpInput } from "react-native-otp-entry";
-import { StyleSheet } from "react-native";
+import ScreenWrapper from "@/components/ScreenWrapper";
+import Typo from "@/components/Typo";
+import { colors, spacingX, spacingY } from "@/constants/theme";
+import { useShowAlert } from "@/hooks/useShowAlert";
 import { signIn } from "@/service/authService";
 import { useSafeLocation } from "@/utils/helpers";
+import { verticalScale } from "@/utils/styling";
 import auth from "@react-native-firebase/auth";
-import { useShowAlert } from "@/hooks/useShowAlert";
+import { router, useLocalSearchParams } from "expo-router";
+import { CaretLeft } from "phosphor-react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
+import { OtpInput } from "react-native-otp-entry";
 
 type SearchParam = {
   verificationId: string;

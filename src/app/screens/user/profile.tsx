@@ -1,31 +1,32 @@
+import LogoutSheet from "@/components/BottomSheets/user/LogoutSheet";
+import Header from "@/components/Header";
+import ScreenWrapper from "@/components/ScreenWrapper";
+import Typo from "@/components/Typo";
+import { commonStyles } from "@/constants/commonStyles";
+import { colors, radius, spacingX, spacingY } from "@/constants/theme";
+import { logout } from "@/service/authService";
+import { fetchUserProfile } from "@/service/userService";
+import { useAuthStore } from "@/store/store";
+import { UserProfileProps } from "@/types";
+import { profileOptions } from "@/utils/defaultData";
+import { scale, verticalScale } from "@/utils/styling";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { router } from "expo-router";
+import { useCallback, useMemo, useRef } from "react";
 import {
   Image,
   Linking,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
-import ScreenWrapper from "@/components/ScreenWrapper";
-import { colors, radius, spacingX, spacingY } from "@/constants/theme";
-import { scale, verticalScale } from "@/utils/styling";
-import Typo from "@/components/Typo";
-import { router } from "expo-router";
-import { profileOptions } from "@/utils/defaultData";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuthStore } from "@/store/store";
-import { fetchUserProfile } from "@/service/userService";
-import { logout } from "@/service/authService";
-import { UserProfileProps } from "@/types";
-import { useCallback, useMemo, useRef } from "react";
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetBackdropProps,
-} from "@gorhom/bottom-sheet";
-import LogoutSheet from "@/components/BottomSheets/user/LogoutSheet";
-import { commonStyles } from "@/constants/commonStyles";
-import { Platform } from "react-native";
 
 const Profile = () => {
   const { token } = useAuthStore.getState();
@@ -77,7 +78,9 @@ const Profile = () => {
 
   return (
     <ScreenWrapper>
-      <ScrollView>
+      <Header title="" />
+      <ScrollView style={{ marginTop: scale(10) }}>
+        {/* TODO add back button */}
         <View style={styles.profileContainer}>
           <View
             style={[styles.profileRing, { borderColor: colors.PRIMARY_LIGHT }]}
@@ -279,7 +282,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(16),
     borderRadius: radius._10,
     shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 5.62,
     elevation: 5,
@@ -302,7 +305,7 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   seperator: {
-    borderWidth: 0.2,
+    borderWidth: Platform.OS === "ios" ? 0.4 : 0.2,
     marginVertical: verticalScale(10),
     borderColor: colors.NEUTRAL400,
   },

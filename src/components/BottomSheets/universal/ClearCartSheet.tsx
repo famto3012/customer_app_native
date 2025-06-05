@@ -1,12 +1,12 @@
-import { StyleSheet, View } from "react-native";
-import { FC } from "react";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import Typo from "@/components/Typo";
-import { scale, verticalScale } from "@/utils/styling";
-import { colors, spacingX } from "@/constants/theme";
 import Button from "@/components/Button";
-import { clearCart } from "@/localDB/controller/cartController";
+import Typo from "@/components/Typo";
+import { colors, spacingX } from "@/constants/theme";
 import { useData } from "@/context/DataContext";
+import { clearCart } from "@/localDB/controller/cartController";
+import { scale, verticalScale } from "@/utils/styling";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { FC } from "react";
+import { Platform, StyleSheet, View } from "react-native";
 
 const ClearCartSheet: FC<{ closeClearCartSheet: () => void }> = ({
   closeClearCartSheet,
@@ -80,6 +80,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     gap: spacingX._10,
-    marginTop: "auto", // Pushes buttons to the bottom
+    marginTop: "auto",
+    marginBottom: Platform.OS === "ios" ? verticalScale(20) : 0, // Pushes buttons to the bottom
   },
 });

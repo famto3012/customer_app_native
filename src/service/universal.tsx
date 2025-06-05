@@ -1,5 +1,4 @@
 import { appAxios } from "@/config/apiInterceptor";
-import { useData } from "@/context/DataContext";
 import { BusinessCategoryProps, DeliveryOptionType } from "@/types";
 import { Alert, Platform, ToastAndroid } from "react-native";
 import RazorpayCheckout from "react-native-razorpay";
@@ -135,7 +134,7 @@ export const fetchCategory = async (
   page: number
 ) => {
   try {
-    console.log("Page", page);
+    // console.log("Page", page);
     const res = await appAxios.get(`/customers/category`, {
       params: { merchantId, businessCategoryId, page },
     });
@@ -156,7 +155,7 @@ export const fetchProduct = async (
   filter?: string
 ) => {
   try {
-    console.log("Filter", filter, categoryId);
+    // console.log("Filter", filter, categoryId);
     const res = await appAxios.get(`/customers/products`, {
       params: { categoryId, customerId, page, filter },
     });
@@ -399,13 +398,9 @@ export const getMerchantDeliveryOption = async (
   preOrderType: "Current-day" | "Next-day" | null;
 }> => {
   try {
-    console.log({ merchantId });
-
     const res = await appAxios.get(
       `/customers/merchant/${merchantId}/delivery-option`
     );
-
-    console.log(res.data);
 
     return res.status === 200
       ? res.data
@@ -466,7 +461,7 @@ export const getCartBill = async (cartId: string) => {
       },
     });
 
-    return res.status === 200 ? res.data.billDetail : null;
+    return res.status === 200 ? res.data : null;
   } catch (err) {
     console.error(`Error in getting cart bill:`, err);
     if (Platform.OS === "android") {
@@ -757,5 +752,37 @@ export const getFiltersFromBusinessCategory = async (
     console.error(`Error in getting filters:`, err);
 
     return [];
+  }
+};
+
+export const getMerchantAvailability = async (merchantId: string) => {
+  try {
+    const res = await appAxios.get("/customers/merchant-availability", {
+      params: {
+        merchantId,
+      },
+    });
+
+    return res.status === 200 ? res.data : [];
+  } catch (err) {
+    console.error(`Error in getting merchant availability:`, err);
+
+    return [];
+  }
+};
+
+export const getImageDisplayType = async (
+  businessCategoryId: string
+): Promise<"contain" | "cover"> => {
+  try {
+    const res = await appAxios.get("/customers/image-display", {
+      params: { businessCategoryId },
+    });
+
+    return res.status === 200 ? res.data.displayType : "cover";
+  } catch (err) {
+    console.error(`Error in getting image display type:`, err);
+
+    return "cover";
   }
 };

@@ -1,13 +1,13 @@
-import { StyleSheet, View } from "react-native";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import Button from "@/components/Button";
 import Typo from "@/components/Typo";
 import { colors, spacingX } from "@/constants/theme";
-import Button from "@/components/Button";
-import { scale, verticalScale } from "@/utils/styling";
-import { router } from "expo-router";
-import { useMutation } from "@tanstack/react-query";
 import { addStoreDetail } from "@/service/customOrderService";
+import { scale, verticalScale } from "@/utils/styling";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { useMutation } from "@tanstack/react-query";
+import { router } from "expo-router";
 import { FC } from "react";
+import { Platform, StyleSheet, View } from "react-native";
 
 const CustomOrderLocationBottomSheet: FC<{ onPress: () => void }> = ({
   onPress,
@@ -43,7 +43,11 @@ const CustomOrderLocationBottomSheet: FC<{ onPress: () => void }> = ({
         Custom Order
       </Typo>
 
-      <Typo size={13} color={colors.NEUTRAL400}>
+      <Typo
+        size={13}
+        color={colors.NEUTRAL400}
+        style={{ paddingTop: verticalScale(15) }}
+      >
         Where do you need the product from?
       </Typo>
 
@@ -82,7 +86,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: "auto",
-    marginBottom: verticalScale(10),
+    marginBottom: Platform.OS === "ios" ? verticalScale(20) : verticalScale(10),
     gap: spacingX._10,
   },
 });

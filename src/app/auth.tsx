@@ -1,18 +1,18 @@
-import { ActivityIndicator, Pressable, View } from "react-native";
+import Button from "@/components/Button";
+import Input from "@/components/Input";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
-import Button from "@/components/Button";
-import { scale, verticalScale } from "@/utils/styling";
 import { colors, radius, spacingX } from "@/constants/theme";
-import Input from "@/components/Input";
-import { useEffect, useRef, useState } from "react";
-import { router, useLocalSearchParams } from "expo-router";
+import { useShowAlert } from "@/hooks/useShowAlert";
+import { fetchVisibilityOfLoyaltyOrReferral } from "@/service/userService";
 import { requestLocationPermission } from "@/utils/helpers";
 import { resetAndNavigate } from "@/utils/navigation";
+import { scale, verticalScale } from "@/utils/styling";
 import auth from "@react-native-firebase/auth";
-import { useShowAlert } from "@/hooks/useShowAlert";
 import { useQuery } from "@tanstack/react-query";
-import { fetchVisibilityOfLoyaltyOrReferral } from "@/service/userService";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Pressable, View } from "react-native";
 
 const Auth = () => {
   const phoneNumberRef = useRef<string>("");

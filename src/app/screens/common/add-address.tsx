@@ -1,45 +1,38 @@
-import {
-  Alert,
-  Platform,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  ToastAndroid,
-  View,
-} from "react-native";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Button from "@/components/Button";
+import AlertBox from "@/components/global/AlertBox";
+import MapDetailLoader from "@/components/Loader/MapDetailLoader";
 import ScreenWrapper from "@/components/ScreenWrapper";
-import MapplsGL from "mappls-map-react-native";
-import MapplsUIWidgets from "mappls-search-widgets-react-native";
-import * as Location from "expo-location";
+import Typo from "@/components/Typo";
+import { commonStyles } from "@/constants/commonStyles";
+import {
+  MAPPLS_CLIENT_ID,
+  MAPPLS_CLIENT_SECRET_KEY,
+  MAPPLS_REST_API_KEY,
+} from "@/constants/links";
+import { colors, radius } from "@/constants/theme";
+import { useData } from "@/context/DataContext";
+import { verifyCustomerAddressLocation } from "@/service/userService";
+import { useAuthStore } from "@/store/store";
 import { LocationAddressProps } from "@/types";
-import { colors } from "@/constants/theme";
-import { scale } from "@/utils/styling";
+import { useSafeLocation } from "@/utils/helpers";
+import { scale, verticalScale } from "@/utils/styling";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
 } from "@gorhom/bottom-sheet";
-import Typo from "@/components/Typo";
-import LottieView from "lottie-react-native";
-import { GpsFix, MagnifyingGlass } from "phosphor-react-native";
-import Button from "@/components/Button";
-import {
-  MAPPLS_CLIENT_ID,
-  MAPPLS_CLIENT_SECRET_KEY,
-  MAPPLS_REST_API_KEY,
-} from "@/constants/links";
-import AddAddressDetail from "./AddAddressDetail";
-import { commonStyles } from "@/constants/commonStyles";
 import { useMutation } from "@tanstack/react-query";
-import { verifyCustomerAddressLocation } from "@/service/userService";
-import { useSafeLocation } from "@/utils/helpers";
-import MapDetailLoader from "@/components/Loader/MapDetailLoader";
-import { router, useLocalSearchParams } from "expo-router";
-import { useAuthStore } from "@/store/store";
-import AlertBox from "@/components/global/AlertBox";
-import { useData } from "@/context/DataContext";
+import * as Location from "expo-location";
+import { router } from "expo-router";
+import LottieView from "lottie-react-native";
+import MapplsGL from "mappls-map-react-native";
+import MapplsUIWidgets from "mappls-search-widgets-react-native";
+import { CaretLeft, GpsFix, MagnifyingGlass } from "phosphor-react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import AddAddressDetail from "./AddAddressDetail";
+import { Platform } from "react-native";
 
 const { MapView, Camera, RestApi, UserLocation } = MapplsGL;
 const defaultCoordinates = [76.938072, 8.528763];
@@ -414,7 +407,25 @@ const AddAddress = () => {
           </View>
 
           {/* Search Button */}
-          <View style={styles.searchButton}>
+          <View
+            style={{
+              position: "absolute",
+              top: Platform.OS === "ios" ? 20 : 30,
+              left: 20,
+              right: 20,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: scale(10),
+            }}
+          >
+            <Pressable onPress={() => router.back()} style={styles.backButton}>
+              <CaretLeft
+                size={verticalScale(20)}
+                color={colors.PRIMARY}
+                weight="bold"
+              />
+            </Pressable>
+
             <Pressable
               onPress={handleSearch}
               style={{
@@ -423,6 +434,9 @@ const AddAddress = () => {
                 alignItems: "center",
                 justifyContent: "space-between",
                 paddingRight: scale(35),
+                backgroundColor: colors.WHITE,
+                paddingVertical: verticalScale(7),
+                borderRadius: radius._6,
               }}
             >
               <TextInput
@@ -566,7 +580,7 @@ const styles = StyleSheet.create({
     top: 20,
     left: 20,
     right: 20,
-    backgroundColor: colors.WHITE,
+    // backgroundColor: colors.WHITE,
     padding: 10,
     borderRadius: 10,
     shadowColor: colors.NEUTRAL900,
@@ -672,6 +686,11 @@ const styles = StyleSheet.create({
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
     borderTopColor: colors.NEUTRAL900,
+  },
+  backButton: {
+    padding: scale(5),
+    backgroundColor: colors.WHITE,
+    borderRadius: radius._30,
   },
 });
 

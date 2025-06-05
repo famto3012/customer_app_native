@@ -1,23 +1,20 @@
+import Header from "@/components/Header";
+import ScreenWrapper from "@/components/ScreenWrapper";
+import Typo from "@/components/Typo";
+import { colors } from "@/constants/theme";
+import { useAuthStore } from "@/store/store";
+import { requestNotificationPermission } from "@/utils/helpers";
+import * as LocalAuthentication from "expo-local-authentication";
+import * as Notifications from "expo-notifications";
 import React, { useEffect, useState } from "react";
 import {
-  View,
   Alert,
-  Switch,
-  StyleSheet,
   Platform,
+  StyleSheet,
+  Switch,
   ToastAndroid,
+  View,
 } from "react-native";
-import * as LocalAuthentication from "expo-local-authentication";
-import ScreenWrapper from "@/components/ScreenWrapper";
-import Header from "@/components/Header";
-import { useAuthStore } from "@/store/store";
-import { colors } from "@/constants/theme";
-import Typo from "@/components/Typo";
-import {
-  requestNotificationPermission,
-  toggleNotificationPermission,
-} from "@/utils/helpers";
-import * as Notifications from "expo-notifications";
 
 const Settings = () => {
   const [hasBiometric, setHasBiometry] = useState<boolean>(false);
@@ -143,7 +140,12 @@ const Settings = () => {
             trackColor={{ false: "#D3D3D3", true: "#00D4FF" }}
             thumbColor={colors.NEUTRAL100}
             ios_backgroundColor="#D3D3D3"
-            style={{ transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }] }}
+            style={{
+              transform: [
+                { scaleX: Platform.OS === "ios" ? 1 : 1.2 },
+                { scaleY: Platform.OS === "ios" ? 1 : 1.2 },
+              ],
+            }}
             onValueChange={requestNotificationPermission}
           />
         </View>
@@ -168,7 +170,12 @@ const Settings = () => {
             trackColor={{ false: "#D3D3D3", true: "#00D4FF" }}
             thumbColor={colors.NEUTRAL100}
             ios_backgroundColor="#D3D3D3"
-            style={{ transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }] }}
+            style={{
+              transform: [
+                { scaleX: Platform.OS === "ios" ? 1 : 1.2 },
+                { scaleY: Platform.OS === "ios" ? 1 : 1.2 },
+              ],
+            }}
             onValueChange={handleFingerprintToggle}
           />
         </View>

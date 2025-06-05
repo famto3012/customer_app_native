@@ -1,24 +1,25 @@
+import { colors, radius } from "@/constants/theme";
+import { getOrderList } from "@/service/orderService";
+import { useAuthStore } from "@/store/store";
+import { OrderItemProps } from "@/types";
+import { scale, verticalScale } from "@/utils/styling";
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
+import { useFocusEffect } from "@react-navigation/native";
+import { useQuery } from "@tanstack/react-query";
+import { router } from "expo-router";
+import LottieView from "lottie-react-native";
+import { FC, useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   Image,
+  Platform,
   Pressable,
+  RefreshControl,
   StyleSheet,
   View,
-  RefreshControl,
 } from "react-native";
-import { scale, verticalScale } from "@/utils/styling";
-import Typo from "../Typo";
-import { colors, radius } from "@/constants/theme";
-import { useQuery } from "@tanstack/react-query";
-import { getOrderList } from "@/service/orderService";
-import { useEffect, useState, useCallback, FC } from "react";
-import { OrderItemProps } from "@/types";
-import { SCREEN_HEIGHT, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
-import { useFocusEffect } from "@react-navigation/native";
-import { useAuthStore } from "@/store/store";
-import LottieView from "lottie-react-native";
-import { router } from "expo-router";
 import SkeletonPlaceholder from "react-native-skeleton-placeholder";
+import Typo from "../Typo";
 
 const OrderList = () => {
   const [orderList, setOrderList] = useState<OrderItemProps[]>([]);
@@ -270,39 +271,47 @@ const OrderList = () => {
 
             <View style={{ flexDirection: "column", alignItems: "center" }}>
               {item.orderStatus === "On-going" && (
-                <Typo
-                  size={12}
-                  color={
-                    remainingTime === "Arriving soon"
-                      ? colors.RED
-                      : colors.GREEN
-                  }
+                <View
                   style={{
                     width: SCREEN_WIDTH * 0.25,
                     backgroundColor: colors.NEUTRAL100,
                     paddingVertical: verticalScale(4),
                     borderRadius: radius._20,
                     justifyContent: "center",
-                    textAlign: "center",
                   }}
                 >
-                  {remainingTime}
-                </Typo>
+                  <Typo
+                    size={12}
+                    color={
+                      remainingTime === "Arriving soon"
+                        ? colors.RED
+                        : colors.GREEN
+                    }
+                    style={{
+                      justifyContent: "center",
+                      textAlign: "center",
+                    }}
+                  >
+                    {remainingTime}
+                  </Typo>
+                </View>
               )}
-              <Typo
-                size={12}
-                color={
-                  item.orderStatus === "On-going" ||
-                  item.orderStatus === "Pending"
-                    ? colors.YELLOW
-                    : item.orderStatus === "Completed"
-                    ? colors.GREEN
-                    : colors.RED
-                }
-                style={styles.completed}
-              >
-                {item.orderStatus}
-              </Typo>
+              <View style={styles.completed}>
+                <Typo
+                  size={12}
+                  color={
+                    item.orderStatus === "On-going" ||
+                    item.orderStatus === "Pending"
+                      ? colors.YELLOW
+                      : item.orderStatus === "Completed"
+                      ? colors.GREEN
+                      : colors.RED
+                  }
+                  // style={styles.completed}
+                >
+                  {item.orderStatus}
+                </Typo>
+              </View>
             </View>
           </View>
         </View>
@@ -513,7 +522,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingHorizontal: scale(12),
     paddingVertical: verticalScale(12),
-    backgroundColor: colors.NEUTRAL100,
+    backgroundColor:
+      Platform.OS === "android" ? colors.NEUTRAL100 : colors.NEUTRAL50,
     borderBottomLeftRadius: radius._10,
     borderBottomRightRadius: radius._10,
   },

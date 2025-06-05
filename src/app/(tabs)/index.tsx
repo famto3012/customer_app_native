@@ -1,41 +1,48 @@
-import { View, StyleSheet, ScrollView, Pressable } from "react-native";
+import TemporaryOrderSheet from "@/components/BottomSheets/universal/TemporaryOrderSheet";
 import HomeHeader from "@/components/HomeHeader";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import SearchView from "@/components/SearchView";
+import TopService from "@/components/TopService";
+import BusinessCategories from "@/components/universal/BusinessCategories";
+import FloatingPreparingOrder from "@/components/universal/FloatingPreparingOrder";
+import { commonStyles } from "@/constants/commonStyles";
 import { colors, radius } from "@/constants/theme";
+import { getAllOrder } from "@/localDB/controller/orderController";
+import { getOngoingOrder } from "@/service/orderService";
+import { getAppBanner } from "@/service/userService";
+import { useAuthStore } from "@/store/store";
+import { AppBannerType } from "@/types";
+import { requestLocationPermission } from "@/utils/helpers";
 import {
   scale,
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
   verticalScale,
 } from "@/utils/styling";
-import TopService from "@/components/TopService";
-import BusinessCategories from "@/components/universal/BusinessCategories";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { requestLocationPermission } from "@/utils/helpers";
-import FloatingPreparingOrder from "@/components/universal/FloatingPreparingOrder";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getOngoingOrder } from "@/service/orderService";
-import { useFocusEffect } from "@react-navigation/native";
-import { useAuthStore } from "@/store/store";
-import { router } from "expo-router";
-import { getAppBanner } from "@/service/userService";
-import { interpolate } from "react-native-reanimated";
-import Carousel, { TAnimationStyle } from "react-native-reanimated-carousel";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
-import { commonStyles } from "@/constants/commonStyles";
-import TemporaryOrderSheet from "@/components/BottomSheets/universal/TemporaryOrderSheet";
+import { useFocusEffect } from "@react-navigation/native";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { router } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import FastImage from "react-native-fast-image";
-import { getAllOrder } from "@/localDB/controller/orderController";
-import { AppBannerType } from "@/types";
+import { interpolate } from "react-native-reanimated";
+import Carousel, { TAnimationStyle } from "react-native-reanimated-carousel";
 
 const Home = () => {
   const temporaryOrderSheet = useRef<BottomSheet>(null);
   const [showCount, setShowCount] = useState(0);
   const [hasTemporaryOrders, setHasTemporaryOrders] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const temporarySnapPoints = useMemo(() => ["60%"], []);
 
@@ -144,19 +151,32 @@ const Home = () => {
     }
   };
 
+  const handleBannerPressWithIndex = () => {
+    if (bannerData && bannerData.length > 0) {
+      const currentItem = bannerData[currentIndex];
+      console.log("Banner pressed with correct index:", currentItem);
+      handleBannerPress(currentItem);
+    }
+  };
+
   return (
-    <View style={{ flex: 1, backgroundColor: colors.WHITE }}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: ongoingOrder?.length
-            ? verticalScale(130)
-            : verticalScale(50),
-          marginTop: -20,
-          backgroundColor: colors.WHITE,
-        }}
-      >
-        <ScreenWrapper>
+    // <SafeAreaView style={{ flex: 1, backgroundColor: colors.WHITE }}>
+    <ScreenWrapper>
+      <View style={{ flex: 1, backgroundColor: colors.WHITE }}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingBottom: ongoingOrder?.length
+              ? Platform.OS === "ios"
+                ? verticalScale(160)
+                : verticalScale(130)
+              : Platform.OS === "ios"
+              ? verticalScale(80)
+              : verticalScale(50),
+            marginTop: Platform.OS === "ios" ? 0 : -20,
+            backgroundColor: colors.WHITE,
+          }}
+        >
           <View style={styles.imageBackground}>
             <View style={styles.overlayContainer}>
               <HomeHeader
@@ -190,60 +210,83 @@ const Home = () => {
               width={Math.round(SCREEN_WIDTH)} // Ensuring whole number
               height={Math.round(SCREEN_HEIGHT * 0.48)} // Ensuring whole number
               data={bannerData || []}
-              renderItem={({ item }: { item: AppBannerType }) => (
-                <Pressable onPress={() => handleBannerPress(item)}>
-                  <FastImage
-                    source={{
-                      uri: item?.imageUrl,
-                      priority: FastImage.priority.high,
-                    }}
-                    resizeMode="cover"
-                    style={{
-                      width: SCREEN_WIDTH,
-                      height: Math.round(SCREEN_HEIGHT * 0.48),
-                      borderBottomLeftRadius: radius._30,
-                      borderBottomRightRadius: radius._30,
-                    }}
-                  />
-                </Pressable>
-              )}
+              onProgressChange={(_, absoluteProgress) => {
+                // Track the current visible index
+                if (absoluteProgress !== undefined) {
+                  const newIndex = Math.round(absoluteProgress);
+                  if (
+                    newIndex !== currentIndex &&
+                    newIndex < (bannerData?.length || 0)
+                  ) {
+                    setCurrentIndex(newIndex);
+                  }
+                }
+              }}
+              renderItem={({
+                item,
+                index,
+              }: {
+                item: AppBannerType;
+                index: number;
+              }) => {
+                // console.log(`Rendering banner at index ${index}:`, item._id);
+
+                return (
+                  <Pressable onPress={handleBannerPressWithIndex}>
+                    <FastImage
+                      source={{
+                        uri: item?.imageUrl,
+                        priority: FastImage.priority.high,
+                      }}
+                      resizeMode="cover"
+                      style={{
+                        width: SCREEN_WIDTH,
+                        height: Math.round(SCREEN_HEIGHT * 0.48),
+                        borderBottomLeftRadius: radius._30,
+                        borderBottomRightRadius: radius._30,
+                      }}
+                    />
+                  </Pressable>
+                );
+              }}
               customAnimation={animationStyle}
             />
           </View>
           <TopService />
           <BusinessCategories query="" />
-        </ScreenWrapper>
-      </ScrollView>
+        </ScrollView>
 
-      <View style={styles.floatingContainer}>
-        <FloatingPreparingOrder
-          data={ongoingOrder}
-          refetchOngoingOrder={refetchOngoingOrder}
-          openTempOrderSheet={() => {
-            checkTemporaryOrders().then((hasOrders) => {
-              if (hasOrders) {
-                temporaryOrderSheet.current?.snapToIndex(0);
-              }
-            });
-          }}
-          countUpdate={showCount}
-        />
+        <View style={styles.floatingContainer}>
+          <FloatingPreparingOrder
+            data={ongoingOrder}
+            refetchOngoingOrder={refetchOngoingOrder}
+            openTempOrderSheet={() => {
+              checkTemporaryOrders().then((hasOrders) => {
+                if (hasOrders) {
+                  temporaryOrderSheet.current?.snapToIndex(0);
+                }
+              });
+            }}
+            countUpdate={showCount}
+          />
+        </View>
+
+        <BottomSheet
+          ref={temporaryOrderSheet}
+          index={-1}
+          snapPoints={temporarySnapPoints}
+          enableDynamicSizing={false}
+          enablePanDownToClose
+          backdropComponent={renderBackdrop}
+        >
+          <TemporaryOrderSheet
+            onClose={() => temporaryOrderSheet.current?.close}
+            onCancel={handleOrderCancel}
+          />
+        </BottomSheet>
       </View>
-
-      <BottomSheet
-        ref={temporaryOrderSheet}
-        index={-1}
-        snapPoints={temporarySnapPoints}
-        enableDynamicSizing={false}
-        enablePanDownToClose
-        backdropComponent={renderBackdrop}
-      >
-        <TemporaryOrderSheet
-          onClose={() => temporaryOrderSheet.current?.close}
-          onCancel={handleOrderCancel}
-        />
-      </BottomSheet>
-    </View>
+    </ScreenWrapper>
+    // </SafeAreaView>
   );
 };
 
@@ -276,7 +319,7 @@ const styles = StyleSheet.create({
   },
   floatingContainer: {
     position: "absolute",
-    bottom: verticalScale(10),
+    bottom: Platform.OS === "android" ? verticalScale(10) : verticalScale(20),
     marginHorizontal: "auto",
   },
   overlayContainer: {

@@ -102,6 +102,18 @@ export type MerchantDataProps = {
   fssaiNumber: string;
   isFavourite: boolean;
   distanceWarning: boolean;
+  type: "Specific-time" | "Full-time";
+  todayAvailability: {
+    openAllDay: boolean;
+    closedAllDay: boolean;
+    specificTime: boolean;
+    startTime: string;
+    endTime: string;
+  };
+  nextDay: {
+    day: string;
+    startTime: string;
+  };
 } | null;
 
 export type CategoryProps = {

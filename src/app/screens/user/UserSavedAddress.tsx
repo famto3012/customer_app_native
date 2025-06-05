@@ -1,8 +1,11 @@
-import { Image, Pressable, ScrollView, View } from "react-native";
-import { FC, useEffect, useState } from "react";
-import ScreenWrapper from "@/components/ScreenWrapper";
+import Button from "@/components/Button";
 import Header from "@/components/Header";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import AddressLoader from "@/components/Loader/AddressLoader";
+import ScreenWrapper from "@/components/ScreenWrapper";
+import Typo from "@/components/Typo";
+import { commonStyles } from "@/constants/commonStyles";
+import { colors, radius } from "@/constants/theme";
+import { useData } from "@/context/DataContext";
 import {
   fetchUserAddress,
   setGeofenceForUser,
@@ -10,15 +13,12 @@ import {
 } from "@/service/userService";
 import { useAuthStore } from "@/store/store";
 import { UserAddressProps } from "@/types";
-import { colors, radius } from "@/constants/theme";
-import { commonStyles } from "@/constants/commonStyles";
 import { scale, SCREEN_HEIGHT, verticalScale } from "@/utils/styling";
-import Typo from "@/components/Typo";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import Button from "@/components/Button";
 import { MapPin } from "phosphor-react-native";
-import AddressLoader from "@/components/Loader/AddressLoader";
-import { useData } from "@/context/DataContext";
+import { FC, useEffect, useState } from "react";
+import { Image, Pressable, ScrollView, View } from "react-native";
 
 interface NewAddressUIProps {
   showActionButton?: boolean;

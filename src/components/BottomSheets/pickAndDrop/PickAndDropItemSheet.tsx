@@ -1,21 +1,22 @@
+import Button from "@/components/Button";
+import Input from "@/components/Input";
+import Typo from "@/components/Typo";
+import { commonStyles } from "@/constants/commonStyles";
+import { colors, spacingY } from "@/constants/theme";
+import { useShowAlert } from "@/hooks/useShowAlert";
+import { PickAndDropItemProps } from "@/types";
+import { pickAndDropItemTypes } from "@/utils/defaultData";
+import { scale, verticalScale } from "@/utils/styling";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { FC, useEffect, useRef, useState } from "react";
 import {
-  StyleSheet,
-  View,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
   TextInput,
+  View,
 } from "react-native";
-import { FC, useEffect, useState, useRef } from "react";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import Typo from "@/components/Typo";
-import { colors, radius, spacingX, spacingY } from "@/constants/theme";
-import { scale, verticalScale } from "@/utils/styling";
 import { Dropdown } from "react-native-element-dropdown";
-import Button from "@/components/Button";
-import { pickAndDropItemTypes } from "@/utils/defaultData";
-import Input from "@/components/Input";
-import { PickAndDropItemProps } from "@/types";
-import { commonStyles } from "@/constants/commonStyles";
 
 interface PickAndDropItemSheetProps {
   heading: string;
@@ -45,6 +46,8 @@ const PickAndDropItemSheet: FC<PickAndDropItemSheetProps> = ({
   const widthRef = useRef<TextInput>(null);
   const heightRef = useRef<TextInput>(null);
   const weightRef = useRef<TextInput>(null);
+
+  const { showAlert } = useShowAlert();
 
   useEffect(() => {
     if (itemData?.itemName) {
@@ -81,7 +84,7 @@ const PickAndDropItemSheet: FC<PickAndDropItemSheetProps> = ({
             data={pickAndDropItemTypes}
             labelField="label"
             valueField="value"
-            placeholder="Select item type"
+            placeholder="Select item type*"
             value={item?.itemName}
             onChange={(data: { label: string; value: string }) =>
               setItem({ ...item, itemName: data.value })
@@ -138,7 +141,7 @@ const PickAndDropItemSheet: FC<PickAndDropItemSheetProps> = ({
           <View style={{ marginTop: verticalScale(10) }}>
             <Input
               inputRef={weightRef}
-              placeholder="Weight (in kg)"
+              placeholder="Weight (in kg)*"
               keyboardType="numeric"
               value={item.weight.toString()}
               onChangeText={(value: string) =>
@@ -153,6 +156,11 @@ const PickAndDropItemSheet: FC<PickAndDropItemSheetProps> = ({
           <Button
             title={buttonLabel}
             onPress={() => {
+              if (!item.itemName || !item.weight) {
+                showAlert("Item Type or Item weight is missing");
+                return;
+              }
+
               const added = onConfirm(item);
               if (added) {
                 setItem({

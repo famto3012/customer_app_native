@@ -1,3 +1,12 @@
+import { colors, radius, spacingX } from "@/constants/theme";
+import { addItemDetail } from "@/service/customOrderService";
+import { CustomOrderItemsProps } from "@/types";
+import { unitData } from "@/utils/defaultData";
+import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
+import { useMutation } from "@tanstack/react-query";
+import * as ImagePicker from "expo-image-picker";
+import { XCircle } from "phosphor-react-native";
+import { FC, useState } from "react";
 import {
   Alert,
   Image,
@@ -8,19 +17,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { FC, useState } from "react";
-import { scale, SCREEN_WIDTH, verticalScale } from "@/utils/styling";
-import { colors, radius, spacingX } from "@/constants/theme";
-import Typo from "../Typo";
-import Input from "../Input";
-import { CustomOrderItemsProps } from "@/types";
-import { XCircle } from "phosphor-react-native";
-import Button from "../Button";
-import * as ImagePicker from "expo-image-picker";
-import { useMutation } from "@tanstack/react-query";
-import { addItemDetail } from "@/service/customOrderService";
 import { Dropdown } from "react-native-element-dropdown";
-import { unitData } from "@/utils/defaultData";
+import Button from "../Button";
+import Input from "../Input";
+import Typo from "../Typo";
 
 const AddItem: FC<{
   openAddSheet?: () => void;
@@ -107,8 +107,6 @@ const AddItem: FC<{
       }
       return;
     }
-
-    console.log({ item });
 
     if (item.quantity && !item.unit) {
       if (Platform.OS === "android") {

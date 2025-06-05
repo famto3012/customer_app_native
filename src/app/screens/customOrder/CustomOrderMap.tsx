@@ -1,40 +1,32 @@
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import AddStoreDetail from "@/components/BottomSheets/customOrder/AddStoreDetail";
+import Button from "@/components/Button";
+import MapDetailLoader from "@/components/Loader/MapDetailLoader";
 import ScreenWrapper from "@/components/ScreenWrapper";
-import Header from "@/components/Header";
+import Typo from "@/components/Typo";
+import { commonStyles } from "@/constants/commonStyles";
+import {
+  MAPPLS_CLIENT_ID,
+  MAPPLS_CLIENT_SECRET_KEY,
+  MAPPLS_REST_API_KEY,
+} from "@/constants/links";
+import { colors, radius } from "@/constants/theme";
+import { LocationAddressProps } from "@/types";
+import { useSafeLocation } from "@/utils/helpers";
+import { scale, verticalScale } from "@/utils/styling";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
 } from "@gorhom/bottom-sheet";
-import Button from "@/components/Button";
-import AddStoreDetail from "@/components/BottomSheets/customOrder/AddStoreDetail";
-import { commonStyles } from "@/constants/commonStyles";
-import { scale, verticalScale } from "@/utils/styling";
-import Map from "@/components/common/Map";
-import { useAuthStore } from "@/store/store";
-import { LocationAddressProps } from "@/types";
+import * as Location from "expo-location";
+import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
-import { GpsFix, MagnifyingGlass } from "phosphor-react-native";
 import MapplsGL from "mappls-map-react-native";
 import MapplsUIWidgets from "mappls-search-widgets-react-native";
-import {
-  MAPPLS_CLIENT_ID,
-  MAPPLS_CLIENT_SECRET_KEY,
-  MAPPLS_REST_API_KEY,
-} from "@/constants/links";
-import { colors } from "@/constants/theme";
-import * as Location from "expo-location";
-import Typo from "@/components/Typo";
-import { useSafeLocation } from "@/utils/helpers";
-import MapDetailLoader from "@/components/Loader/MapDetailLoader";
+import { CaretLeft, GpsFix, MagnifyingGlass } from "phosphor-react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
 
 const { MapView, Camera, RestApi, UserLocation } = MapplsGL;
 
@@ -56,6 +48,7 @@ const CustomOrderMap = () => {
 
   const cameraRef = useRef<any>(null);
   const mapRef = useRef<any>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const initMapSDK = async () => {
@@ -327,7 +320,25 @@ const CustomOrderMap = () => {
           </View>
 
           {/* Search Button */}
-          <View style={styles.searchButton}>
+          <View
+            style={{
+              position: "absolute",
+              top: 20,
+              left: 20,
+              right: 20,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: scale(10),
+            }}
+          >
+            <Pressable onPress={() => router.back()} style={styles.backButton}>
+              <CaretLeft
+                size={verticalScale(20)}
+                color={colors.PRIMARY}
+                weight="bold"
+              />
+            </Pressable>
+
             <Pressable
               onPress={handleSearch}
               style={{
@@ -336,6 +347,9 @@ const CustomOrderMap = () => {
                 alignItems: "center",
                 justifyContent: "space-between",
                 paddingRight: scale(35),
+                backgroundColor: colors.WHITE,
+                paddingVertical: verticalScale(7),
+                borderRadius: radius._6,
               }}
             >
               <TextInput
@@ -563,5 +577,10 @@ const styles = StyleSheet.create({
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
     borderTopColor: colors.NEUTRAL900,
+  },
+  backButton: {
+    padding: scale(5),
+    backgroundColor: colors.WHITE,
+    borderRadius: radius._30,
   },
 });

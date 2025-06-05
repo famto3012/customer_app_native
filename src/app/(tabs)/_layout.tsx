@@ -4,8 +4,8 @@ import { TabBar } from "@/components/TabBar/TabBar";
 const TabLayout = () => {
   return (
     <Tabs
-      screenOptions={{ headerShown: false, animation: "fade" }}
-      tabBar={(props) => <TabBar {...props} />}
+      screenOptions={{ headerShown: false }}
+      tabBar={(props) => <TabBar {...(props as any)} />}
     >
       <Tabs.Screen name="index" options={{ tabBarLabel: "Home" }} />
       <Tabs.Screen name="order" options={{ tabBarLabel: "Orders" }} />

@@ -72,6 +72,7 @@ export const updateCart = async (
       cart: {
         showCart: updatedCartItems.length > 0,
         merchant: useAuthStore.getState().selectedMerchant?.merchantName || "",
+        merchantId: useAuthStore.getState().selectedMerchant?.merchantId || "",
         cartId: "",
       },
     });

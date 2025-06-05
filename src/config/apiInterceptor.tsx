@@ -1,11 +1,11 @@
+import { BASE_URL } from "@/constants/links";
+import { logout } from "@/service/authService";
+import { useAuthStore } from "@/store/store";
 import axios, {
   AxiosError,
   AxiosResponse,
   InternalAxiosRequestConfig,
 } from "axios";
-import { BASE_URL } from "@/constants/links";
-import { useAuthStore } from "@/store/store";
-import { logout } from "@/service/authService";
 import { jwtDecode } from "jwt-decode";
 
 export const appAxios = axios.create({

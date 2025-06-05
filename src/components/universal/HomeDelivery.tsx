@@ -1,10 +1,10 @@
+import { useAuthStore } from "@/store/store";
+import { CartProps, SelectedAddress } from "@/types";
+import { FC, useEffect } from "react";
 import { View } from "react-native";
 import Instructions from "../common/Instructions";
-import ItemList from "./ItemList";
-import { FC, useEffect } from "react";
-import { CartProps, SelectedAddress } from "@/types";
-import { useAuthStore } from "@/store/store";
 import UserSelectedAddress from "../common/UserSelectedAddress";
+import ItemList from "./ItemList";
 
 interface HomeDeliveryProps {
   items: CartProps["items"];
@@ -43,7 +43,6 @@ const HomeDelivery: FC<HomeDeliveryProps> = ({
       <Instructions
         placeholder="Instructions (if any)"
         onRecordComplete={(data) => {
-          console.log(`Agent recording: ${data}`);
           onAgentVoice(data);
         }}
         onChangeText={(data) => onAgentInstruction(data)}

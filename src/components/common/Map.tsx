@@ -669,22 +669,21 @@
 // });
 
 // export default Map;
-import { StyleSheet, View, ActivityIndicator } from "react-native";
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import MapplsGL from "mappls-map-react-native";
 import {
   MAPPLS_CLIENT_ID,
   MAPPLS_CLIENT_SECRET_KEY,
   MAPPLS_REST_API_KEY,
 } from "@/constants/links";
-import { scale } from "@/utils/styling";
-import ScreenWrapper from "../ScreenWrapper";
-import axios from "axios";
+import { colors } from "@/constants/theme";
 import { useSocket } from "@/service/socketProvider";
 import { useSafeLocation } from "@/utils/helpers";
-import { colors } from "@/constants/theme";
-import { House, Storefront } from "phosphor-react-native";
+import { scale } from "@/utils/styling";
+import axios from "axios";
+import MapplsGL from "mappls-map-react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import MapLoader from "../Loader/MapLoader";
+import ScreenWrapper from "../ScreenWrapper";
 
 const {
   MapView,
