@@ -11,8 +11,9 @@ import { commonStyles } from "@/constants/commonStyles";
 import { colors, radius, spacingX } from "@/constants/theme";
 import { useShowAlert } from "@/hooks/useShowAlert";
 import {
-  addPickAndDropItems,
+  proceedPickAndDrop,
   getVehicleDetails,
+  updatePickAndDropItems,
 } from "@/service/pickandDropService";
 import { PickAndDropItemProps } from "@/types";
 import { pickAndDropVehicleDetail } from "@/utils/defaultData";
@@ -21,7 +22,7 @@ import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { Warning } from "phosphor-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -46,6 +47,7 @@ const PickAndDropDetail = () => {
 
   const { item, cartId } = useLocalSearchParams();
   const { showAlert } = useShowAlert();
+  const queryClient = useQueryClient();
 
   const addItemSheetRef = useRef<BottomSheet>(null);
   const editItemSheetRef = useRef<BottomSheet>(null);
@@ -75,8 +77,18 @@ const PickAndDropDetail = () => {
     queryFn: () => getVehicleDetails(cartId.toString()),
   });
 
-  const handleAddItemsMutation = useMutation({
-    mutationKey: ["add-pick-and-drop-items"],
+  const handleUpdateItemMutation = useMutation({
+    mutationKey: ["update-pick-and-drop-items"],
+    mutationFn: (item: PickAndDropItemProps[]) => updatePickAndDropItems(item),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["vehicle-detail"] });
+      setItems(variables);
+      addItemSheetRef.current?.close();
+    },
+  });
+
+  const handleProceedMutation = useMutation({
+    mutationKey: ["proceed-pick-and-drop"],
     mutationFn: ({
       items,
       vehicleType,
@@ -85,7 +97,7 @@ const PickAndDropDetail = () => {
       items: PickAndDropItemProps[];
       vehicleType: string;
       deliveryCharges: number;
-    }) => addPickAndDropItems(items, vehicleType, deliveryCharges),
+    }) => proceedPickAndDrop(items, vehicleType, deliveryCharges),
     onSuccess: (data) => {
       if (data.cartId) {
         router.push({
@@ -115,7 +127,7 @@ const PickAndDropDetail = () => {
         weight: Number(item.weight),
       })) || [];
 
-    handleAddItemsMutation.mutate({
+    handleProceedMutation.mutate({
       items: formattedItems,
       vehicleType: data.vehicleType,
       deliveryCharges: data.deliveryCharges || 0,
@@ -161,9 +173,11 @@ const PickAndDropDetail = () => {
                     editItemSheetRef.current?.expand();
                   }}
                   onDeleteItem={(itemIndex: number) => {
-                    setItems((prevItems) =>
-                      prevItems.filter((_, index) => index !== itemIndex)
+                    const updatedItems = items.filter(
+                      (_, index) => index !== itemIndex
                     );
+
+                    handleUpdateItemMutation.mutate(updatedItems);
                   }}
                   index={index}
                 />
@@ -230,7 +244,7 @@ const PickAndDropDetail = () => {
           <Button
             title="Proceed"
             onPress={handleProceed}
-            isLoading={handleAddItemsMutation.isPending}
+            isLoading={handleProceedMutation.isPending}
           />
         </View>
       </ScreenWrapper>
@@ -246,9 +260,11 @@ const PickAndDropDetail = () => {
           heading="Add Item"
           buttonLabel="Confirm"
           onConfirm={(data: PickAndDropItemProps) => {
-            setItems([...items, data]);
-            addItemSheetRef.current?.close();
-            return true;
+            const updatedItems = [...items, data];
+
+            handleUpdateItemMutation.mutate(updatedItems);
+
+            return handleUpdateItemMutation.isSuccess;
           }}
           isLoading={false}
         />
@@ -265,16 +281,14 @@ const PickAndDropDetail = () => {
           heading="Edit Item"
           buttonLabel="Save"
           onConfirm={(data: PickAndDropItemProps) => {
-            setItems((prevItems) =>
-              prevItems.map((item, idx) =>
-                idx === selectedItem?.index ? data : item
-              )
-            );
+            if (selectedItem?.index === undefined) return false;
 
-            setSelectedItem(null);
-            editItemSheetRef.current?.close();
+            const updatedItems = [...items];
+            updatedItems[selectedItem.index] = data;
 
-            return true;
+            handleUpdateItemMutation.mutate(updatedItems);
+
+            return handleUpdateItemMutation.isSuccess;
           }}
           isLoading={false}
           itemData={selectedItem?.item?.itemName ? selectedItem.item : null}

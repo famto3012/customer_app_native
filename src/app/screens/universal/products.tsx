@@ -450,6 +450,7 @@ import DistanceWarning from "@/components/BottomSheets/universal/DistanceWarning
 import DuplicateVariantSheet from "@/components/BottomSheets/universal/DuplicateVariantSheet";
 import MerchantRatingSheet from "@/components/BottomSheets/universal/MerchantRatingSheet";
 import ProductDetailSheet from "@/components/BottomSheets/universal/ProductDetailSheet";
+import ProductImage from "@/components/BottomSheets/universal/ProductImage";
 import ProductCategoryLoader from "@/components/Loader/ProductCategoryLoader";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Typo from "@/components/Typo";
@@ -499,6 +500,7 @@ const Products = () => {
   const productDetailRef = useRef<BottomSheet>(null);
   const ratingSheetRef = useRef<BottomSheet>(null);
   const distanceWarningSheetRef = useRef<BottomSheet>(null);
+  const productImageSheetRef = useRef<BottomSheet>(null);
 
   const variantSheetSnapPoints = useMemo(() => ["60%"], []);
   const clearCartSheetSnapPoints = useMemo(() => ["28%"], []);
@@ -506,6 +508,7 @@ const Products = () => {
   const productDetailSnapPoints = useMemo(() => ["55%"], []);
   const ratingSheetSnapPoints = useMemo(() => ["45%"], []);
   const distanceWarningSheetSnapPoints = useMemo(() => ["50%"], []);
+  const productImageSheetSnapPoints = useMemo(() => ["80%"], []);
 
   // Refs for checking screen fill
   const listRef = useRef<FlatList>(null);
@@ -520,21 +523,17 @@ const Products = () => {
   const showCart = useAuthStore((state) => state.cart.showCart);
   const { openDuplicate, setOpenDuplicate, productFilter } = useData();
 
-
   const { data: merchantData, isLoading: merchantDataLoading } =
     useQuery<MerchantDataProps>({
       queryKey: ["merchant-data", merchantId],
       queryFn: () => getMerchantData(merchantId as string, latitude, longitude),
     });
 
- 
-
   useEffect(() => {
     if (merchantData?.distanceWarning) {
       distanceWarningSheetRef.current?.expand();
     }
   }, [merchantData]);
-
 
   // Reset state when merchant or business changes
   useEffect(() => {
@@ -959,8 +958,6 @@ const Products = () => {
     []
   );
 
- 
-
   return (
     <>
       <ScreenWrapper>
@@ -1030,7 +1027,6 @@ const Products = () => {
             // legacyImplementation can also be removed
           />
         </View>
-     
 
         <FloatingCart onClearCart={() => clearCartSheetRef.current?.expand()} />
 
@@ -1094,7 +1090,9 @@ const Products = () => {
           enablePanDownToClose
           backdropComponent={renderBackdrop}
         >
-          <ProductDetailSheet />
+          <ProductDetailSheet
+            onViewImage={() => productImageSheetRef.current?.expand()}
+          />
         </BottomSheet>
 
         <BottomSheet
@@ -1125,6 +1123,18 @@ const Products = () => {
               distanceWarningSheetRef.current?.close();
             }}
           />
+        </BottomSheet>
+
+        <BottomSheet
+          ref={productImageSheetRef}
+          index={-1}
+          snapPoints={productImageSheetSnapPoints}
+          enableDynamicSizing={false}
+          enablePanDownToClose
+          backdropComponent={renderBackdrop}
+          onClose={() => productImageSheetRef.current?.close()}
+        >
+          <ProductImage />
         </BottomSheet>
       </ScreenWrapper>
     </>

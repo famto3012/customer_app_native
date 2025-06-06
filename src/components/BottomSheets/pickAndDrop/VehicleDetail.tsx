@@ -54,7 +54,7 @@ const VehicleDetail: FC<VehicleDetailProps> = ({ data }) => {
       >
         <View>
           <Typo size={13} color={colors.NEUTRAL400}>
-            Capacity
+            Capacity upto
           </Typo>
           <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
             {data.capacity}
