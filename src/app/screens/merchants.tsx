@@ -4,6 +4,7 @@ import {
   StyleSheet,
   View,
   RefreshControl,
+  Platform,
 } from "react-native";
 import { useCallback, useEffect, useState } from "react";
 import ScreenWrapper from "@/components/ScreenWrapper";
@@ -154,7 +155,11 @@ const Merchants = () => {
 
   return (
     <ScreenWrapper>
-      <Header title={businessCategory?.toString() || "Merchants"} />
+      <View
+        style={{ marginTop: Platform.OS === "ios" ? 0 : verticalScale(15) }}
+      >
+        <Header title={businessCategory?.toString() || "Merchants"} />
+      </View>
 
       {!(selectedFilter === "" && query === "" && merchants.length === 0) && (
         <>

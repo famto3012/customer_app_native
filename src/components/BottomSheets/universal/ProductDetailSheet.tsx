@@ -6,11 +6,14 @@ import { useAuthStore } from "@/store/store";
 import { scale, verticalScale } from "@/utils/styling";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useQuery } from "@tanstack/react-query";
-import { FC } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import FastImage from "react-native-fast-image";
 
-const ProductDetailSheet: FC<{}> = () => {
+interface ProductDetailSheetProps {
+  onViewImage: () => void;
+}
+
+const ProductDetailSheet = ({ onViewImage }: ProductDetailSheetProps) => {
   const { product } = useData();
   const { selectedBusiness } = useAuthStore.getState();
 
@@ -26,7 +29,7 @@ const ProductDetailSheet: FC<{}> = () => {
     <View style={styles.container}>
       <BottomSheetScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          <Pressable>
+          <Pressable onPress={onViewImage}>
             <FastImage
               source={{
                 uri: product?.productImageURL,
@@ -190,7 +193,7 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     paddingHorizontal: scale(20),
-    marginTop: verticalScale(16),
+    marginVertical: verticalScale(16),
   },
   priceContainer: {
     flexDirection: "row",

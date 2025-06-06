@@ -134,6 +134,10 @@ const PickDropScreen = () => {
         }
       }
 
+      if (data.itemName) {
+        formDataObject.append("item", JSON.stringify(data));
+      }
+
       Object.entries(formData).forEach(([key, value]) => {
         appendFormData(value, key);
       });

@@ -75,7 +75,29 @@ export const getVehicleDetails = async (cartId: string) => {
   }
 };
 
-export const addPickAndDropItems = async (
+export const updatePickAndDropItems = async (items: PickAndDropItemProps[]) => {
+  try {
+    const res = await appAxios.post("/customers/add-additional-pick-items", {
+      items,
+    });
+
+    return res.status === 200 ? res.data.success : false;
+  } catch (err: any) {
+    console.error(`Error in adding items:`, JSON.stringify(err.response.data));
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        "Something went wrong",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Alert.alert("", "Something went wrong");
+    }
+    return false;
+  }
+};
+
+export const proceedPickAndDrop = async (
   items: PickAndDropItemProps[],
   vehicleType: string,
   deliveryCharges: number
