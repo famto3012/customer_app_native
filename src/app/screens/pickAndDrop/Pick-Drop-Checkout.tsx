@@ -229,7 +229,8 @@ const PickAndDropCheckout = () => {
           style={{
             backgroundColor: "white",
             padding: scale(15),
-            paddingBottom: Platform.OS === "ios" ? verticalScale(30) : 0,
+            paddingBottom:
+              Platform.OS === "ios" ? verticalScale(30) : verticalScale(20),
           }}
         >
           <View
