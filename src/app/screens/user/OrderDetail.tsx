@@ -51,13 +51,13 @@ const OrderDetail = () => {
     orderId: "",
   });
 
-  const { orderId } = useLocalSearchParams();
+  const { orderId }: { orderId: string } = useLocalSearchParams();
 
   const { token } = useAuthStore.getState();
 
   const { data, isLoading } = useQuery({
     queryKey: ["order-details", orderId],
-    queryFn: () => getOrderDetail(orderId.toString()),
+    queryFn: () => getOrderDetail(orderId),
     enabled: !!token && !!orderId,
   });
 
@@ -193,6 +193,7 @@ const OrderDetail = () => {
               />
             </View>
           )}
+
         <View style={styles.headerTile}>
           <View>
             <Typo size={16} fontFamily="SemiBold" color={colors.NEUTRAL900}>
@@ -204,6 +205,7 @@ const OrderDetail = () => {
                 : `Order will be delivered at ${data?.deliveryTime} `}
             </Typo>
           </View>
+
           {(data?.status === "On-going" || data?.status === "Pending") &&
             data?.deliveryMode !== "Take Away" && (
               <View
@@ -317,11 +319,13 @@ const OrderDetail = () => {
               </View>
             )}
         </View>
+
         <View style={styles.deliveryMode}>
           <Typo size={12} color={colors.NEUTRAL900}>
             {data?.deliveryMode}
           </Typo>
         </View>
+
         <View style={styles.addressDetails}>
           <View style={styles.address}>
             {/* <View> */}
@@ -424,6 +428,7 @@ const OrderDetail = () => {
             </>
           )}
         </View>
+
         <View style={styles.billDetails}>
           <Typo size={14} fontFamily="Medium" color={colors.PRIMARY}>
             {data?.deliveryMode !== "Home Delivery" &&
@@ -442,6 +447,7 @@ const OrderDetail = () => {
             }}
           />
         </View>
+
         <View>
           {data?.deliveryMode !== "Home Delivery" &&
             data?.deliveryMode !== "Take Away" && (
@@ -451,16 +457,24 @@ const OrderDetail = () => {
                 </Typo>
               </View>
             )}
+
           {data?.deliveryMode === "Custom Order" ? (
-            <View style={{ marginTop: scale(10), marginHorizontal: scale(20) }}>
-              <Typo size={14} fontFamily="Medium" color={colors.NEUTRAL900}>
-                Bill will be updated soon
-              </Typo>
-            </View>
+            typeof data.billDetail === "string" ? (
+              <View
+                style={{ marginTop: scale(10), marginHorizontal: scale(20) }}
+              >
+                <Typo size={14} fontFamily="Medium" color={colors.NEUTRAL900}>
+                  Bill will be updated soon
+                </Typo>
+              </View>
+            ) : (
+              <OrderBillDetail data={data?.billDetail} isLoading={isLoading} />
+            )
           ) : (
             <OrderBillDetail data={data?.billDetail} isLoading={isLoading} />
           )}
         </View>
+
         <View
           style={{
             marginHorizontal: scale(20),
