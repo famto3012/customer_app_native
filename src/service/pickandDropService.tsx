@@ -100,13 +100,15 @@ export const updatePickAndDropItems = async (items: PickAndDropItemProps[]) => {
 export const proceedPickAndDrop = async (
   items: PickAndDropItemProps[],
   vehicleType: string,
-  deliveryCharges: number
+  deliveryCharges: number,
+  surgeCharges: number
 ) => {
   try {
     const res = await appAxios.post("/customers/add-pick-and-drop-items", {
       items,
       vehicleType,
       deliveryCharges,
+      surgeCharges,
     });
 
     return res.status === 200 ? res.data : null;

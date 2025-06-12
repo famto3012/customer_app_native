@@ -31,6 +31,7 @@ import { FlatList, Platform, ScrollView, StyleSheet, View } from "react-native";
 interface DataProps {
   vehicleType: string;
   deliveryCharges: number | null;
+  surgeCharges: number | null;
 }
 
 const PickAndDropDetail = () => {
@@ -43,6 +44,7 @@ const PickAndDropDetail = () => {
   const [data, setData] = useState<DataProps>({
     vehicleType: "",
     deliveryCharges: null,
+    surgeCharges: null,
   });
 
   const { item, cartId } = useLocalSearchParams();
@@ -93,11 +95,13 @@ const PickAndDropDetail = () => {
       items,
       vehicleType,
       deliveryCharges,
+      surgeCharges,
     }: {
       items: PickAndDropItemProps[];
       vehicleType: string;
       deliveryCharges: number;
-    }) => proceedPickAndDrop(items, vehicleType, deliveryCharges),
+      surgeCharges: number;
+    }) => proceedPickAndDrop(items, vehicleType, deliveryCharges, surgeCharges),
     onSuccess: (data) => {
       if (data.cartId) {
         router.push({
@@ -131,6 +135,7 @@ const PickAndDropDetail = () => {
       items: formattedItems,
       vehicleType: data.vehicleType,
       deliveryCharges: data.deliveryCharges || 0,
+      surgeCharges: data.surgeCharges ?? 0,
     });
   };
 
@@ -220,8 +225,16 @@ const PickAndDropDetail = () => {
                       data={vehicleData?.length > 0 ? vehicleData : []}
                       onVehicleSelect={(
                         vehicleType: string,
-                        deliveryCharges: number
-                      ) => setData({ ...data, vehicleType, deliveryCharges })}
+                        deliveryCharges: number,
+                        surgeCharges: number
+                      ) =>
+                        setData({
+                          ...data,
+                          vehicleType,
+                          deliveryCharges,
+                          surgeCharges,
+                        })
+                      }
                       onViewVehicle={(data: string) => {
                         setViewVehicle(data);
                         vehicleSheetRef.current?.expand();

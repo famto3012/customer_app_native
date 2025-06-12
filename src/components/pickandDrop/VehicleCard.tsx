@@ -9,13 +9,18 @@ import { pickAndDropVehicleDetail } from "@/utils/defaultData";
 
 interface VehicleCardProps {
   data: VehicleData[];
-  onVehicleSelect: (vehicleType: string, deliveryCharges: number) => void;
+  onVehicleSelect: (
+    vehicleType: string,
+    deliveryCharges: number,
+    surgeCharges: number
+  ) => void;
   onViewVehicle: (data: string) => void;
 }
 
 interface VehicleData {
   vehicleType: string;
   deliveryCharges: number;
+  surgeCharges: number;
   distance: number;
   duration: number;
 }
@@ -30,7 +35,11 @@ const VehicleCard: FC<VehicleCardProps> = ({
   useEffect(() => {
     data?.length && setSelected(data[0]?.vehicleType);
     data?.length &&
-      onVehicleSelect(data[0]?.vehicleType, data[0]?.deliveryCharges);
+      onVehicleSelect(
+        data[0]?.vehicleType,
+        data[0]?.deliveryCharges,
+        data[0].surgeCharges
+      );
   }, [data]);
 
   if (!data?.length) {
@@ -52,7 +61,11 @@ const VehicleCard: FC<VehicleCardProps> = ({
         <Pressable
           onPress={() => {
             setSelected(vehicle.vehicleType);
-            onVehicleSelect(vehicle.vehicleType, vehicle.deliveryCharges);
+            onVehicleSelect(
+              vehicle.vehicleType,
+              vehicle.deliveryCharges,
+              vehicle.surgeCharges
+            );
           }}
           key={vehicle.vehicleType}
           style={styles.cardContainer}

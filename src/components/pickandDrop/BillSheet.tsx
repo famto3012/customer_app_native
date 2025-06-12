@@ -37,7 +37,7 @@ const BillSheet: FC<{ data: PickAndDropCartBill }> = ({ data }) => {
             Surge charges
           </Typo>
           <Typo fontFamily="Medium" size={16} color={colors.NEUTRAL800}>
-            ₹ {data?.surgePrice?.toFixed(0) || "0.00"}
+            ₹ {data?.surgePrice?.toFixed(2) || "0.00"}
           </Typo>
         </View>
 
@@ -55,7 +55,7 @@ const BillSheet: FC<{ data: PickAndDropCartBill }> = ({ data }) => {
         {/* {data?.discountedAmount && ( */}
         <View style={styles.field}>
           <Typo size={14} color={colors.NEUTRAL800}>
-            Discount ({data?.promoCodeUsed && data?.promoCodeUsed})
+            Discount {data?.promoCodeUsed && `(${data?.promoCodeUsed})`}
           </Typo>
           <Typo fontFamily="Medium" size={16} color={colors.NEUTRAL800}>
             ₹ {data?.discountedAmount?.toFixed(2) || "0.00"}

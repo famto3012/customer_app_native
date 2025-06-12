@@ -96,6 +96,7 @@ export const getOrderDetail = async (orderId: string) => {
     return [];
   }
 };
+
 export const getScheduledOrderDetail = async (
   orderId: string,
   deliveryMode: string

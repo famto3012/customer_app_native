@@ -51,101 +51,6 @@ const OrderList = () => {
     setRefreshing(false);
   }, [refetch]);
 
-  // const renderItem = ({ item }: any) => {
-  //   console.log("item", item);
-  //   return (
-  //     <Pressable
-  //       style={styles.orderItem}
-  //       onPress={() => {
-  //         router.push({
-  //           pathname: "/screens/user/OrderDetail",
-  //           params: { orderId: item.orderId },
-  //         });
-  //       }}
-  //     >
-  //       <View style={styles.orderItemHeader}>
-  //         {item.deliveryMode === "Home Delivery" ||
-  //         item.deliveryMode === "Take Away" ? (
-  //           <LottieView
-  //             source={require("@/assets/images/universal-order.json")} // Path to your Lottie JSON file
-  //             autoPlay
-  //             loop
-  //             style={styles.image} // Adjust size as needed
-  //           />
-  //         ) : item.deliveryMode === "Pick and Drop" ? (
-  //           <LottieView
-  //             source={require("@/assets/images/pick-drop-order.json")} // Path to your Lottie JSON file
-  //             autoPlay
-  //             loop
-  //             style={styles.image} // Adjust size as needed
-  //           />
-  //         ) : (
-  //           <LottieView
-  //             source={require("@/assets/images/custom-order.json")} // Path to your Lottie JSON file
-  //             autoPlay
-  //             loop
-  //             style={styles.image} // Adjust size as needed
-  //           />
-  //         )}
-
-  //         <View style={styles.orderDetail}>
-  //           <View>
-  //             <Typo size={16} color={colors.NEUTRAL900} fontFamily="Medium">
-  //               {item.deliveryMode === "Home Delivery" ||
-  //               item.deliveryMode === "Take Away"
-  //                 ? item.merchantName
-  //                 : item.deliveryMode}
-  //             </Typo>
-  //             <Typo size={12} color={colors.NEUTRAL400}>
-  //               {item.deliveryMode === "Home Delivery" ||
-  //               item.deliveryMode === "Take Away"
-  //                 ? item.displayAddress
-  //                 : ""}
-  //             </Typo>
-  //             <Typo
-  //               size={12}
-  //               color={colors.PRIMARY}
-  //               style={{ paddingTop: verticalScale(10) }}
-  //             >
-  //               {item.orderDate} | {item.orderTime}
-  //             </Typo>
-  //           </View>
-
-  //           <Typo
-  //             size={12}
-  //             color={
-  //               item.orderStatus === "On-going" ||
-  //               item.orderStatus === "Pending"
-  //                 ? colors.YELLOW
-  //                 : item.orderStatus === "Completed"
-  //                 ? colors.GREEN
-  //                 : colors.RED
-  //             }
-  //             style={styles.completed}
-  //           >
-  //             {item.orderStatus}
-  //           </Typo>
-  //         </View>
-  //       </View>
-
-  //       <View style={styles.orderItemFooter}>
-  //         <Typo size={13} color={colors.PRIMARY} fontFamily="Medium">
-  //           Grand Total
-  //         </Typo>
-  //         <Typo
-  //           size={item?.grandTotal ? 16 : 12}
-  //           color={colors.NEUTRAL900}
-  //           fontFamily="SemiBold"
-  //         >
-  //           {item?.grandTotal
-  //             ? ` ₹ ${item?.grandTotal}`
-  //             : "Will be updated soon"}
-  //         </Typo>
-  //       </View>
-  //     </Pressable>
-  //   );
-  // };
-
   const OrderItem: FC<{ item: any }> = ({ item }) => {
     const [remainingTime, setRemainingTime] = useState("");
 
@@ -325,8 +230,9 @@ const OrderList = () => {
             color={colors.NEUTRAL900}
             fontFamily="SemiBold"
           >
+            {item.orderId}
             {item?.grandTotal
-              ? ` ₹ ${item?.grandTotal}`
+              ? ` ₹ ${item?.grandTotal} `
               : "Will be updated soon"}
           </Typo>
         </View>
@@ -367,7 +273,6 @@ const OrderList = () => {
             style={{
               flex: 1,
               alignItems: "flex-start",
-              // justifyContent: "center",
               gap: scale(30),
               height: SCREEN_HEIGHT - verticalScale(250),
               marginTop: verticalScale(20),

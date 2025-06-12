@@ -76,6 +76,11 @@ const BillDetail: FC<{ data: UniversalBillProps; isLoading: boolean }> = ({
             : data?.originalDeliveryCharge
         }
       />
+
+      {typeof data?.surgePrice === "number" && data.surgePrice > 0 && (
+        <RenderBillField field="Surge Charge" value={data.surgePrice} />
+      )}
+
       {typeof data?.addedTip === "number" && data.addedTip > 0 && (
         <RenderBillField field="Tip" value={data.addedTip} />
       )}

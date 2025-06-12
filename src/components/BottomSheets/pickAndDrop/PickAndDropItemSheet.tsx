@@ -38,7 +38,7 @@ const PickAndDropItemSheet: FC<PickAndDropItemSheetProps> = ({
     length: "",
     width: "",
     height: "",
-    unit: "",
+    unit: "cm",
     weight: "",
   });
 
