@@ -22,6 +22,7 @@ export const requestLocationPermission = async () => {
     const { setLocation } = useAuthStore.getState();
 
     let { status } = await Location.getForegroundPermissionsAsync();
+
     if (status !== "granted") {
       const { status: newStatus } =
         await Location.requestForegroundPermissionsAsync();
@@ -35,7 +36,7 @@ export const requestLocationPermission = async () => {
 
     while (!location && attempt < maxRetries) {
       location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
+        accuracy: Location.Accuracy.Highest,
         distanceInterval: 10,
       }).catch(() => null);
 
@@ -51,6 +52,7 @@ export const requestLocationPermission = async () => {
     }
 
     const { latitude, longitude } = location.coords;
+
     setLocation({ latitude, longitude });
 
     return true;

@@ -45,7 +45,12 @@ interface AuthStore {
   location: { latitude: number; longitude: number } | null;
   selectedBusiness: string | null;
   newUser: boolean;
-  cart: { showCart: boolean; merchant: string; merchantId: string; cartId: string };
+  cart: {
+    showCart: boolean;
+    merchant: string;
+    merchantId: string;
+    cartId: string;
+  };
   promoCode: {
     universal: string | null;
     pickAndDrop: string | null;
@@ -71,6 +76,7 @@ interface AuthStore {
   setCart: (cart: {
     showCart: boolean;
     merchant: string;
+    merchantId: string;
     cartId: string;
   }) => void;
   addOrder: (order: Order) => void;
@@ -96,7 +102,7 @@ export const useAuthStore = create<AuthStore>()(
       location: null,
       selectedBusiness: null,
       newUser: true,
-      cart: { showCart: false, merchant: "", cartId: "" },
+      cart: { showCart: false, merchant: "", merchantId: "", cartId: "" },
       promoCode: { universal: null, pickAndDrop: null, customOrder: null },
       fcmToken: null,
       orders: [],
@@ -189,7 +195,7 @@ export const useAuthStore = create<AuthStore>()(
           refreshToken: null,
           location: null,
           selectedBusiness: null,
-          cart: { showCart: false, merchant: "", cartId: "" },
+          cart: { showCart: false, merchant: "", merchantId: "", cartId: "" },
           promoCode: { universal: null, pickAndDrop: null, customOrder: null },
           orders: [],
           userAddress: { type: "", otherId: "", address: "" },

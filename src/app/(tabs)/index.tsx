@@ -46,10 +46,10 @@ const Home = () => {
 
   const temporarySnapPoints = useMemo(() => ["60%"], []);
 
-  const { token, outsideGeofence, location } = useAuthStore.getState();
+  const { token, outsideGeofence, userAddress } = useAuthStore.getState();
 
   useEffect(() => {
-    if (!location || !location.latitude || !location.longitude) {
+    if (!userAddress.type) {
       requestLocationPermission();
     }
   }, []);
@@ -196,6 +196,7 @@ const Home = () => {
                 style={{ marginHorizontal: scale(20) }}
               />
             </View>
+
             <Carousel
               loop
               style={{

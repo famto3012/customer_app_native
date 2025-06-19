@@ -23,7 +23,7 @@ const BusinessCategories: FC<{ query: string }> = ({ query }) => {
   const { latitude, longitude } = useSafeLocation();
   const { showAlert } = useShowAlert();
 
-  const { data, isLoading } = useQuery({
+  const { data } = useQuery({
     queryKey: ["business-category", latitude, longitude],
     queryFn: () => getBusinessCategories(latitude, longitude, query),
     enabled: !!latitude && !!longitude && !outsideGeofence,
@@ -93,10 +93,12 @@ const BusinessCategories: FC<{ query: string }> = ({ query }) => {
           <View style={{ alignItems: "center", marginTop: verticalScale(15) }}>
             {!isDataReady ? (
               <BusinessCategoryLoader />
-            ) : (
+            ) : isDataReady && businessCategory?.length === 0 ? (
               <Typo size={14} color={colors.NEUTRAL900} fontFamily="Medium">
                 Currently we don't deliver in this area!
               </Typo>
+            ) : (
+              <BusinessCategoryLoader />
             )}
           </View>
         }
