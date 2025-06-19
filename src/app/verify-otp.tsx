@@ -84,29 +84,27 @@ const VerifyOTP = () => {
 
     setIsLoading(true);
     try {
-      // let verificationIdToUse;
-      // try {
-      //   const parsedData = JSON.parse(otpVerificationId);
-      //   verificationIdToUse =
-      //     parsedData._verificationId || parsedData.verificationId;
-      // } catch (e) {
-      //   // If parsing fails, use the value directly
-      //   verificationIdToUse = otpVerificationId;
-      // }
-      // if (!verificationIdToUse) {
-      //   throw new Error("Invalid verification ID format");
-      // }
-      // const credential = auth.PhoneAuthProvider.credential(
-      //   verificationIdToUse,
-      //   otpCode
-      // );
-      // const userCredential = await auth().signInWithCredential(credential);
-      // if (userCredential.user) {
-      //   otpVerified.current = true;
-      //   await handleSuccessfulAuth();
-      // }
-
-      await handleSuccessfulAuth();
+      let verificationIdToUse;
+      try {
+        const parsedData = JSON.parse(otpVerificationId);
+        verificationIdToUse =
+          parsedData._verificationId || parsedData.verificationId;
+      } catch (e) {
+        // If parsing fails, use the value directly
+        verificationIdToUse = otpVerificationId;
+      }
+      if (!verificationIdToUse) {
+        throw new Error("Invalid verification ID format");
+      }
+      const credential = auth.PhoneAuthProvider.credential(
+        verificationIdToUse,
+        otpCode
+      );
+      const userCredential = await auth().signInWithCredential(credential);
+      if (userCredential.user) {
+        otpVerified.current = true;
+        await handleSuccessfulAuth();
+      }
     } catch (error: any) {
       let errorMessage = "Something went wrong. Please try again.";
 
