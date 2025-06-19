@@ -148,10 +148,12 @@ const OrderDetail = () => {
             backgroundColor: colors.NEUTRAL900,
           }}
         />
+
         <View
           style={{
             flex: 1,
             flexDirection: "row",
+            alignItems: "center",
             marginHorizontal: scale(30),
             gap: 10,
           }}
@@ -163,8 +165,9 @@ const OrderDetail = () => {
             {item?.itemName}
           </Typo>
         </View>
+
         <Typo size={14} fontFamily="SemiBold" color={colors.NEUTRAL900}>
-          ₹ {item?.price}
+          ₹ {item?.price.toFixed(2)}
         </Typo>
       </View>
     );
@@ -391,6 +394,7 @@ const OrderDetail = () => {
               )}
             </View>
           </View>
+
           {data?.deliveryMode !== "Take Away" && (
             <>
               <View style={styles.separator} />
@@ -436,6 +440,7 @@ const OrderDetail = () => {
               ? "Item Specifications"
               : "Bill details"}
           </Typo>
+
           <FlatList
             data={data?.items}
             renderItem={renderItem}

@@ -90,7 +90,7 @@ const OrderList = () => {
           const deliveryTime = new Date(orderDate.getTime() + 30 * 60 * 1000);
           const diffInMinutes = Math.max(
             0,
-            Math.floor((deliveryTime - now.getTime()) / 60000)
+            Math.floor((+deliveryTime - now.getTime()) / 60000)
           );
 
           if (diffInMinutes > 0) {
@@ -230,9 +230,8 @@ const OrderList = () => {
             color={colors.NEUTRAL900}
             fontFamily="SemiBold"
           >
-            {item.orderId}
             {item?.grandTotal
-              ? ` ₹ ${item?.grandTotal} `
+              ? `₹ ${item?.grandTotal} `
               : "Will be updated soon"}
           </Typo>
         </View>

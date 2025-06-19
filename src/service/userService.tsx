@@ -176,7 +176,7 @@ export const getTemporaryOrder = async () => {
 
 export const getAppBanner = async () => {
   try {
-    const res = await appAxios.get(`/admin/app-banner/get-app-banner`);
+    const res = await appAxios.get(`/customers/app-banners`);
 
     return res.status === 200 ? res.data.data : [];
   } catch (err: any) {

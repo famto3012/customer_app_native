@@ -164,8 +164,6 @@ export const confirmPickAndDropOrder = async (
       paymentMode,
     });
 
-    console.log("RES", res.data);
-
     return res.status === 200 ? res.data : { success: false, orderId: "" };
   } catch (err) {
     console.error(`Error in confirming P&D:`, JSON.stringify(err));

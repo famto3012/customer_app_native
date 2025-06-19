@@ -12,7 +12,7 @@ import auth from "@react-native-firebase/auth";
 import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, View } from "react-native";
+import { ActivityIndicator, Keyboard, Pressable, View } from "react-native";
 
 const Auth = () => {
   const phoneNumberRef = useRef<string>("");
@@ -122,153 +122,159 @@ const Auth = () => {
 
   return (
     <ScreenWrapper>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "flex-end",
-          marginEnd: scale(20),
-          display: Boolean(showSkip) ? "none" : "flex",
-        }}
+      <Pressable
+        onPress={Keyboard.dismiss}
+        accessible={false}
+        style={{ flex: 1 }}
       >
-        <Pressable
-          onPress={handleSkip}
-          style={{
-            backgroundColor: colors.PRIMARY,
-            paddingVertical: verticalScale(2),
-            paddingHorizontal: scale(16),
-            borderRadius: radius._30,
-          }}
-        >
-          {isLoading ? (
-            <ActivityIndicator size="small" color={colors.WHITE} />
-          ) : (
-            <Typo size={14} color={colors.WHITE}>
-              Skip
-            </Typo>
-          )}
-        </Pressable>
-      </View>
-
-      <View
-        style={{
-          flex: 1,
-          marginHorizontal: 20,
-          marginTop: verticalScale(20),
-        }}
-      >
-        <Typo size={16} fontFamily="Medium" color={colors.PRIMARY}>
-          Login or Signup
-        </Typo>
-        <Typo
-          size={14}
-          style={{
-            marginTop: verticalScale(16),
-            marginBottom: verticalScale(32),
-          }}
-        >
-          Enter your phone number and we will send you a confirmation code to
-          your number
-        </Typo>
-
         <View
           style={{
             flexDirection: "row",
-            gap: spacingX._15,
-            marginTop: verticalScale(10),
+            justifyContent: "flex-end",
+            marginEnd: scale(20),
+            display: Boolean(showSkip) ? "none" : "flex",
           }}
         >
+          <Pressable
+            onPress={handleSkip}
+            style={{
+              backgroundColor: colors.PRIMARY,
+              paddingVertical: verticalScale(2),
+              paddingHorizontal: scale(16),
+              borderRadius: radius._30,
+            }}
+          >
+            {isLoading ? (
+              <ActivityIndicator size="small" color={colors.WHITE} />
+            ) : (
+              <Typo size={14} color={colors.WHITE}>
+                Skip
+              </Typo>
+            )}
+          </Pressable>
+        </View>
+
+        <View
+          style={{
+            flex: 1,
+            marginHorizontal: 20,
+            marginTop: verticalScale(20),
+          }}
+        >
+          <Typo size={16} fontFamily="Medium" color={colors.PRIMARY}>
+            Login or Signup
+          </Typo>
+          <Typo
+            size={14}
+            style={{
+              marginTop: verticalScale(16),
+              marginBottom: verticalScale(32),
+            }}
+          >
+            Enter your phone number and we will send you a confirmation code to
+            your number
+          </Typo>
+
           <View
             style={{
               flexDirection: "row",
-              height: verticalScale(45),
-              alignItems: "center",
-              borderWidth: 1,
-              borderColor: colors.NEUTRAL300,
-              borderRadius: radius._10,
-              borderCurve: "continuous",
-              paddingHorizontal: spacingX._10,
+              gap: spacingX._15,
+              marginTop: verticalScale(10),
             }}
           >
-            <Typo size={13}>🇮🇳 +91</Typo>
+            <View
+              style={{
+                flexDirection: "row",
+                height: verticalScale(45),
+                alignItems: "center",
+                borderWidth: 1,
+                borderColor: colors.NEUTRAL300,
+                borderRadius: radius._10,
+                borderCurve: "continuous",
+                paddingHorizontal: spacingX._10,
+              }}
+            >
+              <Typo size={13}>🇮🇳 +91</Typo>
+            </View>
+
+            <Input
+              placeholder="0000000000"
+              keyboardType="number-pad"
+              maxLength={10}
+              onChangeText={(value) => (phoneNumberRef.current = value)}
+            />
           </View>
 
-          <Input
-            placeholder="0000000000"
-            keyboardType="number-pad"
-            maxLength={10}
-            onChangeText={(value) => (phoneNumberRef.current = value)}
-          />
+          {referralStatus?.status && (
+            <View>
+              {showReferral ? (
+                <View
+                  style={{ flexDirection: "row", marginTop: verticalScale(20) }}
+                >
+                  <Input
+                    placeholder="Referral code"
+                    onChangeText={(value: string) => setReferral(value)}
+                    value={referral}
+                  />
+                </View>
+              ) : (
+                <Pressable
+                  onPress={() => setShowReferral(true)}
+                  style={{ marginTop: verticalScale(20) }}
+                >
+                  <Typo
+                    size={16}
+                    color={colors.PRIMARY}
+                    fontFamily="SemiBold"
+                    style={{ textDecorationLine: "underline" }}
+                  >
+                    Have a referral code?
+                  </Typo>
+                </Pressable>
+              )}
+            </View>
+          )}
         </View>
 
-        {referralStatus?.status && (
-          <View>
-            {showReferral ? (
-              <View
-                style={{ flexDirection: "row", marginTop: verticalScale(20) }}
-              >
-                <Input
-                  placeholder="Referral code"
-                  onChangeText={(value: string) => setReferral(value)}
-                  value={referral}
-                />
-              </View>
-            ) : (
-              <Pressable
-                onPress={() => setShowReferral(true)}
-                style={{ marginTop: verticalScale(20) }}
-              >
-                <Typo
-                  size={16}
-                  color={colors.PRIMARY}
-                  fontFamily="SemiBold"
-                  style={{ textDecorationLine: "underline" }}
-                >
-                  Have a referral code?
-                </Typo>
-              </Pressable>
-            )}
-          </View>
-        )}
-      </View>
-
-      <View
-        style={{
-          marginBottom: verticalScale(40),
-          marginHorizontal: verticalScale(24),
-        }}
-      >
-        <Typo size={12} style={{ textAlign: "center" }}>
-          By clicking continue you are agreeing to the
-        </Typo>
         <View
           style={{
-            marginBottom: verticalScale(12),
-            flexDirection: "row",
-            gap: 10,
-            alignSelf: "center",
+            marginBottom: verticalScale(40),
+            marginHorizontal: verticalScale(24),
           }}
         >
-          <Pressable>
-            <Typo size={12} color={colors.PRIMARY}>
-              Terms of Service
-            </Typo>
-          </Pressable>
+          <Typo size={12} style={{ textAlign: "center" }}>
+            By clicking continue you are agreeing to the
+          </Typo>
+          <View
+            style={{
+              marginBottom: verticalScale(12),
+              flexDirection: "row",
+              gap: 10,
+              alignSelf: "center",
+            }}
+          >
+            <Pressable>
+              <Typo size={12} color={colors.PRIMARY}>
+                Terms of Service
+              </Typo>
+            </Pressable>
 
-          <Typo size={12}>and</Typo>
+            <Typo size={12}>and</Typo>
 
-          <Pressable>
-            <Typo size={12} color={colors.PRIMARY}>
-              Privacy Policy
-            </Typo>
-          </Pressable>
+            <Pressable>
+              <Typo size={12} color={colors.PRIMARY}>
+                Privacy Policy
+              </Typo>
+            </Pressable>
+          </View>
+
+          <Button
+            title="Continue"
+            onPress={sendOTP}
+            isLoading={isGeneratingOTP}
+          />
         </View>
-
-        <Button
-          title="Continue"
-          onPress={sendOTP}
-          isLoading={isGeneratingOTP}
-        />
-      </View>
+      </Pressable>
     </ScreenWrapper>
   );
 };
