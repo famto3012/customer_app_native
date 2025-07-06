@@ -45,7 +45,9 @@ export const logout = async (disconnect?: () => void) => {
     const { clearStorage } = useAuthStore.getState();
 
     clearStorage();
-    resetAndNavigate("/auth");
+    resetAndNavi
+    
+    gate("/auth");
   } catch (err) {
     console.log(`Error while logging out: ${err}`);
     if (Platform.OS === "android") {

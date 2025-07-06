@@ -18,6 +18,7 @@ import { forceAudioCleanup, playOrStopSound } from "@/utils/helpers";
 import { useAudioCleanup } from "@/hooks/useAudio";
 import { useAuthStore } from "@/store/store";
 import { router } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 
 const CustomOrderHome = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -31,6 +32,18 @@ const CustomOrderHome = () => {
   const { token } = useAuthStore.getState();
 
   useAudioCleanup();
+
+    useFocusEffect(
+      useCallback(() => {
+        const timeout = setTimeout(() => {
+          if (infoSheetRef.current) {
+            infoSheetRef.current.expand();
+          }
+        }, 300);
+  
+        return () => clearTimeout(timeout);
+      }, [])
+    );
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (

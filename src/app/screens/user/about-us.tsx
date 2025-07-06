@@ -46,7 +46,7 @@ const AboutUs = () => {
           </View>
         </View>
       </Pressable>
-      <Pressable
+      {/* <Pressable
         style={styles.container}
         onPress={() =>
           Linking.openURL("https://famto.in/contact-us").catch((err) =>
@@ -80,7 +80,7 @@ const AboutUs = () => {
             <CaretRight size={16} />
           </View>
         </View>
-      </Pressable>
+      </Pressable> */}
       <Pressable
         style={styles.container}
         onPress={() =>

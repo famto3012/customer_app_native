@@ -191,7 +191,7 @@ const Home = () => {
                 }
               />
               <SearchView
-                placeholder="Search for dishes, restaurants & groceries"
+                placeholder="Search "
                 onPress={() => router.push("/screens/universal/home-search")}
                 style={{ marginHorizontal: scale(20) }}
               />

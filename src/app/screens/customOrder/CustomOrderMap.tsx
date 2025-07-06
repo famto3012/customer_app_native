@@ -110,7 +110,7 @@ const CustomOrderMap = () => {
           poi: result.poi || "",
         });
         setShopData({
-          shopName: result.formatted_address,
+          shopName: "",
           place: result.locality,
           latitude,
           longitude,

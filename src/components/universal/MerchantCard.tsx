@@ -216,6 +216,8 @@ const styles = StyleSheet.create({
     borderRadius: Platform.OS === "android" ? radius._30 : radius._10,
     paddingHorizontal: spacingX._7,
     overflow: "hidden",
+    textAlign: "center",
+    textAlignVertical: "center",
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,

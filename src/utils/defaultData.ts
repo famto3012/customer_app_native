@@ -27,7 +27,7 @@ export const scheduleDetails = [
 
 export const profileOptions: {
   label: string;
-  route: `/${string}` | { pathName: string; params: any };
+  route: `/${string}` | { pathName: string; params: any } | string;
   image: any;
 }[] = [
   {
@@ -67,6 +67,11 @@ export const profileOptions: {
     label: "About Us",
     route: "/screens/user/about-us",
     image: require("@/assets/icons/info-circle.webp"),
+  },
+ {
+    label: "Contact Us",
+    route: "https://famto.in/contact-us",
+    image: require("@/assets/icons/telephone.webp"),
   },
 ];
 

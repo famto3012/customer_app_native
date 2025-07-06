@@ -88,7 +88,7 @@ const VehicleCard: FC<VehicleCardProps> = ({
                 style={{ padding: scale(5) }}
                 onPress={() => onViewVehicle(vehicle.vehicleType)}
               >
-                <Info size={scale(16)} />
+                <Info size={scale(16)} color="#00ced1"/>
               </Pressable>
             </View>
 

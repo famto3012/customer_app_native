@@ -52,59 +52,46 @@ const Auth = () => {
 
       const fullPhoneNumber = `+91${phoneNumberRef.current}`;
 
-      const confirmation = await auth().signInWithPhoneNumber(fullPhoneNumber);
+      // Using verifyPhoneNumber for manual OTP verification flow
+      const unsubscribe = auth()
+        .verifyPhoneNumber(fullPhoneNumber, 60, true)
+        .on("state_changed", (phoneAuthSnapshot) => {
+          switch (phoneAuthSnapshot.state) {
+            case auth.PhoneAuthState.CODE_SENT: // Code has been sent
+              setIsGeneratingOTP(false);
 
-      if (confirmation.verificationId) {
-        router.push({
-          pathname: "/verify-otp",
-          params: {
-            phoneNumber: phoneNumberRef.current,
-            referralCode: referralStatus?.status ? referral : "",
-            verificationId: JSON.stringify(confirmation),
-          },
+              router.push({
+                pathname: "/verify-otp",
+                params: {
+                  phoneNumber: phoneNumberRef.current,
+                  referralCode: referralStatus?.status ? referral : "",
+                  verificationId: phoneAuthSnapshot.verificationId,
+                },
+              });
+              break;
+
+            case auth.PhoneAuthState.AUTO_VERIFIED: // Auto verification detected
+              console.log(
+                "Auto verification triggered but ignored to enforce manual entry."
+              );
+              // DO NOT SIGN IN HERE - force manual OTP input
+              break;
+
+            case auth.PhoneAuthState.AUTO_VERIFY_TIMEOUT: // Timeout
+              console.log(
+                "Auto-retrieval timeout reached. Manual entry required."
+              );
+              break;
+
+            case auth.PhoneAuthState.ERROR: // Verification failed
+              console.log("Verification failed:", phoneAuthSnapshot.error);
+              showAlert("Verification failed. Please try again.");
+              setIsGeneratingOTP(false);
+              break;
+          }
         });
-      }
-    } catch (error: any) {
-      let errorMessage = "Something went wrong. Please try again.";
-
-      switch (error.code) {
-        case "auth/invalid-phone-number":
-          errorMessage = "Invalid phone number. Please enter a valid number.";
-          break;
-        case "auth/too-many-requests":
-          errorMessage = "Too many requests. Please try again later.";
-          break;
-        case "auth/quota-exceeded":
-          errorMessage =
-            "OTP verification limit exceeded. Please try again later.";
-          break;
-        case "auth/user-disabled":
-          errorMessage =
-            "This phone number has been disabled. Please contact support.";
-          break;
-        case "auth/sms-quota-exceeded":
-          errorMessage = "SMS quota exceeded. Please try again later.";
-          break;
-        case "auth/invalid-verification-code":
-          errorMessage = "Incorrect OTP entered. Please try again.";
-          break;
-        case "auth/invalid-verification-id":
-          errorMessage = "OTP has expired. Please request a new one.";
-          break;
-        case "auth/network-request-failed":
-          errorMessage =
-            "Network error. Please check your internet connection.";
-          break;
-        case "auth/code-expired":
-          errorMessage = "OTP expired. Please request a new one.";
-          break;
-        default:
-          errorMessage = "Something went wrong. Please try again.";
-          break;
-      }
-
-      showAlert(errorMessage);
-    } finally {
+    } catch (error) {
+      showAlert("Something went wrong. Please try again.");
       setIsGeneratingOTP(false);
     }
   };

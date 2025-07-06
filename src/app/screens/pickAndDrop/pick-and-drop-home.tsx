@@ -30,6 +30,7 @@ import { forceAudioCleanup, playOrStopSound } from "@/utils/helpers";
 import { useAudioCleanup } from "@/hooks/useAudio";
 import { useData } from "@/context/DataContext";
 import { useAuthStore } from "@/store/store";
+import { useFocusEffect } from "@react-navigation/native";
 
 const PickAndDropHome = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -47,6 +48,20 @@ const PickAndDropHome = () => {
   const { token } = useAuthStore.getState();
 
   useAudioCleanup();
+
+  useFocusEffect(
+
+    
+    useCallback(() => {
+      const timeout = setTimeout(() => {
+        if (infoSheetRef.current) {
+          infoSheetRef.current.expand();
+        }
+      }, 300);
+
+      return () => clearTimeout(timeout);
+    }, [])
+  );
 
   useEffect(() => {
     const cycleImages = () => {

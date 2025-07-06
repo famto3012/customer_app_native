@@ -152,7 +152,7 @@ const Profile = () => {
                 onPress={() => {
                   if (
                     !token &&
-                    !["Rate Us", "About Us"].includes(option.label)
+                    !["Rate Us", "About Us", "Contact Us"].includes(option.label)
                   ) {
                     router.push({ pathname: "/auth", params: { showSkip: 0 } });
                     return;
@@ -169,6 +169,7 @@ const Profile = () => {
                     router.push(
                       option.route.pathName as any,
                       option.route.params
+                      
                     );
                   }
                 }}
@@ -183,7 +184,7 @@ const Profile = () => {
                 <Typo
                   size={14}
                   color={
-                    token || ["Rate Us", "About Us"].includes(option.label)
+                    token || ["Rate Us", "About Us", "Contact Us"].includes(option.label)
                       ? colors.NEUTRAL800
                       : colors.NEUTRAL400
                   }

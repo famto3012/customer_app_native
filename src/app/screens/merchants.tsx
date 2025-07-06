@@ -164,7 +164,7 @@ const Merchants = () => {
       {!(selectedFilter === "" && query === "" && merchants.length === 0) && (
         <>
           <Search
-            placeHolder="Search Restaurants/Dishes/Products"
+            placeHolder="Search "
             onChangeText={(value) => setDebounceQuery(value)}
           />
 

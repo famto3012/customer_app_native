@@ -131,7 +131,7 @@ const ScheduleSheet: FC<ScheduleSheetProps> = ({
       startDate.toDateString() === currentDate.toDateString()
     ) {
       showAlert(
-        "This merchant does not allow scheduling orders for today. Please select a different date.",
+        "This merchant does not accept current scheduling.",
         "Error"
       );
 

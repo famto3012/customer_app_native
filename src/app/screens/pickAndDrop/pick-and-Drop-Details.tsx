@@ -85,7 +85,13 @@ const PickAndDropDetail = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["vehicle-detail"] });
       setItems(variables);
-      addItemSheetRef.current?.close();
+      if (selectedItem) {
+        editItemSheetRef.current?.close();
+        setSelectedItem(null); 
+      } else {
+        addItemSheetRef.current?.close();
+      }
+
     },
   });
 
